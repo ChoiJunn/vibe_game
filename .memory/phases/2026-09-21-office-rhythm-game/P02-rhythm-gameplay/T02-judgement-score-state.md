@@ -1,6 +1,6 @@
 # Task: T02 Judgement, Score, and State
 
-## Status: pending
+## Status: done
 
 ## Goal
 
