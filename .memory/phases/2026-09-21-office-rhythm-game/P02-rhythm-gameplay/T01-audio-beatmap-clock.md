@@ -96,4 +96,4 @@ Task: T01-audio-beatmap-clock
 
 - [ ] 구현 완료
 - [ ] 검증 통과
-- commit: pending
+- commit: 626e3ef
