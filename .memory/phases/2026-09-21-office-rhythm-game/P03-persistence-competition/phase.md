@@ -4,10 +4,10 @@
 
 | Task | Status | Summary | Blueprint |
 | :--- | :--- | :--- | :--- |
-| T01 | `pending` | Cosmos DB client, 컨테이너·문서 스키마와 Managed Identity 접근 경계 구현 | [T01](./T01-cosmos-data-access.md) |
-| T02 | `pending` | 진행 세션 생성·조회·autosave·resume·abandon API 구현 | [T02](./T02-session-api.md) |
-| T03 | `pending` | 입력 이벤트 검증, 결과 제출, 기록 보관·중복 방지 구현 | [T03](./T03-result-validation.md) |
-| T04 | `pending` | 오늘/전체 순위표와 표시 이름·다중 기록 UI 구현 | [T04](./T04-leaderboard.md) |
+| T01 | `in_progress` | Implement Cosmos DB client, container contracts, document schemas, and Managed Identity boundary | [T01](./T01-cosmos-data-access.md) |
+| T02 | `pending` | Implement run session create, read, autosave, resume, and abandon APIs | [T02](./T02-session-api.md) |
+| T03 | `pending` | Implement input validation, result submission, persistence, and duplicate protection | [T03](./T03-result-validation.md) |
+| T04 | `pending` | Implement today/all-time leaderboard display and current-user ranking UI | [T04](./T04-leaderboard.md) |
 
 ## Progress
 

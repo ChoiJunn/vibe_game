@@ -6,11 +6,11 @@
 
 ## Active Phase
 
-[P02 Rhythm Gameplay](./phases/2026-09-21-office-rhythm-game/P02-rhythm-gameplay/phase.md)
+[P03 Persistence and Competition](./phases/2026-09-21-office-rhythm-game/P03-persistence-competition/phase.md)
 
 ## Active Task
 
-[T04 Pause Tutorial Results](./phases/2026-09-21-office-rhythm-game/P02-rhythm-gameplay/T04-pause-tutorial-results.md)
+[T01 Cosmos DB Data Access](./phases/2026-09-21-office-rhythm-game/P03-persistence-competition/T01-cosmos-data-access.md)
 
 ## Status
 
@@ -21,10 +21,12 @@
 - P02 T01 Audio Beatmap Clock: done
 - P02 T02 Judgement Score State: done
 - P02 T03 Phaser Office Scene: done
-- P02 T04 Pause Tutorial Results: in_progress
+- P02 T04 Pause Tutorial Results: done
+- P02 Rhythm Gameplay: complete
+- P03 T01 Cosmos DB Data Access: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Read the P02-T04 blueprint and implement only tutorial, pause/resume, navigation guard, and results flow. Do not implement Cosmos DB or leaderboard behavior yet.
+Read the P03-T01 blueprint and implement only Cosmos DB client, container/document contracts, and Managed Identity access boundaries. Do not implement session APIs, result validation, or leaderboard behavior yet.

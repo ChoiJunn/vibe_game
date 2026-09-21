@@ -59,6 +59,13 @@ export class RhythmGameController {
   }
 
   async start(atSongMs = 0): Promise<void> {
+    this.runState = createInitialRunState({
+      runId: this.runId,
+      userOid: this.userOid,
+      beatmapId: this.beatmap.id,
+    });
+    this.pendingHoldStart = undefined;
+    this.lastJudgement = undefined;
     await this.clock.load(this.beatmap, this.audioSettings);
     this.scheduler.load(this.beatmap, this.audioSettings);
     await this.clock.start(atSongMs);
@@ -84,6 +91,13 @@ export class RhythmGameController {
     this.scheduler.stop();
     this.clock.stop();
     this.emit();
+  }
+
+  abandon(): void {
+    if (this.runState.status === 'active') {
+      this.runState = { ...this.runState, status: 'abandoned' };
+    }
+    this.stop();
   }
 
   handleInput(input: InputEvent): void {

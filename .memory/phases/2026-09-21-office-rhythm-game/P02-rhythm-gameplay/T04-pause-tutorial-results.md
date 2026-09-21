@@ -1,6 +1,6 @@
 # Task: T04 Pause, Tutorial, and Results
 
-## Status: pending
+## Status: done
 
 ## Goal
 

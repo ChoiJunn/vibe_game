@@ -1,14 +1,29 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import beatmapJson from '@/content/beatmaps/office-day-01.json';
+import { PauseOverlay } from './PauseOverlay';
+import { ResultSummary } from '@/components/results/ResultSummary';
 import { validateBeatmap } from '@/domain/validateBeatmap';
 import { AudioClock } from '@/game/audio/AudioClock';
-import { RhythmGameController } from '@/game/RhythmGameController';
+import { RhythmGameController, type RhythmGameSnapshot } from '@/game/RhythmGameController';
 import { SpaceInputController } from '@/game/input/SpaceInputController';
+import { PauseCoordinator, type PauseState } from '@/game/pause/PauseCoordinator';
+import { usePageLifecyclePause } from '@/hooks/usePageLifecyclePause';
+
+type GameRuntime = {
+  controller: RhythmGameController;
+  coordinator: PauseCoordinator;
+  snapshot: RhythmGameSnapshot;
+  pauseState: PauseState;
+};
 
 export function PhaserCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [runtime, setRuntime] = useState<GameRuntime | null>(null);
+  const [coordinator, setCoordinator] = useState<PauseCoordinator | null>(null);
+
+  usePageLifecyclePause(coordinator);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -28,6 +43,20 @@ export function PhaserCanvas() {
       onPauseRequest: () => controller.pause(),
     });
     controller.attachInputController(inputController);
+    const pauseCoordinator = new PauseCoordinator(controller);
+    setCoordinator(pauseCoordinator);
+    setRuntime({
+      controller,
+      coordinator: pauseCoordinator,
+      snapshot: controller.getSnapshot(),
+      pauseState: pauseCoordinator.getState(),
+    });
+    const unsubscribeController = controller.subscribe((snapshot) => {
+      setRuntime((current) => current ? { ...current, snapshot } : current);
+    });
+    const unsubscribePause = pauseCoordinator.subscribe((pauseState) => {
+      setRuntime((current) => current ? { ...current, pauseState } : current);
+    });
 
     let game: import('phaser').Game | null = null;
     let started = false;
@@ -62,9 +91,38 @@ export function PhaserCanvas() {
       mount.removeEventListener('pointerdown', startGame);
       resizeObserver?.disconnect();
       controller.dispose();
+      unsubscribeController();
+      unsubscribePause();
+      setCoordinator(null);
+      setRuntime(null);
       game?.destroy(true);
     };
   }, []);
 
-  return <div ref={mountRef} className="phaser-canvas-shell" tabIndex={0} aria-label="Office Rhythm Manager Phaser 게임 캔버스" />;
+  const showResult = runtime?.snapshot.runState.status === 'completed'
+    || runtime?.snapshot.runState.status === 'failed'
+    || runtime?.snapshot.runState.status === 'abandoned';
+
+  return (
+    <>
+      <div ref={mountRef} className="phaser-canvas-shell" tabIndex={0} aria-label="Office Rhythm Manager Phaser 게임 캔버스" />
+      {runtime && !runtime.pauseState.paused && runtime.snapshot.clockState === 'playing' && !showResult && (
+        <button type="button" className="pause-button" onClick={() => runtime.coordinator.requestPause('button')}>
+          일시정지
+        </button>
+      )}
+      {runtime && (
+        <PauseOverlay
+          paused={runtime.pauseState.paused}
+          reason={runtime.pauseState.reason}
+          snapshot={runtime.pauseState.snapshot}
+          onResume={() => void runtime.coordinator.resume()}
+          onAbandon={() => runtime.coordinator.abandon()}
+        />
+      )}
+      {runtime && showResult && (
+        <ResultSummary runState={runtime.snapshot.runState} elapsedMs={runtime.snapshot.songPositionMs} onPlayAgain={() => void runtime.controller.start()} />
+      )}
+    </>
+  );
 }

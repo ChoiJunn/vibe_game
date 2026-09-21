@@ -28,6 +28,7 @@ export type RunState = {
   nextEventIndex: number;
   hearts: number;
   combo: number;
+  maxCombo: number;
   consecutivePerfects: number;
   score: number;
   perfectCount: number;
