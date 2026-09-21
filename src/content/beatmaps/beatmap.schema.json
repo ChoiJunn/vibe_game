@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vibe-game.local/schemas/beatmap.schema.json",
+  "title": "Office Rhythm Beatmap",
+  "type": "object",
+  "required": ["id", "bpm", "timeSignature", "events", "sections"],
+  "properties": {
+    "id": { "const": "office-day-01" },
+    "bpm": { "const": 110 },
+    "timeSignature": {
+      "type": "array",
+      "prefixItems": [{ "const": 4 }, { "const": 4 }],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/section" }
+    }
+  },
+  "$defs": {
+    "sectionId": {
+      "enum": ["arrival", "keyboard", "mail", "meeting", "copy", "departure"]
+    },
+    "section": {
+      "type": "object",
+      "required": ["id", "startMs", "endMs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/sectionId" },
+        "startMs": { "type": "integer", "minimum": 0 },
+        "endMs": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "type", "startMs", "section"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["tap", "hold"] },
+        "startMs": { "type": "integer", "minimum": 0 },
+        "endMs": { "type": "integer", "minimum": 1 },
+        "section": { "$ref": "#/$defs/sectionId" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "hold" } } },
+          "then": {
+            "required": ["endMs"],
+            "properties": {
+              "endMs": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

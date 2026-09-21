@@ -1,0 +1,27 @@
+{
+  "id": "office-day-01",
+  "bpm": 110,
+  "timeSignature": [4, 4],
+  "sections": [
+    { "id": "arrival", "startMs": 0, "endMs": 17455 },
+    { "id": "keyboard", "startMs": 17455, "endMs": 34909 },
+    { "id": "mail", "startMs": 34909, "endMs": 52364 },
+    { "id": "meeting", "startMs": 52364, "endMs": 69818 },
+    { "id": "copy", "startMs": 69818, "endMs": 87273 },
+    { "id": "departure", "startMs": 87273, "endMs": 104727 }
+  ],
+  "events": [
+    { "id": "arrival-01", "type": "tap", "startMs": 1091, "section": "arrival" },
+    { "id": "arrival-02", "type": "hold", "startMs": 2727, "endMs": 3818, "section": "arrival" },
+    { "id": "keyboard-01", "type": "tap", "startMs": 18545, "section": "keyboard" },
+    { "id": "keyboard-02", "type": "hold", "startMs": 20182, "endMs": 21273, "section": "keyboard" },
+    { "id": "mail-01", "type": "tap", "startMs": 35909, "section": "mail" },
+    { "id": "mail-02", "type": "hold", "startMs": 37636, "endMs": 38727, "section": "mail" },
+    { "id": "meeting-01", "type": "tap", "startMs": 53455, "section": "meeting" },
+    { "id": "meeting-02", "type": "hold", "startMs": 55091, "endMs": 56182, "section": "meeting" },
+    { "id": "copy-01", "type": "tap", "startMs": 70909, "section": "copy" },
+    { "id": "copy-02", "type": "hold", "startMs": 72545, "endMs": 73636, "section": "copy" },
+    { "id": "departure-01", "type": "tap", "startMs": 88364, "section": "departure" },
+    { "id": "departure-02", "type": "hold", "startMs": 90000, "endMs": 91091, "section": "departure" }
+  ]
+}

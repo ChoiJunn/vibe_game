@@ -1,9 +1,11 @@
 import { LoginButton } from '@/components/auth/LoginButton';
+import { GameViewport } from '@/components/game/GameViewport';
 
 export default function HomePage() {
   return (
     <main className="page-shell">
-      <section className="game-frame" aria-labelledby="game-title">
+      <GameViewport>
+        <section className="game-frame-content" aria-labelledby="game-title">
         <div className="office-window" aria-hidden="true">
           <span className="window-dot window-dot--coral" />
           <span className="window-dot window-dot--yellow" />
@@ -33,7 +35,8 @@ export default function HomePage() {
           <span className="office-card__icon">▤</span>
           <span>복사 완료</span>
         </div>
-      </section>
+        </section>
+      </GameViewport>
     </main>
   );
 }

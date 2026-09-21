@@ -1,6 +1,6 @@
 # Task: T03 App Shell and Domain Contracts
 
-## Status: pending
+## Status: done
 
 ## Goal
 

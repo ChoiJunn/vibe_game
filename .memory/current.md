@@ -6,20 +6,22 @@
 
 ## Active Phase
 
-[P01 Foundation and Entra Authentication](./phases/2026-09-21-office-rhythm-game/P01-foundation-auth/phase.md)
+[P02 Rhythm Gameplay](./phases/2026-09-21-office-rhythm-game/P02-rhythm-gameplay/phase.md)
 
 ## Active Task
 
-[T03 App Shell and Domain Contracts](./phases/2026-09-21-office-rhythm-game/P01-foundation-auth/T03-app-shell-domain-contracts.md)
+[T01 Audio Beatmap Clock](./phases/2026-09-21-office-rhythm-game/P02-rhythm-gameplay/T01-audio-beatmap-clock.md)
 
 ## Status
 
 - T01 Scaffold Web Game: done
 - T02 Entra Auth Shell: done
-- T03 App Shell and Domain Contracts: in_progress
+- T03 App Shell and Domain Contracts: done
+- P01 Foundation and Entra Authentication: complete
+- P02 T01 Audio Beatmap Clock: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Read the T03 blueprint and implement the shared AppShell, responsive layout tokens, Beatmap/RunState/ScoreResult contracts, and the first fixed office-day beatmap schema. Do not implement gameplay, Cosmos DB, or leaderboard behavior in T03.
+Read the P02-T01 blueprint and implement only the Web Audio clock and fixed beatmap playback scheduler. Do not implement judgement scoring, Phaser scene behavior, pause/results flow, Cosmos DB, or leaderboard behavior yet.

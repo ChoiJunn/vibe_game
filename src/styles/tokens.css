@@ -1,0 +1,14 @@
+:root {
+  --ink: #263238;
+  --muted-ink: #68747b;
+  --paper: #fffdf8;
+  --cream: #f6efe4;
+  --coral: #ff8b7b;
+  --yellow: #ffd166;
+  --mint: #a8dfc6;
+  --lavender: #c9c2ff;
+  --line: rgba(38, 50, 56, 0.12);
+  --focus-ring: 0 0 0 3px rgba(38, 50, 56, 0.22);
+  --shell-content-width: 1280px;
+  --shell-radius: 2rem;
+}
