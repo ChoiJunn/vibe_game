@@ -1,0 +1,212 @@
+:root {
+  --ink: #263238;
+  --muted-ink: #68747b;
+  --paper: #fffdf8;
+  --cream: #f6efe4;
+  --coral: #ff8b7b;
+  --yellow: #ffd166;
+  --mint: #a8dfc6;
+  --lavender: #c9c2ff;
+  --line: rgba(38, 50, 56, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--cream);
+  font-family: Arial, 'Malgun Gothic', sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 3rem);
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255, 209, 102, 0.22), transparent 24rem),
+    radial-gradient(circle at 88% 80%, rgba(168, 223, 198, 0.28), transparent 26rem),
+    var(--cream);
+}
+
+.game-frame {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 1280px);
+  aspect-ratio: 16 / 9;
+  min-height: min(560px, calc(100vh - 2rem));
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 2rem;
+  background: var(--paper);
+  box-shadow: 0 2rem 5rem rgba(57, 47, 35, 0.14);
+}
+
+.game-frame::before,
+.game-frame::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(0.2px);
+}
+
+.game-frame::before {
+  width: 32%;
+  aspect-ratio: 1;
+  top: -22%;
+  right: -6%;
+  background: var(--lavender);
+  opacity: 0.55;
+}
+
+.game-frame::after {
+  width: 42%;
+  aspect-ratio: 1;
+  bottom: -33%;
+  left: -10%;
+  background: var(--mint);
+  opacity: 0.42;
+}
+
+.office-window {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.75rem;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.window-dot {
+  display: block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+}
+
+.window-dot--coral { background: var(--coral); }
+.window-dot--yellow { background: var(--yellow); }
+.window-dot--mint { background: var(--mint); }
+
+.landing-content {
+  position: absolute;
+  top: 50%;
+  left: 12%;
+  width: min(52%, 38rem);
+  transform: translateY(-50%);
+}
+
+.eyebrow {
+  margin: 0 0 1.2rem;
+  color: var(--muted-ink);
+  font-size: clamp(0.65rem, 1vw, 0.85rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 5vw, 5.2rem);
+  line-height: 1.08;
+  letter-spacing: -0.06em;
+}
+
+.landing-copy {
+  max-width: 30rem;
+  margin: 1.5rem 0 2rem;
+  color: var(--muted-ink);
+  font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+  line-height: 1.75;
+}
+
+.login-placeholder {
+  padding: 0.9rem 1.3rem;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--ink);
+  font-weight: 700;
+  opacity: 0.82;
+  cursor: not-allowed;
+}
+
+.setup-note {
+  margin: 0.8rem 0 0;
+  color: var(--muted-ink);
+  font-size: 0.78rem;
+}
+
+.office-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(38, 50, 56, 0.08);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 1rem 2rem rgba(57, 47, 35, 0.08);
+  color: var(--muted-ink);
+  font-size: clamp(0.7rem, 1vw, 0.9rem);
+  font-weight: 700;
+  transform: rotate(-5deg);
+}
+
+.office-card__icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  color: var(--ink);
+  background: var(--yellow);
+  font-size: 1.1rem;
+}
+
+.office-card--keyboard { top: 24%; right: 13%; }
+.office-card--mail { right: 26%; bottom: 23%; transform: rotate(6deg); }
+.office-card--mail .office-card__icon { background: var(--coral); }
+.office-card--copy { right: 7%; bottom: 11%; transform: rotate(-4deg); }
+.office-card--copy .office-card__icon { background: var(--mint); }
+
+@media (max-width: 700px) {
+  .game-frame {
+    min-height: 520px;
+    border-radius: 1.25rem;
+  }
+
+  .landing-content {
+    left: 8%;
+    width: 84%;
+  }
+
+  .office-card {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

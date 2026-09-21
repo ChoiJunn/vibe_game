@@ -1,6 +1,6 @@
 # Task: T01 Scaffold Web Game
 
-## Status: pending
+## Status: done
 
 ## Goal
 

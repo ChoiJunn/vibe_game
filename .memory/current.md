@@ -2,7 +2,7 @@
 
 ## Active Plan
 
-[사내 업무 리듬 매니저 게임](./plans/2026-09-21-office-rhythm-game.md)
+[Office Rhythm Manager Game](./plans/2026-09-21-office-rhythm-game.md)
 
 ## Active Phase
 
@@ -10,15 +10,15 @@
 
 ## Active Task
 
-[T01 Scaffold Web Game](./phases/2026-09-21-office-rhythm-game/P01-foundation-auth/T01-scaffold-web-game.md)
+[T02 Entra Auth Shell](./phases/2026-09-21-office-rhythm-game/P01-foundation-auth/T02-entra-auth-shell.md)
 
 ## Status
 
-- T01 구현 시작 준비 완료
+- T01 Scaffold Web Game: done
+- T02 Entra Auth Shell: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
-- Repository state: empty `main` branch; no commits
 
 ## Next Step (IMPORTANT)
 
-T01 청사진을 읽고 `vibe_game/`에 Next.js·TypeScript·Phaser·테스트 기반을 생성하는 작업부터 시작한다. 이 단계에서는 Entra 로그인이나 게임 플레이 로직을 함께 구현하지 않는다.
+Read the T02 blueprint and implement the single-tenant MSAL authentication shell and protected routes in `src/auth/`, `src/app/page.tsx`, `src/app/game/page.tsx`, and `src/app/leaderboard/page.tsx`. Do not implement gameplay logic or Cosmos integration in T02.
