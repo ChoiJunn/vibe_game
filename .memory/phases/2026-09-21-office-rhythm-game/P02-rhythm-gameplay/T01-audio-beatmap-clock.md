@@ -1,6 +1,6 @@
 # Task: T01 Audio Beatmap Clock
 
-## Status: pending
+## Status: done
 
 ## Goal
 
