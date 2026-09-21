@@ -1,6 +1,6 @@
 # Task: T02 Entra Auth Shell
 
-## Status: pending
+## Status: done
 
 ## Goal
 
@@ -110,6 +110,8 @@ Task: T02-entra-auth-shell
 ```
 
 ## Progress
+
+- Automated validation passed. Real Entra redirect requires local/production app registration environment variables.
 
 - [ ] 구현 완료
 - [ ] 검증 통과

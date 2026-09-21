@@ -1,3 +1,5 @@
+import { LoginButton } from '@/components/auth/LoginButton';
+
 export default function HomePage() {
   return (
     <main className="page-shell">
@@ -15,10 +17,8 @@ export default function HomePage() {
             키보드, 메일, 회의, 복사기의 소리를 박자에 맞춰 처리하고
             조직 전체의 기록에 도전하는 오리지널 리듬게임입니다.
           </p>
-          <button className="login-placeholder" type="button" disabled>
-            Entra ID 로그인 준비 중
-          </button>
-          <p className="setup-note">인증은 다음 단계에서 연결됩니다.</p>
+          <LoginButton />
+          <p className="setup-note">조직 계정으로 로그인하면 게임과 순위표를 이용할 수 있습니다.</p>
         </div>
 
         <div className="office-card office-card--keyboard" aria-hidden="true">

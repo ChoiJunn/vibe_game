@@ -145,6 +145,43 @@ h1 {
   cursor: not-allowed;
 }
 
+.auth-action {
+  display: grid;
+  justify-items: start;
+  gap: 0.8rem;
+}
+
+.protected-state {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(--ink);
+  background: var(--cream);
+  text-align: center;
+}
+
+.protected-state h1,
+.protected-state p {
+  margin: 0;
+}
+
+.protected-state h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.protected-state p {
+  color: var(--muted-ink);
+  line-height: 1.7;
+}
+
+.protected-state a {
+  justify-self: center;
+  color: var(--ink);
+  font-weight: 700;
+}
+
 .setup-note {
   margin: 0.8rem 0 0;
   color: var(--muted-ink);

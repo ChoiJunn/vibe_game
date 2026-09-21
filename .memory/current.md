@@ -10,15 +10,16 @@
 
 ## Active Task
 
-[T02 Entra Auth Shell](./phases/2026-09-21-office-rhythm-game/P01-foundation-auth/T02-entra-auth-shell.md)
+[T03 App Shell and Domain Contracts](./phases/2026-09-21-office-rhythm-game/P01-foundation-auth/T03-app-shell-domain-contracts.md)
 
 ## Status
 
 - T01 Scaffold Web Game: done
-- T02 Entra Auth Shell: in_progress
+- T02 Entra Auth Shell: done
+- T03 App Shell and Domain Contracts: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Read the T02 blueprint and implement the single-tenant MSAL authentication shell and protected routes in `src/auth/`, `src/app/page.tsx`, `src/app/game/page.tsx`, and `src/app/leaderboard/page.tsx`. Do not implement gameplay logic or Cosmos integration in T02.
+Read the T03 blueprint and implement the shared AppShell, responsive layout tokens, Beatmap/RunState/ScoreResult contracts, and the first fixed office-day beatmap schema. Do not implement gameplay, Cosmos DB, or leaderboard behavior in T03.
