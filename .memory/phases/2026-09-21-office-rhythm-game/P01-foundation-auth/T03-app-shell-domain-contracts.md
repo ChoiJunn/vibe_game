@@ -125,4 +125,4 @@ Task: T03-app-shell-domain-contracts
 
 - [ ] 구현 완료
 - [ ] 검증 통과
-- commit: pending
+- commit: ef59bab
