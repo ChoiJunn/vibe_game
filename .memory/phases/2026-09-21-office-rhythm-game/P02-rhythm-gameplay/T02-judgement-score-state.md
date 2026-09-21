@@ -107,4 +107,4 @@ Task: T02-judgement-score-state
 
 - [ ] 구현 완료
 - [ ] 검증 통과
-- commit: pending
+- commit: 741bd9f
