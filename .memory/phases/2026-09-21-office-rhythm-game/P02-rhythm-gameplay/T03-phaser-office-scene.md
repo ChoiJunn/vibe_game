@@ -90,4 +90,4 @@ Task: T03-phaser-office-scene
 
 - [ ] 구현 완료
 - [ ] 검증 통과
-- commit: pending
+- commit: b2655e6
