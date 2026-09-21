@@ -87,4 +87,4 @@ Task: T04-pause-tutorial-results
 
 - [ ] 구현 완료
 - [ ] 검증 통과
-- commit: pending
+- commit: f6e237d
