@@ -185,6 +185,22 @@ select {
   box-shadow: 0 2rem 5rem rgba(57, 47, 35, 0.14);
 }
 
+.phaser-canvas-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  outline: none;
+}
+
+.phaser-canvas-shell canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .game-frame::before,
 .game-frame::after {
   content: '';
@@ -288,6 +304,18 @@ h1 {
   color: var(--ink);
   background: var(--cream);
   text-align: center;
+}
+
+.game-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: auto;
+}
+
+.game-page .game-frame {
+  flex: 0 1 auto;
 }
 
 button:focus-visible,

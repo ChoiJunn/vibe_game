@@ -1,6 +1,6 @@
 # Task: T03 Phaser Office Scene
 
-## Status: pending
+## Status: done
 
 ## Goal
 

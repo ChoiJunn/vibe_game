@@ -10,7 +10,7 @@
 
 ## Active Task
 
-[T03 Phaser Office Scene](./phases/2026-09-21-office-rhythm-game/P02-rhythm-gameplay/T03-phaser-office-scene.md)
+[T04 Pause Tutorial Results](./phases/2026-09-21-office-rhythm-game/P02-rhythm-gameplay/T04-pause-tutorial-results.md)
 
 ## Status
 
@@ -20,10 +20,11 @@
 - P01 Foundation and Entra Authentication: complete
 - P02 T01 Audio Beatmap Clock: done
 - P02 T02 Judgement Score State: done
-- P02 T03 Phaser Office Scene: in_progress
+- P02 T03 Phaser Office Scene: done
+- P02 T04 Pause Tutorial Results: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Read the P02-T03 blueprint and implement only the Phaser 2D office scene and gameplay viewport. Do not implement pause/results flow, Cosmos DB, or leaderboard behavior yet.
+Read the P02-T04 blueprint and implement only tutorial, pause/resume, navigation guard, and results flow. Do not implement Cosmos DB or leaderboard behavior yet.
