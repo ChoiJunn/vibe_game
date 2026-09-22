@@ -10,7 +10,7 @@
 
 ## Active Task
 
-[T02 Azure Deployment](./phases/2026-09-21-office-rhythm-game/P04-azure-release/T02-azure-deployment.md)
+[T03 Release Readiness](./phases/2026-09-21-office-rhythm-game/P04-azure-release/T03-release-readiness.md)
 
 ## Status
 
@@ -29,10 +29,11 @@
 - P03 T04 Leaderboard: done
 - P03 Persistence and Competition: complete
 - P04 T01 Settings, Accessibility, and E2E: done
-- P04 T02 Azure Deployment: in_progress
+- P04 T02 Azure Deployment: done
+- P04 T03 Release Readiness: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Deploy the locally verified source to the newly created F1 App Service, confirm Cosmos health through Managed Identity and verify Entra sign-in; then complete P04-T02 and advance to P04-T03.
+Read and execute the active P04-T03 release-readiness blueprint; the app is live at `https://vibe-game-jun-rhythm-260922.azurewebsites.net` on free tiers, with quota limitations documented.

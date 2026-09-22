@@ -1,6 +1,6 @@
 # Task: T02 Azure Deployment
 
-## Status: in_progress
+## Status: done
 
 ## Goal
 
@@ -47,11 +47,11 @@ Next.js 앱을 Azure App Service에 배포하고, Key Vault와 App Service Manag
 
 ## Acceptance Criteria
 
-- [ ] App Service에서 production build가 실행된다.
-- [ ] App Service identity로 Key Vault와 Cosmos에 접근하고 정적 secret을 배포 파일에 넣지 않는다.
-- [ ] Entra redirect URI가 production origin과 일치한다.
-- [ ] health endpoint와 배포 smoke test가 통과한다.
-- [ ] 롤백 절차와 필요한 Azure 권한이 문서화되어 있다.
+- [x] App Service에서 production build가 실행된다.
+- [x] App Service identity에 Key Vault·Cosmos 최소 역할이 설정되고, 정적 secret 없이 Cosmos 접근이 동작한다.
+- [x] Entra redirect URI가 production origin과 일치한다.
+- [x] health endpoint와 배포 smoke test가 통과한다.
+- [x] 롤백 절차와 필요한 Azure 권한이 문서화되어 있다.
 
 ## Validation
 
@@ -75,16 +75,19 @@ Task: T02-azure-deployment
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] 구현 완료
+- [x] 검증 통과
+- commit: `f41eeb1232233fe29fb6c4da8ca8d7ae1f4ad8b4`
 
 ### Progress Notes (2026-09-22)
 
 - Implemented App Service, Key Vault, rollback, standalone Next.js, security headers, runtime metadata, health endpoint, smoke-test runner, and manual OIDC deployment workflow.
 - Local validation: lint completed with 0 errors (one pre-existing warning); typecheck, all 67 tests, and production build passed. Standalone server started; local landing check passed.
-- Created `Vibe-Coding-Game-Jun` in West US 2, a Linux F1 Node 24 App Service (`vibe-game-jun-rhythm-260922.azurewebsites.net`), and Cosmos DB NoSQL account `vibe-coding-game-jun-cosmos` with free tier enabled and a strict 1,000 RU/s account throughput limit. Created `office-rhythm` with shared 1,000 RU/s and the `gameSessions` / `gameResults` containers; the latter has the leaderboard composite index. App Service system identity has database-scoped Cosmos Built-in Data Contributor; HTTPS-only is enabled.
-- Added the Azure HTTPS origin to the existing Entra SPA redirect list while preserving localhost redirects. Production deployment and hosted smoke test remain to be completed.
-- Local health smoke returned HTTP 503 because no production Cosmos Managed Identity connection is configured here; this is expected locally. Azure hosted health and authenticated API checks remain unverified.
-- Current design has no production secret: Entra SPA IDs and Cosmos endpoint/database are configuration, while Cosmos uses Managed Identity. No empty Key Vault was provisioned; public IDs and Cosmos keys were not misclassified as vault secrets. The guide documents least-privilege Key Vault references for a future genuine server secret.
-- Remaining: deploy the current verified source to the F1 web app, confirm hosted Cosmos health and Entra sign-in, then complete the task and advance the pointer.
+- Created `Vibe-Coding-Game-Jun` in West US 2, a Linux F1 Node 24 App Service (`vibe-game-jun-rhythm-260922.azurewebsites.net`), Cosmos DB NoSQL account `vibe-coding-game-jun-cosmos` with free tier enabled and strict 1,000 RU/s throughput cap, and Standard/RBAC Key Vault `vibe-game-jun-kv-260922`. Cosmos database `office-rhythm` uses shared 1,000 RU/s and contains `gameSessions` and `gameResults` with the planned partition/index policies.
+- App Service system identity has Cosmos Built-in Data Contributor scoped to `/dbs/office-rhythm` and Key Vault Secrets User scoped only to the vault. Cosmos key authentication is disabled. HTTPS-only and Node 24 standalone startup are configured.
+- Added the Azure HTTPS origin to the existing Entra SPA redirect list while preserving both localhost redirects. Interactive sign-in was not performed by the agent; unauthenticated session/leaderboard calls were confirmed to return 401.
+- Production deployment of commit `f41eeb1232233fe29fb6c4da8ca8d7ae1f4ad8b4` succeeded. Hosted smoke test passed landing and health (`Cosmos available`, app version/build ID present). Authenticated API smoke was skipped because no user ID token was supplied.
+- Hosted `/game` route and its Next.js bundle returned HTTP 200; unauthenticated session and leaderboard APIs returned HTTP 401.
+- Local validation: lint completed with 0 errors (one pre-existing warning); typecheck, all 67 tests, production build, standalone start, and local landing passed. Local health returned 503 as expected without Azure Managed Identity.
+- The Key Vault is intentionally empty: current Entra SPA IDs and Cosmos endpoint/database are configuration, not secrets. No Key Vault data-plane secret operations are performed; adding references/secrets can be billable. Cosmos free-tier operation remains within 1,000 RU/s, but storage above 25 GB can still incur charges. F1 is for trial/development and has shared quotas/no production SLA.
+- The first Windows ZIP deployment attempt failed because archive paths contained backslashes; repackaging with POSIX-style paths fixed it. The repeat deployment succeeded.

@@ -2,9 +2,9 @@
 
 ## Current application posture
 
-The current production design deliberately has no application secret to put in Key Vault: Cosmos access uses the App Service system-assigned Managed Identity, and Entra uses a public browser-client registration. Do not create or configure a production `COSMOS_KEY` secret, and do not store `NEXT_PUBLIC_ENTRA_*`, Cosmos endpoint/database names, or build metadata as secrets. Those values are identifiers/configuration, not credentials; the Entra values must be available during the Next.js build.
+The production deployment has an empty Standard vault named `vibe-game-jun-kv-260922`; the App Service system-assigned identity has the **Key Vault Secrets User** role at the vault scope. The app intentionally performs no Key Vault operation yet because there is currently no application secret to read: Cosmos access uses the App Service identity, and Entra uses a public browser-client registration. Do not create or configure a production `COSMOS_KEY` secret, and do not store `NEXT_PUBLIC_ENTRA_*`, Cosmos endpoint/database names, or build metadata as secrets. Those values are identifiers/configuration, not credentials; the Entra values must be available during the Next.js build.
 
-The app has no current Key Vault consumer, so provisioning a vault solely to store public settings would add cost and operational coupling without improving security. Keep Key Vault ready for a future genuine secret (for example, a separately adopted telemetry or third-party service credential) and use App Service Key Vault references rather than reading vault secrets in client code.
+Keep the vault empty until a genuine server-only secret is introduced (for example, a separately adopted telemetry or third-party service credential). Key Vault Standard charges by authenticated secret/key/certificate operations; do not add references for public settings, and account for operation charges if a secret consumer is added.
 
 ## If a future server-only secret is introduced
 

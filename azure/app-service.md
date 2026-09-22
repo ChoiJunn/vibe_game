@@ -1,6 +1,18 @@
 # Azure App Service deployment
 
-This guide targets the Linux built-in Node.js runtime and the standalone Next.js output. No Azure resource names, region, or plan SKU are hard-coded here; select those before provisioning so cost and location are explicit.
+This guide targets the Linux built-in Node.js runtime and the standalone Next.js output. The provisioning examples stay generic; the actual free-tier deployment choices are recorded below.
+
+## Current free-tier deployment
+
+- Resource group: `Vibe-Coding-Game-Jun` (West US 2)
+- App Service: `vibe-game-jun-rhythm-260922` on Linux F1, Node 24 LTS; public URL `https://vibe-game-jun-rhythm-260922.azurewebsites.net`
+- Cosmos DB for NoSQL: `vibe-coding-game-jun-cosmos`, database `office-rhythm`, single region, free tier enabled, 1,000 RU/s strict account throughput cap
+- Key Vault: `vibe-game-jun-kv-260922`, Standard/RBAC; the app identity has `Key Vault Secrets User`, and the vault is intentionally empty until a genuine server secret exists
+- Cosmos containers: `gameSessions` (`/userOid`) and `gameResults` (`/leaderboardKey`)
+
+F1 is free and intended for trial/development, not supported as a production workload; it has shared CPU, memory, storage, and bandwidth quotas, and no production SLA. Cosmos DB free tier covers up to 1,000 RU/s and 25 GB of storage; storage beyond 25 GB can still incur charges even though the provisioned-throughput cap prevents adding RU/s above 1,000. Keep the dataset below 25 GB and do not change the F1 plan or Cosmos cap if zero-cost operation is required.
+
+Key Vault Standard is transaction-metered. This deployment has no secret reads or writes because there is currently no server-side secret to store; adding Key Vault references or secrets can create billable operations.
 
 ## 1. Create or select the Azure resources
 
