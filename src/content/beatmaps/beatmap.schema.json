@@ -15,13 +15,23 @@
     },
     "events": {
       "type": "array",
+      "minItems": 90,
+      "maxItems": 120,
       "items": { "$ref": "#/$defs/event" }
     },
     "sections": {
       "type": "array",
       "minItems": 6,
       "maxItems": 6,
-      "items": { "$ref": "#/$defs/section" }
+      "prefixItems": [
+        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "arrival" }, "startMs": { "const": 0 }, "endMs": { "const": 19636 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "keyboard" }, "startMs": { "const": 19636 }, "endMs": { "const": 39273 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "mail" }, "startMs": { "const": 39273 }, "endMs": { "const": 58909 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "meeting" }, "startMs": { "const": 58909 }, "endMs": { "const": 78545 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "copy" }, "startMs": { "const": 78545 }, "endMs": { "const": 98182 } } }] },
+        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "departure" }, "startMs": { "const": 98182 }, "endMs": { "const": 120000 } } }] }
+      ],
+      "items": false
     }
   },
   "$defs": {

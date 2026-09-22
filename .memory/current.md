@@ -2,15 +2,15 @@
 
 ## Active Plan
 
-[Office Rhythm Manager Game](./plans/2026-09-21-office-rhythm-game.md)
+[Office Rhythm Manager Visual Gameplay](../../.memory/plans/2026-09-22-office-rhythm-visual-gameplay.md)
 
 ## Active Phase
 
-[P04 Azure Release and Verification](./phases/2026-09-21-office-rhythm-game/P04-azure-release/phase.md)
+[P01 Illustrated Rhythm Experience](../../.memory/phases/2026-09-22-office-rhythm-visual-gameplay/P01-illustrated-rhythm-experience/phase.md)
 
 ## Active Task
 
-[T03 Release Readiness](./phases/2026-09-21-office-rhythm-game/P04-azure-release/T03-release-readiness.md)
+[T02 Note Lifecycle and Automatic Miss](../../.memory/phases/2026-09-22-office-rhythm-visual-gameplay/P01-illustrated-rhythm-experience/T02-note-lifecycle-and-miss.md)
 
 ## Status
 
@@ -30,10 +30,12 @@
 - P03 Persistence and Competition: complete
 - P04 T01 Settings, Accessibility, and E2E: done
 - P04 T02 Azure Deployment: done
-- P04 T03 Release Readiness: in_progress
+- P04 T03 Release Readiness: complete (user-confirmed 2026-09-22)
+- 2026-09-22 P01 T01 Two-Minute Beatmap: done
+- 2026-09-22 P01 T02 Note Lifecycle and Automatic Miss: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Finish the active P04-T03 manual release gates: sign in with a real Entra user, verify live gameplay/audio, and run the authenticated smoke check against the deployed candidate. Until then, production release sign-off is pending.
+Execute only P01-T02: advance overdue notes as automatic Misses and expose chart events to the Phaser scene.

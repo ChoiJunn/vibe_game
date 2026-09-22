@@ -21,7 +21,7 @@ describe('RhythmGameController', () => {
     expect(scheduler.start).toHaveBeenCalledTimes(1);
     expect(inputController.start).toHaveBeenCalledTimes(1);
 
-    controller.handleInput({ type: 'keydown', songPositionMs: 1091 });
+    controller.handleInput({ type: 'keydown', songPositionMs: beatmap.events[0].startMs });
     expect(controller.getSnapshot().runState.perfectCount).toBe(1);
     expect(controller.getSnapshot().runState.nextEventIndex).toBe(1);
   });
@@ -32,7 +32,7 @@ describe('RhythmGameController', () => {
     const controller = new RhythmGameController({ beatmap, clock: clock as never, scheduler: createFakeScheduler() as never, audioSettings: settings });
 
     await controller.start();
-    controller.handleInput({ type: 'keydown', songPositionMs: 1091 });
+    controller.handleInput({ type: 'keydown', songPositionMs: beatmap.events[0].startMs });
 
     expect(controller.getSnapshot().runState.nextEventIndex).toBe(0);
   });

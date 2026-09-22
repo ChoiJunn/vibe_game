@@ -10,7 +10,7 @@ describe('beatmap domain contract', () => {
     expect(beatmap.bpm).toBe(110);
     expect(beatmap.timeSignature).toEqual([4, 4]);
     expect(beatmap.sections).toHaveLength(6);
-    expect(beatmap.events).toHaveLength(12);
+    expect(beatmap.events).toHaveLength(96);
   });
 
   it('rejects duplicate event ids and invalid hold timing', () => {

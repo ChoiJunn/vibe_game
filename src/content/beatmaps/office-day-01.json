@@ -1,27 +1,638 @@
 {
-  "id": "office-day-01",
-  "bpm": 110,
-  "timeSignature": [4, 4],
-  "sections": [
-    { "id": "arrival", "startMs": 0, "endMs": 17455 },
-    { "id": "keyboard", "startMs": 17455, "endMs": 34909 },
-    { "id": "mail", "startMs": 34909, "endMs": 52364 },
-    { "id": "meeting", "startMs": 52364, "endMs": 69818 },
-    { "id": "copy", "startMs": 69818, "endMs": 87273 },
-    { "id": "departure", "startMs": 87273, "endMs": 104727 }
-  ],
-  "events": [
-    { "id": "arrival-01", "type": "tap", "startMs": 1091, "section": "arrival" },
-    { "id": "arrival-02", "type": "hold", "startMs": 2727, "endMs": 3818, "section": "arrival" },
-    { "id": "keyboard-01", "type": "tap", "startMs": 18545, "section": "keyboard" },
-    { "id": "keyboard-02", "type": "hold", "startMs": 20182, "endMs": 21273, "section": "keyboard" },
-    { "id": "mail-01", "type": "tap", "startMs": 35909, "section": "mail" },
-    { "id": "mail-02", "type": "hold", "startMs": 37636, "endMs": 38727, "section": "mail" },
-    { "id": "meeting-01", "type": "tap", "startMs": 53455, "section": "meeting" },
-    { "id": "meeting-02", "type": "hold", "startMs": 55091, "endMs": 56182, "section": "meeting" },
-    { "id": "copy-01", "type": "tap", "startMs": 70909, "section": "copy" },
-    { "id": "copy-02", "type": "hold", "startMs": 72545, "endMs": 73636, "section": "copy" },
-    { "id": "departure-01", "type": "tap", "startMs": 88364, "section": "departure" },
-    { "id": "departure-02", "type": "hold", "startMs": 90000, "endMs": 91091, "section": "departure" }
-  ]
+    "id":  "office-day-01",
+    "bpm":  110,
+    "timeSignature":  [
+                          4,
+                          4
+                      ],
+    "sections":  [
+                     {
+                         "id":  "arrival",
+                         "startMs":  0,
+                         "endMs":  19636
+                     },
+                     {
+                         "id":  "keyboard",
+                         "startMs":  19636,
+                         "endMs":  39273
+                     },
+                     {
+                         "id":  "mail",
+                         "startMs":  39273,
+                         "endMs":  58909
+                     },
+                     {
+                         "id":  "meeting",
+                         "startMs":  58909,
+                         "endMs":  78545
+                     },
+                     {
+                         "id":  "copy",
+                         "startMs":  78545,
+                         "endMs":  98182
+                     },
+                     {
+                         "id":  "departure",
+                         "startMs":  98182,
+                         "endMs":  120000
+                     }
+                 ],
+    "events":  [
+                   {
+                       "id":  "arrival-01",
+                       "type":  "tap",
+                       "startMs":  818,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-02",
+                       "type":  "hold",
+                       "startMs":  2455,
+                       "section":  "arrival",
+                       "endMs":  3000
+                   },
+                   {
+                       "id":  "arrival-03",
+                       "type":  "tap",
+                       "startMs":  4091,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-04",
+                       "type":  "tap",
+                       "startMs":  5727,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-05",
+                       "type":  "tap",
+                       "startMs":  7364,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-06",
+                       "type":  "tap",
+                       "startMs":  9000,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-07",
+                       "type":  "hold",
+                       "startMs":  10636,
+                       "section":  "arrival",
+                       "endMs":  11182
+                   },
+                   {
+                       "id":  "arrival-08",
+                       "type":  "tap",
+                       "startMs":  12273,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-09",
+                       "type":  "tap",
+                       "startMs":  13909,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-10",
+                       "type":  "tap",
+                       "startMs":  15545,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-11",
+                       "type":  "tap",
+                       "startMs":  17182,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "arrival-12",
+                       "type":  "tap",
+                       "startMs":  18818,
+                       "section":  "arrival"
+                   },
+                   {
+                       "id":  "keyboard-01",
+                       "type":  "tap",
+                       "startMs":  20182,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-02",
+                       "type":  "tap",
+                       "startMs":  21545,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-03",
+                       "type":  "tap",
+                       "startMs":  22909,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-04",
+                       "type":  "hold",
+                       "startMs":  24273,
+                       "section":  "keyboard",
+                       "endMs":  24818
+                   },
+                   {
+                       "id":  "keyboard-05",
+                       "type":  "tap",
+                       "startMs":  25636,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-06",
+                       "type":  "tap",
+                       "startMs":  27000,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-07",
+                       "type":  "tap",
+                       "startMs":  28364,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-08",
+                       "type":  "tap",
+                       "startMs":  29727,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-09",
+                       "type":  "tap",
+                       "startMs":  31091,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-10",
+                       "type":  "tap",
+                       "startMs":  32455,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-11",
+                       "type":  "hold",
+                       "startMs":  33818,
+                       "section":  "keyboard",
+                       "endMs":  34364
+                   },
+                   {
+                       "id":  "keyboard-12",
+                       "type":  "tap",
+                       "startMs":  35182,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-13",
+                       "type":  "tap",
+                       "startMs":  36545,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "keyboard-14",
+                       "type":  "tap",
+                       "startMs":  38182,
+                       "section":  "keyboard"
+                   },
+                   {
+                       "id":  "mail-01",
+                       "type":  "tap",
+                       "startMs":  39545,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-02",
+                       "type":  "tap",
+                       "startMs":  40909,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-03",
+                       "type":  "tap",
+                       "startMs":  42000,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-04",
+                       "type":  "hold",
+                       "startMs":  43364,
+                       "section":  "mail",
+                       "endMs":  43909
+                   },
+                   {
+                       "id":  "mail-05",
+                       "type":  "tap",
+                       "startMs":  44455,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-06",
+                       "type":  "tap",
+                       "startMs":  45818,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-07",
+                       "type":  "tap",
+                       "startMs":  46909,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-08",
+                       "type":  "tap",
+                       "startMs":  48273,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-09",
+                       "type":  "hold",
+                       "startMs":  49364,
+                       "section":  "mail",
+                       "endMs":  49909
+                   },
+                   {
+                       "id":  "mail-10",
+                       "type":  "tap",
+                       "startMs":  50727,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-11",
+                       "type":  "tap",
+                       "startMs":  51818,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-12",
+                       "type":  "tap",
+                       "startMs":  53182,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-13",
+                       "type":  "tap",
+                       "startMs":  54273,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "mail-14",
+                       "type":  "hold",
+                       "startMs":  55636,
+                       "section":  "mail",
+                       "endMs":  56182
+                   },
+                   {
+                       "id":  "mail-15",
+                       "type":  "tap",
+                       "startMs":  57273,
+                       "section":  "mail"
+                   },
+                   {
+                       "id":  "meeting-01",
+                       "type":  "tap",
+                       "startMs":  59182,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-02",
+                       "type":  "tap",
+                       "startMs":  60273,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-03",
+                       "type":  "hold",
+                       "startMs":  61364,
+                       "section":  "meeting",
+                       "endMs":  61909
+                   },
+                   {
+                       "id":  "meeting-04",
+                       "type":  "tap",
+                       "startMs":  62455,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-05",
+                       "type":  "tap",
+                       "startMs":  63545,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-06",
+                       "type":  "tap",
+                       "startMs":  64636,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-07",
+                       "type":  "tap",
+                       "startMs":  65727,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-08",
+                       "type":  "hold",
+                       "startMs":  66818,
+                       "section":  "meeting",
+                       "endMs":  67364
+                   },
+                   {
+                       "id":  "meeting-09",
+                       "type":  "tap",
+                       "startMs":  67909,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-10",
+                       "type":  "tap",
+                       "startMs":  69000,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-11",
+                       "type":  "tap",
+                       "startMs":  70091,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-12",
+                       "type":  "tap",
+                       "startMs":  71182,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-13",
+                       "type":  "hold",
+                       "startMs":  72273,
+                       "section":  "meeting",
+                       "endMs":  72818
+                   },
+                   {
+                       "id":  "meeting-14",
+                       "type":  "tap",
+                       "startMs":  73364,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-15",
+                       "type":  "tap",
+                       "startMs":  74455,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "meeting-16",
+                       "type":  "tap",
+                       "startMs":  76091,
+                       "section":  "meeting"
+                   },
+                   {
+                       "id":  "copy-01",
+                       "type":  "tap",
+                       "startMs":  78818,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-02",
+                       "type":  "tap",
+                       "startMs":  79636,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-03",
+                       "type":  "hold",
+                       "startMs":  80455,
+                       "section":  "copy",
+                       "endMs":  81000
+                   },
+                   {
+                       "id":  "copy-04",
+                       "type":  "tap",
+                       "startMs":  81273,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-05",
+                       "type":  "tap",
+                       "startMs":  82091,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-06",
+                       "type":  "tap",
+                       "startMs":  82909,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-07",
+                       "type":  "tap",
+                       "startMs":  83727,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-08",
+                       "type":  "hold",
+                       "startMs":  84545,
+                       "section":  "copy",
+                       "endMs":  85091
+                   },
+                   {
+                       "id":  "copy-09",
+                       "type":  "tap",
+                       "startMs":  85364,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-10",
+                       "type":  "tap",
+                       "startMs":  86182,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-11",
+                       "type":  "tap",
+                       "startMs":  87000,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-12",
+                       "type":  "tap",
+                       "startMs":  87818,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-13",
+                       "type":  "hold",
+                       "startMs":  88636,
+                       "section":  "copy",
+                       "endMs":  89182
+                   },
+                   {
+                       "id":  "copy-14",
+                       "type":  "tap",
+                       "startMs":  89455,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-15",
+                       "type":  "tap",
+                       "startMs":  90273,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-16",
+                       "type":  "tap",
+                       "startMs":  91091,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "copy-17",
+                       "type":  "hold",
+                       "startMs":  92455,
+                       "section":  "copy",
+                       "endMs":  93000
+                   },
+                   {
+                       "id":  "copy-18",
+                       "type":  "tap",
+                       "startMs":  94636,
+                       "section":  "copy"
+                   },
+                   {
+                       "id":  "departure-01",
+                       "type":  "tap",
+                       "startMs":  98455,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-02",
+                       "type":  "tap",
+                       "startMs":  99273,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-03",
+                       "type":  "hold",
+                       "startMs":  100091,
+                       "section":  "departure",
+                       "endMs":  100636
+                   },
+                   {
+                       "id":  "departure-04",
+                       "type":  "tap",
+                       "startMs":  100909,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-05",
+                       "type":  "tap",
+                       "startMs":  101727,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-06",
+                       "type":  "hold",
+                       "startMs":  102545,
+                       "section":  "departure",
+                       "endMs":  103091
+                   },
+                   {
+                       "id":  "departure-07",
+                       "type":  "tap",
+                       "startMs":  103364,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-08",
+                       "type":  "tap",
+                       "startMs":  104182,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-09",
+                       "type":  "tap",
+                       "startMs":  105000,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-10",
+                       "type":  "hold",
+                       "startMs":  105818,
+                       "section":  "departure",
+                       "endMs":  106364
+                   },
+                   {
+                       "id":  "departure-11",
+                       "type":  "tap",
+                       "startMs":  106636,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-12",
+                       "type":  "tap",
+                       "startMs":  107455,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-13",
+                       "type":  "tap",
+                       "startMs":  108273,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-14",
+                       "type":  "hold",
+                       "startMs":  109091,
+                       "section":  "departure",
+                       "endMs":  109636
+                   },
+                   {
+                       "id":  "departure-15",
+                       "type":  "tap",
+                       "startMs":  109909,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-16",
+                       "type":  "tap",
+                       "startMs":  110727,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-17",
+                       "type":  "tap",
+                       "startMs":  111545,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-18",
+                       "type":  "hold",
+                       "startMs":  112364,
+                       "section":  "departure",
+                       "endMs":  112909
+                   },
+                   {
+                       "id":  "departure-19",
+                       "type":  "tap",
+                       "startMs":  114000,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-20",
+                       "type":  "tap",
+                       "startMs":  116182,
+                       "section":  "departure"
+                   },
+                   {
+                       "id":  "departure-21",
+                       "type":  "hold",
+                       "startMs":  118364,
+                       "section":  "departure",
+                       "endMs":  118909
+                   }
+               ]
 }

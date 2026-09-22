@@ -1,5 +1,7 @@
 import { SECTION_ORDER, type Beatmap, type RhythmEvent, type SectionId } from './rhythm';
 
+const SECTION_BOUNDARIES = [0, 19_636, 39_273, 58_909, 78_545, 98_182, 120_000] as const;
+
 export class BeatmapValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -45,6 +47,7 @@ export function validateBeatmap(input: unknown): Beatmap {
   assert(Array.isArray(beatmap.timeSignature) && beatmap.timeSignature[0] === 4 && beatmap.timeSignature[1] === 4, 'time signature must be 4/4');
   assert(Array.isArray(beatmap.sections) && beatmap.sections.length === SECTION_ORDER.length, 'beatmap must contain six sections');
   assert(Array.isArray(beatmap.events), 'beatmap events are required');
+  assert(beatmap.events.length >= 90 && beatmap.events.length <= 120, 'beatmap must contain between 90 and 120 events');
 
   const sections = beatmap.sections;
   sections.forEach((section, index) => {
@@ -52,6 +55,10 @@ export function validateBeatmap(input: unknown): Beatmap {
     assert(Number.isInteger(section.startMs) && Number.isInteger(section.endMs), `sections[${index}] times must be integers`);
     assert(section.endMs > section.startMs, `sections[${index}] must have positive duration`);
     assert(section.id === SECTION_ORDER[index], `sections[${index}] is out of order`);
+    assert(
+      section.startMs === SECTION_BOUNDARIES[index] && section.endMs === SECTION_BOUNDARIES[index + 1],
+      `sections[${index}] must match the 120-second chart boundaries`,
+    );
     if (index === 0) {
       assert(section.startMs === 0, 'first section must start at zero');
     } else {

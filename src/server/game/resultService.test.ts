@@ -79,9 +79,9 @@ describe('ResultService', () => {
       runId: 'run-1', terminalStatus: 'completed', claimedSnapshot: claim,
     });
 
-    expect(response.result.durationMs).toBe(91092);
+    expect(response.result.durationMs).toBe(118910);
     expect(Number.isInteger(response.result.durationMs)).toBe(true);
-    expect(insertResult).toHaveBeenCalledWith(expect.objectContaining({ durationMs: 91092 }));
+    expect(insertResult).toHaveBeenCalledWith(expect.objectContaining({ durationMs: 118910 }));
   });
 
   it('never writes a result when the client sends a forged score', async () => {
