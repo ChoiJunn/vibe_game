@@ -36,4 +36,4 @@
 
 ## Next Step (IMPORTANT)
 
-Read and execute the active P04-T03 release-readiness blueprint; the app is live at `https://vibe-game-jun-rhythm-260922.azurewebsites.net` on free tiers, with quota limitations documented.
+Finish the active P04-T03 manual release gates: deploy the pushed candidate through the manually dispatched production workflow, then verify real Entra sign-in, live gameplay/audio, and authenticated persistence/leaderboard behavior. Until then, production release sign-off is pending.

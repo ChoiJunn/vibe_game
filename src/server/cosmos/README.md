@@ -13,7 +13,7 @@ An active session stores `id = runId`. A companion `__active__` lock document is
 
 Snapshot and input-event updates use the document ETag with `If-Match`. A stale write becomes `CosmosPreconditionFailedError` with status 412 so the API layer can reload the latest state rather than treating the conflict as a generic storage failure.
 
-Leaderboard keys are `daily:YYYY-MM-DD` (UTC date) or `all-time`. Leaderboard reads are authenticated, parameterized, partition-scoped, bounded to 100 rows per page, and return every terminal attempt. Ordering is score descending, Perfect count descending, duration ascending, then played time ascending. The container uses a matching composite index; the continuation token is opaque and is passed back to Cosmos unchanged.
+Leaderboard keys are `daily:YYYY-MM-DD` (UTC date) or `all-time`. Leaderboard reads are authenticated, parameterized, partition-scoped, bounded to 100 rows per page, and return completed attempts only. Failed and abandoned terminal results remain in `gameResults` but are not ranked. Ordering is score descending, Perfect count descending, duration ascending, then played time ascending. The container uses a matching composite index; the continuation token is opaque and is passed back to Cosmos unchanged.
 
 ## Authentication and setup
 

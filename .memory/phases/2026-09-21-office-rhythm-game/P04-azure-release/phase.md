@@ -10,4 +10,4 @@
 
 ## Progress
 
-- done: 2/3 (active: T03)
+- done: 2/3 (active: T03; automated checks pass, manual release gates pending)

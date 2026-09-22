@@ -1,6 +1,6 @@
 # Task: T03 Release Readiness
 
-## Status: pending
+## Status: in_progress
 
 ## Goal
 
@@ -75,6 +75,14 @@ Task: T03-release-readiness
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
+- [x] README, operations/data/auth/game-rule docs, release checklist, and critical-path E2E are implemented.
+- [x] Automated checks passed: lint (one existing warning), typecheck, 25 files / 67 unit tests, 18 Chromium+Edge E2E tests, production build.
+- [x] Public smoke passed against the current deployed baseline (`f41eeb1232233fe29fb6c4da8ca8d7ae1f4ad8b4`); authenticated smoke skipped.
+- [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and deployed-candidate verification remain not run; see `vibe_game/docs/release-checklist.md`.
 - commit: pending
+
+### Execution Notes
+
+- Leaderboard repository queries now return completed attempts only; failed and abandoned outcomes remain stored but are not ranked.
+- Corrected the result E2E fixture to use the last hold in the short test beatmap; the previous timings never reached the terminal event.
+- GitHub deploy workflow is `workflow_dispatch` only. A main push does not deploy the candidate; do not mark the live production release signed off until a deploy and manual checks are completed.

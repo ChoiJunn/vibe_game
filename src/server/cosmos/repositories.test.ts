@@ -138,11 +138,11 @@ describe('SessionRepository', () => {
 });
 
 describe('ResultRepository', () => {
-  it('inserts validated terminal results and parameterizes partition-scoped leaderboard queries', async () => {
+  it('inserts terminal results but ranks only completed attempts in parameterized partition-scoped queries', async () => {
     const result = makeResult();
     const create = vi.fn().mockResolvedValue({ resource: result });
     const fetchNext = vi.fn().mockResolvedValue({
-      resources: [result, makeResult({ id: 'result-02', score: 900, status: 'failed' })],
+      resources: [result, makeResult({ id: 'result-02', score: 900, status: 'failed' }), makeResult({ id: 'result-03', score: 800, status: 'abandoned' })],
       continuationToken: 'opaque-page-2',
     });
     const query = vi.fn(() => ({ fetchNext }));
@@ -150,14 +150,16 @@ describe('ResultRepository', () => {
 
     await expect(repository.insertResult(result)).resolves.toEqual(result);
     await expect(repository.queryLeaderboard('all-time', 10)).resolves.toEqual({
-      items: [result, makeResult({ id: 'result-02', score: 900, status: 'failed' })],
+      items: [result],
       continuationToken: 'opaque-page-2',
     });
     expect(query).toHaveBeenCalledWith(
       expect.objectContaining({
         parameters: expect.arrayContaining([
           { name: '@leaderboardKey', value: 'all-time' },
+          { name: '@status', value: 'completed' },
         ]),
+        query: expect.stringContaining('c.status = @status'),
       }),
       { partitionKey: 'all-time', maxItemCount: 10, continuationToken: undefined },
     );
