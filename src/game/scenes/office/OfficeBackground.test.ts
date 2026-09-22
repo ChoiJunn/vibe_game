@@ -8,6 +8,13 @@ describe('OfficeBackground journey timing', () => {
     expect(getJourneyPanOffset(9_000)).toBeCloseTo(-14);
   });
 
+  it('increases motion with combo and softens it briefly after Miss', () => {
+    const calm = getJourneyPanOffset(3_000, 0);
+    expect(getJourneyPanOffset(3_000, 10)).toBeGreaterThan(calm);
+    expect(getJourneyPanOffset(3_000, 20)).toBeGreaterThan(getJourneyPanOffset(3_000, 10));
+    expect(getJourneyPanOffset(3_000, 10, 1)).toBeLessThan(getJourneyPanOffset(3_000, 10));
+  });
+
   it('crossfades on the song clock and clamps at both ends', () => {
     expect(getCrossfadeProgress(4_000, 5_000)).toBe(0);
     expect(getCrossfadeProgress(5_380, 5_000)).toBeCloseTo(0.5);

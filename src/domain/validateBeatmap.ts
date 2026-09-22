@@ -39,7 +39,9 @@ function validateEvent(event: RhythmEvent, index: number, sections: Beatmap['sec
   assert((event.endMs ?? event.startMs) <= section.endMs, `events[${index}] must end inside its section`);
 }
 
-export function validateBeatmap(input: unknown): Beatmap {
+export type BeatmapValidationOptions = { allowShortChart?: boolean };
+
+export function validateBeatmap(input: unknown, options: BeatmapValidationOptions = {}): Beatmap {
   assert(input && typeof input === 'object', 'beatmap must be an object');
   const beatmap = input as Partial<Beatmap>;
   assert(beatmap.id === 'office-day-01', 'beatmap id must be office-day-01');
@@ -47,7 +49,9 @@ export function validateBeatmap(input: unknown): Beatmap {
   assert(Array.isArray(beatmap.timeSignature) && beatmap.timeSignature[0] === 4 && beatmap.timeSignature[1] === 4, 'time signature must be 4/4');
   assert(Array.isArray(beatmap.sections) && beatmap.sections.length === SECTION_ORDER.length, 'beatmap must contain six sections');
   assert(Array.isArray(beatmap.events), 'beatmap events are required');
-  assert(beatmap.events.length >= 90 && beatmap.events.length <= 120, 'beatmap must contain between 90 and 120 events');
+  const minimumEvents = options.allowShortChart ? 1 : 90;
+  assert(beatmap.events.length >= minimumEvents && beatmap.events.length <= 120,
+    options.allowShortChart ? 'test beatmap must contain at least one event and no more than 120' : 'beatmap must contain between 90 and 120 events');
 
   const sections = beatmap.sections;
   sections.forEach((section, index) => {
@@ -55,10 +59,12 @@ export function validateBeatmap(input: unknown): Beatmap {
     assert(Number.isInteger(section.startMs) && Number.isInteger(section.endMs), `sections[${index}] times must be integers`);
     assert(section.endMs > section.startMs, `sections[${index}] must have positive duration`);
     assert(section.id === SECTION_ORDER[index], `sections[${index}] is out of order`);
-    assert(
-      section.startMs === SECTION_BOUNDARIES[index] && section.endMs === SECTION_BOUNDARIES[index + 1],
-      `sections[${index}] must match the 120-second chart boundaries`,
-    );
+    if (!options.allowShortChart) {
+      assert(
+        section.startMs === SECTION_BOUNDARIES[index] && section.endMs === SECTION_BOUNDARIES[index + 1],
+        `sections[${index}] must match the 120-second chart boundaries`,
+      );
+    }
     if (index === 0) {
       assert(section.startMs === 0, 'first section must start at zero');
     } else {

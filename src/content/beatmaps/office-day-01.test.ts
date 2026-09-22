@@ -2,6 +2,7 @@ import Ajv2020 from 'ajv/dist/2020';
 import { describe, expect, it } from 'vitest';
 import beatmapJson from './office-day-01.json';
 import beatmapSchema from './beatmap.schema.json';
+import e2eQuickBeatmap from './e2e-quick-beatmap';
 import { validateBeatmap } from '@/domain/validateBeatmap';
 
 describe('office-day-01 beatmap', () => {
@@ -48,5 +49,11 @@ describe('office-day-01 beatmap', () => {
     const sections = beatmapJson.sections.map((section) => ({ ...section }));
     sections[sections.length - 1].endMs += 1;
     expect(() => validateBeatmap({ ...beatmapJson, sections })).toThrow(/chart boundaries/);
+  });
+
+  it('accepts the shorter test fixture only when explicitly enabled for E2E', () => {
+    expect(() => validateBeatmap(e2eQuickBeatmap)).toThrow(/90 and 120/);
+    expect(validateBeatmap(e2eQuickBeatmap, { allowShortChart: true }).events).toHaveLength(4);
+    expect(() => validateBeatmap({ ...e2eQuickBeatmap, events: [] }, { allowShortChart: true })).toThrow(/at least one event/);
   });
 });

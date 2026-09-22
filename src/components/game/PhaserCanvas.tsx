@@ -101,7 +101,8 @@ export function PhaserCanvas() {
     let unsubscribeAutomaticMiss: () => void = () => undefined;
     let unsubscribePause: () => void = () => undefined;
     let unsubscribeAutosave: () => void = () => undefined;
-    const beatmap = validateBeatmap(isE2eAuthEnabled() ? testBeatmapJson : beatmapJson);
+    const isE2e = isE2eAuthEnabled();
+    const beatmap = validateBeatmap(isE2e ? testBeatmapJson : beatmapJson, { allowShortChart: isE2e });
     const api = new SessionApiClient(() => tokenProviderRef.current());
 
     const bootstrap = async () => {

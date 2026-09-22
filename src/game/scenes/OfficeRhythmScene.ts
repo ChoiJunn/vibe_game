@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
+import type { Judgement } from '@/domain/rhythm';
 import type { RhythmGameController, RhythmGameSnapshot } from '../RhythmGameController';
 import { OfficeBackground } from './office/OfficeBackground';
 import { OfficeCharacter } from './office/OfficeCharacter';
 import { MokaCompanion } from './office/MokaCompanion';
 import { GameHud } from './office/GameHud';
-import { JudgementFeedback } from './office/JudgementFeedback';
+import { isNewJudgementEvent, JudgementFeedback } from './office/JudgementFeedback';
 import { RhythmLane } from './office/RhythmLane';
 import { WorkIconPrompt } from './office/WorkIconPrompt';
 
@@ -46,16 +47,19 @@ export class OfficeRhythmScene extends Phaser.Scene {
       return;
     }
 
-    this.background.update(snapshot.section, snapshot.songPositionMs);
-    this.character.update(snapshot.clockState, snapshot.songPositionMs);
-    this.moka.update(snapshot.section, snapshot.runState.combo);
+    let newJudgement: Judgement | undefined;
+    if (isNewJudgementEvent(this.feedback.lastEventId, snapshot.lastJudgement)) {
+      newJudgement = snapshot.lastJudgement.judgement;
+      this.feedback.lastEventId = snapshot.lastJudgement.eventId;
+      this.feedback.show(newJudgement);
+    }
+
+    this.background.update(snapshot.section, snapshot.songPositionMs, snapshot.runState.combo, newJudgement);
+    this.character.update(snapshot.clockState, snapshot.songPositionMs, newJudgement, snapshot.runState.combo);
+    this.moka.update(snapshot.section, newJudgement, snapshot.runState.combo);
     this.lane.update(snapshot);
     this.prompt.update(snapshot.section, snapshot.currentEvent?.type, snapshot.clockState);
     this.hud.update(snapshot);
 
-    if (snapshot.lastJudgement && snapshot.lastJudgement !== this.feedback.lastResult) {
-      this.feedback.show(snapshot.lastJudgement.judgement);
-      this.feedback.lastResult = snapshot.lastJudgement;
-    }
   }
 }

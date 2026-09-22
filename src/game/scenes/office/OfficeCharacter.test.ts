@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getMokaForm } from './MokaCompanion';
-import { getWalkPoseKey } from './OfficeCharacter';
+import { getMokaForm, getMokaSize } from './MokaCompanion';
+import { getCharacterReactionPose, getComboEnergyTier, getWalkPoseKey } from './OfficeCharacter';
 import { GAME_ASSETS } from '@/game/assets';
 
 describe('Office journey characters', () => {
@@ -18,5 +18,16 @@ describe('Office journey characters', () => {
     expect(getMokaForm('meeting')).toBe('deskCup');
     expect(getMokaForm('copy')).toBe('deskCup');
     expect(getMokaForm('departure')).toBe('tumbler');
+  });
+
+  it('raises cosmetic liveliness at each ten-combo tier', () => {
+    expect([0, 9, 10, 20].map(getComboEnergyTier)).toEqual([0, 0, 1, 2]);
+    expect(getMokaSize('keyboard', 20)).toBeGreaterThan(getMokaSize('keyboard', 9));
+  });
+
+  it('uses distinct non-color poses for Perfect, Good, and Miss', () => {
+    expect(getCharacterReactionPose('perfect').yOffset).toBeLessThan(0);
+    expect(getCharacterReactionPose('good').rotation).toBeGreaterThan(0);
+    expect(getCharacterReactionPose('miss').yOffset).toBeGreaterThan(0);
   });
 });

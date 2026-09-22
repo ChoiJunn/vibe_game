@@ -33,6 +33,16 @@ describe('reduceRunState', () => {
 
     expect(state.hearts).toBe(4);
     expect(state.consecutivePerfects).toBe(10);
+
+    let fullHeartState = createInitialRunState({ runId: 'run-02-full', userOid: 'user-01', beatmapId: 'office-day-01', hearts: 5 });
+    for (let index = 0; index < 10; index += 1) {
+      fullHeartState = reduceRunState(fullHeartState, {
+        result: result('perfect', `full-event-${index}`),
+        eventIndex: index,
+        songPositionMs: index * 100,
+      });
+    }
+    expect(fullHeartState.hearts).toBe(5);
   });
 
   it('resets combo on Good and fails when a Miss removes the last heart', () => {
