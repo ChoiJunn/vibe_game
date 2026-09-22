@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import type { RhythmGameController, RhythmGameSnapshot } from '../RhythmGameController';
-import { OfficeBackground, renderOfficeBackground } from './office/OfficeBackground';
+import { OfficeBackground } from './office/OfficeBackground';
 import { OfficeCharacter } from './office/OfficeCharacter';
+import { MokaCompanion } from './office/MokaCompanion';
 import { GameHud } from './office/GameHud';
 import { JudgementFeedback } from './office/JudgementFeedback';
 import { TimingGauge } from './office/TimingGauge';
@@ -11,6 +12,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
   private readonly controller: RhythmGameController;
   private background!: OfficeBackground;
   private character!: OfficeCharacter;
+  private moka!: MokaCompanion;
   private gauge!: TimingGauge;
   private prompt!: WorkIconPrompt;
   private hud!: GameHud;
@@ -25,6 +27,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
   create(): void {
     this.background = new OfficeBackground(this);
     this.character = new OfficeCharacter(this, 430, 668);
+    this.moka = new MokaCompanion(this, 430, 668);
     this.gauge = new TimingGauge(this, 640, 180, 520);
     this.prompt = new WorkIconPrompt(this, 640, 300);
     this.hud = new GameHud(this);
@@ -43,8 +46,9 @@ export class OfficeRhythmScene extends Phaser.Scene {
       return;
     }
 
-    renderOfficeBackground(this.background, snapshot.section);
-    this.character.update(snapshot.clockState, snapshot.lastJudgement, snapshot.section, this.time.now);
+    this.background.update(snapshot.section, snapshot.songPositionMs);
+    this.character.update(snapshot.clockState, snapshot.songPositionMs);
+    this.moka.update(snapshot.section, snapshot.runState.combo);
     this.gauge.update(snapshot.currentEvent, snapshot.songPositionMs);
     this.prompt.update(snapshot.section, snapshot.currentEvent?.type, snapshot.clockState);
     this.hud.update(snapshot);
