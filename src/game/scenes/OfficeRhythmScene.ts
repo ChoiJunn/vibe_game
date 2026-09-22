@@ -5,7 +5,7 @@ import { OfficeCharacter } from './office/OfficeCharacter';
 import { MokaCompanion } from './office/MokaCompanion';
 import { GameHud } from './office/GameHud';
 import { JudgementFeedback } from './office/JudgementFeedback';
-import { TimingGauge } from './office/TimingGauge';
+import { RhythmLane } from './office/RhythmLane';
 import { WorkIconPrompt } from './office/WorkIconPrompt';
 
 export class OfficeRhythmScene extends Phaser.Scene {
@@ -13,7 +13,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
   private background!: OfficeBackground;
   private character!: OfficeCharacter;
   private moka!: MokaCompanion;
-  private gauge!: TimingGauge;
+  private lane!: RhythmLane;
   private prompt!: WorkIconPrompt;
   private hud!: GameHud;
   private feedback!: JudgementFeedback;
@@ -28,7 +28,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
     this.background = new OfficeBackground(this);
     this.character = new OfficeCharacter(this, 430, 668);
     this.moka = new MokaCompanion(this, 430, 668);
-    this.gauge = new TimingGauge(this, 640, 180, 520);
+    this.lane = new RhythmLane(this);
     this.prompt = new WorkIconPrompt(this, 640, 300);
     this.hud = new GameHud(this);
     this.feedback = new JudgementFeedback(this, 640, 115);
@@ -49,7 +49,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
     this.background.update(snapshot.section, snapshot.songPositionMs);
     this.character.update(snapshot.clockState, snapshot.songPositionMs);
     this.moka.update(snapshot.section, snapshot.runState.combo);
-    this.gauge.update(snapshot.currentEvent, snapshot.songPositionMs);
+    this.lane.update(snapshot);
     this.prompt.update(snapshot.section, snapshot.currentEvent?.type, snapshot.clockState);
     this.hud.update(snapshot);
 

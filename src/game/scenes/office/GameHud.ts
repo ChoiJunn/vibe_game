@@ -2,6 +2,11 @@ import Phaser from 'phaser';
 import type { RhythmGameSnapshot } from '@/game/RhythmGameController';
 import { getComboMultiplier } from '@/game/state/scorePolicy';
 
+export function getHudProgress(snapshot: RhythmGameSnapshot): string {
+  const status = snapshot.clockState === 'idle' ? 'READY' : snapshot.clockState.toUpperCase();
+  return `${status}  ·  ${snapshot.runState.nextEventIndex}/${snapshot.totalEvents}`;
+}
+
 export class GameHud {
   private readonly text: Phaser.GameObjects.Text;
 
@@ -17,11 +22,10 @@ export class GameHud {
   update(snapshot: RhythmGameSnapshot): void {
     const { runState } = snapshot;
     const multiplier = getComboMultiplier(runState.combo).toFixed(1);
-    const status = snapshot.clockState === 'idle' ? 'READY' : snapshot.clockState.toUpperCase();
     this.text.setText([
       `HEARTS  ${'♥'.repeat(runState.hearts)}${'♡'.repeat(Math.max(0, 5 - runState.hearts))}`,
       `SCORE  ${runState.score.toString().padStart(5, '0')}   COMBO  ${runState.combo}   x${multiplier}`,
-      `${status}  ·  ${runState.nextEventIndex}/${snapshot.totalEvents}`,
+      getHudProgress(snapshot),
     ]);
   }
 }
