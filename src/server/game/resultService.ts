@@ -100,7 +100,8 @@ export class ResultService {
       goodCount: validation.state.goodCount,
       missCount: validation.state.missCount,
       maxCombo: validation.state.maxCombo,
-      durationMs: validation.state.cursorMs,
+      // Audio clock positions are fractional; leaderboard durations are stored in whole milliseconds.
+      durationMs: Math.round(validation.state.cursorMs),
       playedAt,
       rawEventArchiveRef: session.id,
       schemaVersion: 1 as const,

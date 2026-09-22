@@ -69,6 +69,21 @@ describe('ResultService', () => {
     expect(sessions.markTerminal).toHaveBeenCalledWith(identity.oid, 'run-1', 'completed', 'etag-1');
   });
 
+  it('rounds fractional audio clock duration to an integer millisecond before persistence', async () => {
+    const events = makeEvents();
+    const lastEvent = events.at(-1)!;
+    events[events.length - 1] = { ...lastEvent, songPositionMs: lastEvent.songPositionMs + 0.5 };
+    const { service, claim, insertResult } = setup(events);
+
+    const response = await service.submitResult(identity, {
+      runId: 'run-1', terminalStatus: 'completed', claimedSnapshot: claim,
+    });
+
+    expect(response.result.durationMs).toBe(91092);
+    expect(Number.isInteger(response.result.durationMs)).toBe(true);
+    expect(insertResult).toHaveBeenCalledWith(expect.objectContaining({ durationMs: 91092 }));
+  });
+
   it('never writes a result when the client sends a forged score', async () => {
     const { service, claim, insertResult } = setup();
 
