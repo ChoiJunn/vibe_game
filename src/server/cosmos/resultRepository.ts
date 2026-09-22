@@ -27,24 +27,27 @@ export class ResultRepository {
     }
   }
 
-  async queryLeaderboard(leaderboardKeyInput: string, limit = 10): Promise<GameResultDocument[]> {
+  async queryLeaderboard(
+    leaderboardKeyInput: string,
+    limit = 50,
+    continuationToken?: string,
+  ): Promise<{ items: GameResultDocument[]; continuationToken?: string }> {
     const leaderboardKey = normalizeLeaderboardKey(leaderboardKeyInput);
-    const safeLimit = Math.max(1, Math.min(100, Math.floor(Number.isFinite(limit) ? limit : 10)));
+    const safeLimit = Math.max(1, Math.min(100, Math.floor(Number.isFinite(limit) ? limit : 50)));
     const query: SqlQuerySpec = {
-      query: `SELECT TOP ${safeLimit} * FROM c WHERE c.leaderboardKey = @leaderboardKey AND c.status = @status ORDER BY c.score DESC`,
-      parameters: [
-        { name: '@leaderboardKey', value: leaderboardKey },
-        { name: '@status', value: 'completed' },
-      ],
+      query: 'SELECT * FROM c WHERE c.leaderboardKey = @leaderboardKey ORDER BY c.leaderboardKey ASC, c.score DESC, c.perfectCount DESC, c.durationMs ASC, c.playedAt ASC, c.id ASC',
+      parameters: [{ name: '@leaderboardKey', value: leaderboardKey }],
     };
-    const { resources } = await this.container.items
-      .query<GameResultDocument>(query, { partitionKey: leaderboardKey, maxItemCount: safeLimit })
-      .fetchAll();
+    const page = await this.container.items
+      .query<GameResultDocument>(query, { partitionKey: leaderboardKey, maxItemCount: safeLimit, continuationToken })
+      .fetchNext();
 
-    return resources
-      .filter((result) => result.type === 'gameResult' && result.leaderboardKey === leaderboardKey)
-      .sort(compareLeaderboardRows)
-      .slice(0, safeLimit);
+    return {
+      items: (page.resources ?? []).filter(
+        (result) => result.type === 'gameResult' && result.leaderboardKey === leaderboardKey,
+      ),
+      ...(page.continuationToken ? { continuationToken: page.continuationToken } : {}),
+    };
   }
 }
 
@@ -70,8 +73,4 @@ function validateResult(document: GameResultDocument): void {
   if (!Number.isFinite(Date.parse(document.playedAt)) || document.schemaVersion !== 1) {
     throw new Error('Result playedAt and schemaVersion are invalid.');
   }
-}
-
-function compareLeaderboardRows(left: GameResultDocument, right: GameResultDocument): number {
-  return right.score - left.score || left.playedAt.localeCompare(right.playedAt) || left.id.localeCompare(right.id);
 }

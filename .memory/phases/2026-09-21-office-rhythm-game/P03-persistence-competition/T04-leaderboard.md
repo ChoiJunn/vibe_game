@@ -1,6 +1,6 @@
 # Task: T04 Leaderboard
 
-## Status: pending
+## Status: done
 
 ## Goal
 
@@ -47,11 +47,11 @@
 
 ## Acceptance Criteria
 
-- [ ] daily와 all-time 탭이 동일한 row 계약으로 작동한다.
-- [ ] 한 사용자의 여러 기록이 모두 표시된다.
-- [ ] 서버 정렬 기준이 UI 표시 순서와 일치한다.
-- [ ] 중도 실패·포기 기록이 상태 배지로 구분된다.
-- [ ] Cosmos pagination과 API 오류가 사용자에게 안전하게 표시된다.
+- [x] daily와 all-time 탭이 동일한 row 계약으로 작동한다.
+- [x] 한 사용자의 여러 기록이 모두 표시된다.
+- [x] 서버 정렬 기준이 UI 표시 순서와 일치한다.
+- [x] 중도 실패·포기 기록이 상태 배지로 구분된다.
+- [x] Cosmos pagination과 API 오류가 사용자에게 안전하게 표시된다.
 
 ## Validation
 
@@ -75,6 +75,6 @@ Task: T04-leaderboard
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] 구현 완료
+- [x] 검증 통과
+- commit: committed

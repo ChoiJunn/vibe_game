@@ -141,32 +141,40 @@ describe('ResultRepository', () => {
   it('inserts validated terminal results and parameterizes partition-scoped leaderboard queries', async () => {
     const result = makeResult();
     const create = vi.fn().mockResolvedValue({ resource: result });
-    const fetchAll = vi.fn().mockResolvedValue({ resources: [makeResult({ id: 'result-02', score: 900 }), result] });
-    const query = vi.fn(() => ({ fetchAll }));
+    const fetchNext = vi.fn().mockResolvedValue({
+      resources: [result, makeResult({ id: 'result-02', score: 900, status: 'failed' })],
+      continuationToken: 'opaque-page-2',
+    });
+    const query = vi.fn(() => ({ fetchNext }));
     const repository = new ResultRepository({ items: { create, query } } as unknown as Container);
 
     await expect(repository.insertResult(result)).resolves.toEqual(result);
-    await expect(repository.queryLeaderboard('all-time', 10)).resolves.toMatchObject([{ id: 'result-01' }, { id: 'result-02' }]);
+    await expect(repository.queryLeaderboard('all-time', 10)).resolves.toEqual({
+      items: [result, makeResult({ id: 'result-02', score: 900, status: 'failed' })],
+      continuationToken: 'opaque-page-2',
+    });
     expect(query).toHaveBeenCalledWith(
       expect.objectContaining({
         parameters: expect.arrayContaining([
           { name: '@leaderboardKey', value: 'all-time' },
-          { name: '@status', value: 'completed' },
         ]),
       }),
-      { partitionKey: 'all-time', maxItemCount: 10 },
+      { partitionKey: 'all-time', maxItemCount: 10, continuationToken: undefined },
     );
+    expect(fetchNext).toHaveBeenCalledOnce();
   });
 
   it('validates daily leaderboard keys and enforces safe result limits', async () => {
-    const fetchAll = vi.fn().mockResolvedValue({ resources: [] });
-    const query = vi.fn(() => ({ fetchAll }));
+    const fetchNext = vi.fn().mockResolvedValue({ resources: [] });
+    const query = vi.fn(() => ({ fetchNext }));
     const repository = new ResultRepository({ items: { query } } as unknown as Container);
 
     expect(getDailyLeaderboardKey(new Date('2026-09-22T23:59:00.000Z'))).toBe('daily:2026-09-22');
     await expect(repository.queryLeaderboard('daily:2026-02-30')).rejects.toThrow(/real calendar date/);
     await repository.queryLeaderboard('daily:2026-09-22', 500);
-    expect(query).toHaveBeenCalledWith(expect.anything(), { partitionKey: 'daily:2026-09-22', maxItemCount: 100 });
+    expect(query).toHaveBeenCalledWith(expect.anything(), {
+      partitionKey: 'daily:2026-09-22', maxItemCount: 100, continuationToken: undefined,
+    });
   });
 
   it('rejects non-terminal result documents', async () => {

@@ -463,6 +463,57 @@ h1 {
   text-align: center;
 }
 
+.leaderboard-page {
+  min-height: calc(100vh - 4rem);
+  padding: clamp(1.5rem, 5vw, 4rem) max(1rem, calc((100vw - 1120px) / 2));
+  color: var(--ink);
+  background: radial-gradient(ellipse at 92% 8%, rgba(201, 194, 255, 0.42), transparent 28rem), var(--cream);
+}
+
+.leaderboard-heading { margin: 0 auto 2rem; max-width: 1120px; }
+.leaderboard-back { color: var(--muted-ink); text-decoration: none; font-weight: 700; }
+.leaderboard-heading .eyebrow { margin: 2rem 0 0.5rem; color: #6f69bb; letter-spacing: 0.16em; font-weight: 800; }
+.leaderboard-heading h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.75rem); letter-spacing: -0.06em; }
+.leaderboard-heading > p:last-child { color: var(--muted-ink); }
+
+.leaderboard-card {
+  max-width: 1120px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--paper);
+  box-shadow: 0 1.5rem 4rem rgba(57, 47, 35, 0.08);
+}
+.leaderboard-tabs { display: flex; gap: 0.6rem; padding: 1rem; border-bottom: 1px solid var(--line); }
+.leaderboard-tabs button, .leaderboard-more, .leaderboard-error button {
+  border: 0; border-radius: 999px; padding: 0.75rem 1.1rem; color: var(--ink);
+  background: #f1eee7; font: inherit; font-weight: 800; cursor: pointer;
+}
+.leaderboard-tabs button[aria-selected='true'] { background: var(--lavender); }
+.leaderboard-message { padding: 2.5rem 1rem; color: var(--muted-ink); text-align: center; }
+.leaderboard-error { color: #a33b31; }
+.leaderboard-table-wrap { overflow-x: auto; }
+.leaderboard-table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+.leaderboard-table th { color: var(--muted-ink); font-size: 0.78rem; letter-spacing: 0.06em; }
+.leaderboard-table th, .leaderboard-table td { padding: 1rem 1.1rem; border-bottom: 1px solid var(--line); }
+.leaderboard-table tbody tr:hover { background: rgba(168, 223, 198, 0.16); }
+.leaderboard-player { min-width: 10rem; font-weight: 800; }
+.leaderboard-score { color: #6f69bb; font-weight: 900; }
+.leaderboard-podium { font-size: 1.25rem; }
+.leaderboard-status { display: inline-flex; border-radius: 999px; padding: 0.25rem 0.65rem; font-size: 0.78rem; font-weight: 800; }
+.status-completed { background: #e0f3e8; }
+.status-failed { background: #ffe4df; }
+.status-abandoned { background: #eeeaf8; }
+.leaderboard-more { display: block; margin: 1.25rem auto; background: var(--yellow); }
+.leaderboard-more:disabled { opacity: 0.65; cursor: wait; }
+
+@media (max-width: 600px) {
+  .leaderboard-tabs { display: grid; grid-template-columns: 1fr 1fr; }
+  .leaderboard-tabs button { padding-inline: 0.6rem; }
+  .leaderboard-table th, .leaderboard-table td { padding: 0.8rem; }
+}
+
 .game-page {
   display: flex;
   flex-direction: column;
