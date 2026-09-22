@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import beatmapJson from '@/content/beatmaps/office-day-01.json';
 import { validateBeatmap } from '@/domain/validateBeatmap';
 import { AudioClock } from './AudioClock';
@@ -14,6 +14,12 @@ const settings: AudioSettings = {
 };
 
 describe('OfficeSoundScheduler', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) }));
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
   it('schedules fixed beatmap events with section-specific instruments', async () => {
     const fakeContext = createFakeAudioContext();
     const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
@@ -24,12 +30,12 @@ describe('OfficeSoundScheduler', () => {
     scheduler.load(beatmap, settings);
     scheduler.start();
 
-    expect(fakeContext.createOscillator.mock.calls.length).toBeGreaterThan(4);
+    expect(fakeContext.createOscillator.mock.calls.length).toBeGreaterThan(0);
     expect(fakeContext.createGain).toHaveBeenCalled();
     scheduler.stop();
   });
 
-  it('schedules the backing motif from the start of a run', async () => {
+  it('starts the continuous backing track from the run offset', async () => {
     const fakeContext = createFakeAudioContext();
     const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
     await clock.load(beatmap, settings);
@@ -39,7 +45,25 @@ describe('OfficeSoundScheduler', () => {
     scheduler.load(beatmap, settings);
     scheduler.start();
 
-    expect(fakeContext.createOscillator).toHaveBeenCalled();
+    await vi.waitFor(() => expect(fakeContext.createBufferSource).toHaveBeenCalledTimes(1));
+    expect(fakeContext.createBufferSource.mock.results[0].value.start).toHaveBeenCalledWith(0, 0);
+    scheduler.stop();
+  });
+
+  it('resumes at the frozen audio clock offset without restarting the beatmap', async () => {
+    const fakeContext = createFakeAudioContext();
+    const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+    await clock.load(beatmap, settings);
+    await clock.start(5000);
+    const scheduler = new OfficeSoundScheduler(clock);
+    scheduler.load(beatmap, settings);
+    scheduler.start();
+    await vi.waitFor(() => expect(fakeContext.createBufferSource).toHaveBeenCalledTimes(1));
+    scheduler.pause();
+    await clock.resume();
+    scheduler.resume();
+    await vi.waitFor(() => expect(fakeContext.createBufferSource).toHaveBeenCalledTimes(2));
+    expect(fakeContext.createBufferSource.mock.results[1].value.start).toHaveBeenCalledWith(0, 5);
     scheduler.stop();
   });
 
@@ -108,5 +132,6 @@ function createFakeAudioContext(): Record<string, unknown> & {
     createOscillator,
     createBuffer,
     createBufferSource,
+    decodeAudioData: vi.fn().mockResolvedValue({ duration: 120 }),
   };
 }

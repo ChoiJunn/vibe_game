@@ -1,6 +1,7 @@
 import type { Beatmap, RhythmEvent } from '@/domain/rhythm';
 import { AudioClock } from './AudioClock';
-import { createBeatAccent, createMusicNote, createSectionSound, type ScheduledAudioNode } from './instruments';
+import { createBeatAccent, createSectionSound, type ScheduledAudioNode } from './instruments';
+import { MusicTrackPlayer } from './MusicTrackPlayer';
 import { clampAudioSettings, DEFAULT_AUDIO_SETTINGS, type AudioSettings } from './types';
 
 export type OfficeSoundSchedulerOptions = {
@@ -20,6 +21,8 @@ export class OfficeSoundScheduler {
   private nextMusicStepIndex = 0;
   private readonly scheduledEventIds = new Set<string>();
   private readonly activeNodes = new Set<ScheduledAudioNode>();
+  private musicTrack: MusicTrackPlayer | null = null;
+  private musicLoad: Promise<void> | null = null;
 
   constructor(clock: AudioClock, options: OfficeSoundSchedulerOptions = {}) {
     this.clock = clock;
@@ -33,6 +36,12 @@ export class OfficeSoundScheduler {
     this.settings = clampAudioSettings(settings);
     this.musicStepMs = 60_000 / beatmap.bpm / 2;
     this.nextMusicStepIndex = Math.ceil(fromSongPositionMs / this.musicStepMs);
+    this.musicTrack?.stop();
+    this.musicTrack = new MusicTrackPlayer(this.clock.getAudioContext());
+    this.musicTrack.setVolume(this.settings.muted ? 0 : this.settings.musicVolume);
+    this.musicLoad = this.musicTrack.load('/game/audio/office-groove.wav').catch((error: unknown) => {
+      console.error('Unable to load the local office soundtrack.', error);
+    });
     beatmap.events.forEach((event) => {
       if ((event.endMs ?? event.startMs) < fromSongPositionMs) this.scheduledEventIds.add(event.id);
     });
@@ -44,11 +53,17 @@ export class OfficeSoundScheduler {
     }
 
     this.running = true;
+    void this.musicLoad?.then(() => {
+      if (this.running && !this.settings.muted && this.settings.musicVolume > 0) {
+        this.musicTrack?.start(this.clock.getSongPositionMs());
+      }
+    });
     this.tick();
     this.timer = setInterval(() => this.tick(), this.tickMs);
   }
 
   pause(): void {
+    this.musicTrack?.pause(this.clock.getSongPositionMs());
     this.clearTimer();
     this.running = false;
   }
@@ -58,12 +73,20 @@ export class OfficeSoundScheduler {
       return;
     }
 
-    this.start();
+    this.running = true;
+    void this.musicLoad?.then(() => {
+      if (this.running && !this.settings.muted && this.settings.musicVolume > 0) {
+        this.musicTrack?.resume(this.clock.getSongPositionMs());
+      }
+    });
+    this.tick();
+    this.timer = setInterval(() => this.tick(), this.tickMs);
   }
 
   stop(): void {
     this.clearTimer();
     this.running = false;
+    this.musicTrack?.stop();
     this.scheduledEventIds.clear();
     this.nextMusicStepIndex = 0;
     this.activeNodes.forEach((node) => {
@@ -78,6 +101,11 @@ export class OfficeSoundScheduler {
 
   setSettings(settings: AudioSettings): void {
     this.settings = clampAudioSettings(settings);
+    this.musicTrack?.setVolume(this.settings.muted ? 0 : this.settings.musicVolume);
+    if (this.settings.muted || this.settings.musicVolume <= 0) this.musicTrack?.pause(this.clock.getSongPositionMs());
+    else if (this.running) {
+      void this.musicLoad?.then(() => this.musicTrack?.resume(this.clock.getSongPositionMs()));
+    }
   }
 
   private tick(): void {
@@ -95,45 +123,11 @@ export class OfficeSoundScheduler {
     const context = this.clock.getAudioContext();
     const horizonMs = songPositionMs + this.lookaheadMs;
 
-    while (this.nextMusicStepIndex * this.musicStepMs <= horizonMs) {
-      const stepIndex = this.nextMusicStepIndex++;
-      this.scheduleMusicStep(stepIndex, songPositionMs, context);
-    }
+    while (this.nextMusicStepIndex * this.musicStepMs <= horizonMs) this.nextMusicStepIndex += 1;
 
     beatmap.events
       .filter((event) => !this.scheduledEventIds.has(event.id) && event.startMs <= horizonMs)
       .forEach((event) => this.scheduleEvent(event, songPositionMs, context));
-  }
-
-  private scheduleMusicStep(stepIndex: number, songPositionMs: number, context: AudioContext): void {
-    const beatmap = this.beatmap;
-    if (!beatmap || this.settings.muted || this.settings.musicVolume <= 0) return;
-    const stepMs = stepIndex * this.musicStepMs;
-    const endMs = beatmap.sections.at(-1)?.endMs ?? 0;
-    if (stepMs > endMs) return;
-
-    const sectionIndex = beatmap.sections.findIndex((section) => stepMs < section.endMs);
-    const section = beatmap.sections[Math.max(0, sectionIndex)];
-    if (!section) return;
-
-    // Original pentatonic arpeggio: a steady backing motif that changes root
-    // with each office-day scene instead of relying on a licensed music file.
-    const motif = [0, 2, 4, 7, 4, 2, 0, 7];
-    const sectionRoot = [0, 7, 5, 2, 9, 0][Math.max(0, sectionIndex)] ?? 0;
-    const semitones = sectionRoot + motif[stepIndex % motif.length];
-    const frequency = 261.63 * (2 ** (semitones / 12));
-    const delayMs = Math.max(0, stepMs - songPositionMs);
-    const nodes = createMusicNote({
-      context,
-      when: context.currentTime + delayMs / 1000,
-      durationSec: Math.min(0.18, this.musicStepMs / 1000 * 0.8),
-      volume: this.settings.musicVolume * 0.12,
-      destination: context.destination,
-    }, frequency);
-    nodes.forEach((node) => {
-      this.activeNodes.add(node);
-      node.addEventListener('ended', () => this.activeNodes.delete(node), { once: true });
-    });
   }
 
   private scheduleEvent(event: RhythmEvent, songPositionMs: number, context: AudioContext): void {
@@ -147,12 +141,12 @@ export class OfficeSoundScheduler {
     const when = context.currentTime + delayMs / 1000;
     const durationSec = event.type === 'hold' ? Math.max(0.08, ((event.endMs ?? event.startMs) - event.startMs) / 1000) : 0.12;
     const nodes = [
-      ...(this.settings.musicVolume > 0
+      ...(this.settings.sfxVolume > 0
         ? createSectionSound(event.section, {
             context,
             when,
             durationSec,
-            volume: this.settings.musicVolume,
+            volume: this.settings.sfxVolume,
             destination: context.destination,
           })
         : []),
