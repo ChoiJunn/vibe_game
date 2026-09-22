@@ -79,7 +79,7 @@ Task: T03-release-readiness
 - [x] Automated checks passed: lint (one existing warning), typecheck, 25 files / 67 unit tests, 18 Chromium+Edge E2E tests, production build.
 - [x] Public smoke passed against the current deployed baseline (`f41eeb1232233fe29fb6c4da8ca8d7ae1f4ad8b4`); authenticated smoke skipped.
 - [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and deployed-candidate verification remain not run; see `vibe_game/docs/release-checklist.md`.
-- commit: pending
+- implementation commit: `ffe84ac` (manual production gates remain active)
 
 ### Execution Notes
 
