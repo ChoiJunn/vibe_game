@@ -118,6 +118,27 @@ describe('RhythmGameController', () => {
     expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: holdIndex + 1, missCount: 1 });
   });
 
+  it('exposes visible hold progress before and after the hold keydown', async () => {
+    const clock = createFakeClock();
+    const holdIndex = beatmap.events.findIndex((event) => event.type === 'hold');
+    const event = beatmap.events[holdIndex];
+    const initialRunState = { ...createInitialRunState({ runId: 'run-hold-feedback', userOid: 'user-1', beatmapId: beatmap.id }), nextEventIndex: holdIndex };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: clock as never,
+      scheduler: createFakeScheduler() as never,
+      initialRunState,
+      audioSettings: settings,
+    });
+
+    await controller.start(0, initialRunState);
+    clock.getSongPositionMs.mockReturnValue(event.startMs);
+    expect(controller.getSnapshot().holdState).toMatchObject({ eventId: event.id, phase: 'waiting', progress: 0 });
+    controller.handleInput({ type: 'keydown', songPositionMs: event.startMs });
+    expect(controller.getSnapshot().holdState).toMatchObject({ eventId: event.id, phase: 'holding', progress: 0 });
+    expect(controller.getSnapshot().holdState?.startJudgement?.judgement).toBe('perfect');
+  });
+
   it('notifies persistence before subscribers observe automatic terminal failure', async () => {
     const event = beatmap.events[0];
     const initialRunState = { ...createInitialRunState({ runId: 'run-auto-fail', userOid: 'user-1', beatmapId: beatmap.id }), hearts: 1 };

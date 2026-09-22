@@ -15,10 +15,11 @@ export function getWalkPoseKey(state: AudioClockState, songPositionMs: number): 
 
 export class OfficeCharacter {
   private readonly sprite: Phaser.GameObjects.Image;
-  private readonly reactionFace: Phaser.GameObjects.Text;
   private readonly baseY: number;
   private readonly baseScaleX: number;
   private readonly baseScaleY: number;
+  private reactionActive = false;
+  private lastWalkPoseKey: string = GAME_ASSETS.protagonist.walkA.key;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.baseY = y;
@@ -26,45 +27,31 @@ export class OfficeCharacter {
       .setOrigin(0.5, 1)
       .setDisplaySize(190, 190)
       .setDepth(11);
-    this.reactionFace = scene.add.text(x + 88, y - 60, '', {
-      color: '#fff8e9',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '28px',
-      fontStyle: 'bold',
-      stroke: '#24323b',
-      strokeThickness: 5,
-    })
-      .setOrigin(0.5)
-      .setDepth(13)
-      .setAlpha(0);
     this.baseScaleX = this.sprite.scaleX;
     this.baseScaleY = this.sprite.scaleY;
   }
 
   update(state: AudioClockState, songPositionMs: number, judgement?: Judgement, combo = 0): void {
     const poseKey = getWalkPoseKey(state, songPositionMs);
-    if (poseKey && this.sprite.texture.key !== poseKey) {
+    if (!this.reactionActive && poseKey && this.sprite.texture.key !== poseKey) {
       this.sprite.setTexture(poseKey);
+      this.lastWalkPoseKey = poseKey;
     }
     const energyTier = getComboEnergyTier(combo);
     const walking = state === 'playing';
     const bob = walking ? Math.sin((songPositionMs / 272) * Math.PI) * (2 + Math.min(energyTier, 5) * 1.2) : 0;
     this.sprite.setY(this.baseY + bob);
-    this.reactionFace.setPosition(this.sprite.x + 88, this.baseY - 60);
     if (judgement) this.react(judgement);
   }
 
   react(judgement: Judgement): void {
     const pose = getCharacterReactionPose(judgement);
-    const face = getCharacterReactionFace(judgement);
+    this.reactionActive = true;
     this.sprite.scene.tweens.killTweensOf(this.sprite);
-    this.sprite.scene.tweens.killTweensOf(this.reactionFace);
-    this.sprite.setRotation(0).setScale(this.baseScaleX, this.baseScaleY);
-    this.reactionFace
-      .setText(face.text)
-      .setColor(face.color)
-      .setPosition(this.sprite.x + 88, this.baseY - 60)
-      .setAlpha(1);
+    this.sprite
+      .setTexture(getCharacterReactionAssetKey(judgement))
+      .setRotation(0)
+      .setScale(this.baseScaleX, this.baseScaleY);
     this.sprite.scene.tweens.add({
       targets: this.sprite,
       rotation: pose.rotation,
@@ -74,14 +61,10 @@ export class OfficeCharacter {
       duration: pose.duration,
       yoyo: true,
       ease: pose.ease,
-    });
-    this.sprite.scene.tweens.add({
-      targets: this.reactionFace,
-      alpha: 0,
-      y: this.baseY - 84,
-      delay: 120,
-      duration: 420,
-      ease: 'Sine.easeIn',
+      onComplete: () => {
+        this.reactionActive = false;
+        this.sprite.setTexture(this.lastWalkPoseKey);
+      },
     });
   }
 }
@@ -98,10 +81,6 @@ export function getCharacterReactionPose(judgement: Judgement): { rotation: numb
   }
 }
 
-export function getCharacterReactionFace(judgement: Judgement): { text: string; color: string } {
-  switch (judgement) {
-    case 'perfect': return { text: '^_^', color: '#f3bf54' };
-    case 'good': return { text: 'o_o', color: '#79c7ad' };
-    case 'miss': return { text: 'T_T', color: '#f08f83' };
-  }
+export function getCharacterReactionAssetKey(judgement: Judgement): string {
+  return GAME_ASSETS.protagonist[judgement].key;
 }

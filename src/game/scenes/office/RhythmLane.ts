@@ -69,16 +69,28 @@ export class RhythmLane {
   private readonly scene: Phaser.Scene;
   private readonly lane: ResolvedLaneOptions;
   private readonly frame: Phaser.GameObjects.Graphics;
+  private readonly holdProgress: Phaser.GameObjects.Graphics;
+  private readonly holdStatus: Phaser.GameObjects.Text;
   private readonly notes = new Map<string, LaneNoteVisual>();
 
   constructor(scene: Phaser.Scene, options: RhythmLaneOptions = {}) {
     this.scene = scene;
     this.lane = resolveLaneOptions(options);
     this.frame = scene.add.graphics().setDepth(10).setScrollFactor(0);
+    this.holdProgress = scene.add.graphics().setDepth(14).setScrollFactor(0);
+    this.holdStatus = scene.add.text(this.lane.hitX, this.lane.y - 106, '', {
+      color: '#fff8e9',
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '18px',
+      fontStyle: 'bold',
+      stroke: '#182a31',
+      strokeThickness: 5,
+    }).setOrigin(0.5).setDepth(14).setScrollFactor(0).setAlpha(0);
     this.drawLaneFrame();
   }
 
   update(snapshot: RhythmGameSnapshot): void {
+    this.updateHoldFeedback(snapshot);
     const pendingEvents = snapshot.events.slice(snapshot.runState.nextEventIndex);
     const visibleEvents = pendingEvents.filter((event) =>
       isLaneEventVisible(event, snapshot.songPositionMs, this.lane),
@@ -88,13 +100,15 @@ export class RhythmLane {
     for (const event of visibleEvents) {
       const projection = projectLaneEvent(event, snapshot.songPositionMs, this.lane);
       const visual = this.notes.get(event.id) ?? this.createNote(event);
+      const activeHold = snapshot.currentEvent?.id === event.id && snapshot.holdState?.phase === 'holding';
       visual.container.setPosition(projection.startX, this.lane.y);
       visual.motif.setTexture(getNoteAssetKey(event.section));
+      visual.motif.setTint(activeHold ? 0x79c7ad : 0xffffff);
       visual.rail.clear();
 
       if (projection.endX !== undefined && projection.railWidth > 0) {
         const railLeft = Math.min(0, projection.endX - projection.startX);
-        visual.rail.fillStyle(0xffe3a5, 0.95);
+        visual.rail.fillStyle(activeHold ? 0x79c7ad : 0xffe3a5, 0.95);
         visual.rail.fillRoundedRect(railLeft, -7, projection.railWidth, 14, 7);
         visual.rail.lineStyle(2, 0x6a4533, 0.9);
         visual.rail.strokeRoundedRect(railLeft, -7, projection.railWidth, 14, 7);
@@ -114,6 +128,8 @@ export class RhythmLane {
 
   destroy(): void {
     this.frame.destroy();
+    this.holdProgress.destroy();
+    this.holdStatus.destroy();
     for (const visual of this.notes.values()) {
       visual.container.destroy(true);
     }
@@ -145,5 +161,29 @@ export class RhythmLane {
     this.frame.fillCircle(hitX, y, 13);
     this.frame.fillStyle(0xd88143, 1);
     this.frame.fillCircle(hitX, y, 7);
+  }
+
+  private updateHoldFeedback(snapshot: RhythmGameSnapshot): void {
+    const event = snapshot.currentEvent;
+    const hold = snapshot.holdState;
+    if (!event || event.type !== 'hold' || !hold) {
+      this.holdProgress.clear();
+      this.holdStatus.setAlpha(0);
+      return;
+    }
+
+    const progress = Math.round(hold.progress * 100);
+    this.holdProgress.clear();
+    this.holdProgress.fillStyle(0x243e43, 0.9);
+    this.holdProgress.fillRoundedRect(this.lane.hitX - 132, this.lane.y - 92, 264, 12, 6);
+    const startJudgement = hold.startJudgement?.judgement;
+    const holdingColor = startJudgement === 'miss' ? 0xf08f83 : 0x79c7ad;
+    this.holdProgress.fillStyle(hold.phase === 'holding' ? holdingColor : 0xffd46f, 1);
+    this.holdProgress.fillRoundedRect(this.lane.hitX - 132, this.lane.y - 92, 264 * hold.progress, 12, 6);
+    const startLabel = startJudgement ? `시작 ${startJudgement.toUpperCase()}` : '시작 대기';
+    this.holdStatus
+      .setText(hold.phase === 'holding' ? `HOLDING  ${progress}%  ·  ${startLabel}  ·  끝까지 유지` : 'HOLD  ·  스페이스를 누르고 끝까지 유지')
+      .setColor(hold.phase === 'holding' && startJudgement === 'miss' ? '#f08f83' : hold.phase === 'holding' ? '#79c7ad' : '#fff8e9')
+      .setAlpha(1);
   }
 }

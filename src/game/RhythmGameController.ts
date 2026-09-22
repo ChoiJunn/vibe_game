@@ -16,6 +16,14 @@ export type RhythmGameSnapshot = {
   totalEvents: number;
   section: SectionId;
   lastJudgement?: JudgementResult;
+  holdState?: HoldState;
+};
+
+export type HoldState = {
+  eventId: string;
+  phase: 'waiting' | 'holding';
+  progress: number;
+  startJudgement?: JudgementResult;
 };
 
 export type AutomaticMissNotification = { chartEventId: string; songPositionMs: number };
@@ -199,6 +207,14 @@ export class RhythmGameController {
 
   getSnapshot(): RhythmGameSnapshot {
     const currentEvent = this.beatmap.events[this.runState.nextEventIndex];
+    const holdState = currentEvent?.type === 'hold' && currentEvent.endMs !== undefined
+      ? {
+          eventId: currentEvent.id,
+          phase: this.pendingHoldStart ? 'holding' as const : 'waiting' as const,
+          progress: Math.min(1, Math.max(0, (this.clock.getSongPositionMs() - currentEvent.startMs) / (currentEvent.endMs - currentEvent.startMs))),
+          startJudgement: this.pendingHoldStart,
+        }
+      : undefined;
     return {
       clockState: this.clock.getState(),
       songPositionMs: this.clock.getSongPositionMs(),
@@ -208,6 +224,7 @@ export class RhythmGameController {
       totalEvents: this.beatmap.events.length,
       section: currentEvent?.section ?? this.beatmap.sections[this.beatmap.sections.length - 1]?.id ?? 'arrival',
       lastJudgement: this.lastJudgement,
+      holdState,
     };
   }
 

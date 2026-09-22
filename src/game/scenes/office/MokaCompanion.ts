@@ -18,6 +18,7 @@ export class MokaCompanion {
   private readonly carryY: number;
   private readonly deskX: number;
   private readonly deskY: number;
+  private reactionActive = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.carryX = x - 64;
@@ -37,7 +38,7 @@ export class MokaCompanion {
     const size = getMokaSize(section, combo);
     this.sprite.setPosition(carried ? this.carryX : this.deskX, carried ? this.carryY : this.deskY);
     this.sprite.setDisplaySize(size, size);
-    if (this.sprite.texture.key !== asset.key) {
+    if (!this.reactionActive && this.sprite.texture.key !== asset.key) {
       this.sprite.setTexture(asset.key);
     }
     if (judgement) this.react(judgement);
@@ -45,14 +46,20 @@ export class MokaCompanion {
 
   react(judgement: Judgement): void {
     const rotation = judgement === 'perfect' ? 0.16 : judgement === 'good' ? 0.1 : -0.22;
+    this.reactionActive = true;
     this.sprite.scene.tweens.killTweensOf(this.sprite);
-    this.sprite.setRotation(0);
+    this.sprite.setTexture(getMokaReactionAssetKey(judgement)).setRotation(0);
     this.sprite.scene.tweens.add({
       targets: this.sprite,
       rotation,
       duration: judgement === 'miss' ? 340 : 240,
       yoyo: true,
       ease: 'Sine.easeInOut',
+      onComplete: () => { this.reactionActive = false; },
     });
   }
+}
+
+export function getMokaReactionAssetKey(judgement: Judgement): string {
+  return GAME_ASSETS.moka[judgement].key;
 }

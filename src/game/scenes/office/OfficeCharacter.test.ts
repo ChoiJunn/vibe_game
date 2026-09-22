@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getMokaForm, getMokaSize } from './MokaCompanion';
-import { getCharacterReactionFace, getCharacterReactionPose, getComboEnergyTier, getWalkPoseKey } from './OfficeCharacter';
+import { getMokaForm, getMokaReactionAssetKey, getMokaSize } from './MokaCompanion';
+import { getCharacterReactionAssetKey, getCharacterReactionPose, getComboEnergyTier, getWalkPoseKey } from './OfficeCharacter';
 import { GAME_ASSETS } from '@/game/assets';
 
 describe('Office journey characters', () => {
@@ -29,7 +29,9 @@ describe('Office journey characters', () => {
     expect(getCharacterReactionPose('perfect').yOffset).toBeLessThan(0);
     expect(getCharacterReactionPose('good').rotation).toBeGreaterThan(0);
     expect(getCharacterReactionPose('miss').yOffset).toBeGreaterThan(0);
-    expect(getCharacterReactionFace('perfect').text).not.toBe(getCharacterReactionFace('miss').text);
-    expect(getCharacterReactionFace('good').color).not.toBe(getCharacterReactionFace('miss').color);
+    expect(getCharacterReactionAssetKey('perfect')).toBe(GAME_ASSETS.protagonist.perfect.key);
+    expect(getCharacterReactionAssetKey('miss')).toBe(GAME_ASSETS.protagonist.miss.key);
+    expect(getMokaReactionAssetKey('good')).toBe(GAME_ASSETS.moka.good.key);
+    expect(getMokaReactionAssetKey('miss')).toBe(GAME_ASSETS.moka.miss.key);
   });
 });
