@@ -1,6 +1,6 @@
 # Task: T03 Result Validation
 
-## Status: pending
+## Status: done
 
 ## Goal
 
@@ -95,6 +95,8 @@ Task: T03-result-validation
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] 구현 완료
+- [x] 검증 통과 (typecheck, targeted ESLint, 20 focused tests, production build)
+- Cosmos integration smoke skipped: Cosmos connection settings are not configured locally.
+- Full repository lint still has the two pre-existing TutorialOverlay errors.
+- commit: feat(security): validate rhythm results on server

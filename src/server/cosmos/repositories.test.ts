@@ -175,4 +175,18 @@ describe('ResultRepository', () => {
     await expect(repository.insertResult(makeResult({ status: 'active' as GameResultDocument['status'] }))).rejects.toThrow(/terminal/);
     expect(create).not.toHaveBeenCalled();
   });
+
+  it('treats an identical result retry as idempotent but rejects a different run payload', async () => {
+    const result = makeResult();
+    const create = vi.fn().mockRejectedValue({ statusCode: 409 });
+    const read = vi.fn().mockResolvedValue({ resource: result });
+    const repository = new ResultRepository({
+      items: { create },
+      item: vi.fn(() => ({ read })),
+    } as unknown as Container);
+
+    await expect(repository.insertResult(result)).resolves.toEqual(result);
+    read.mockResolvedValueOnce({ resource: { ...result, score: result.score + 1 } });
+    await expect(repository.insertResult(result)).rejects.toThrow(/different result/);
+  });
 });

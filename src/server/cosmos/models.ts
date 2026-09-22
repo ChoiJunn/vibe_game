@@ -1,4 +1,4 @@
-import type { Judgement, RunState } from '@/domain/rhythm';
+import type { RunState } from '@/domain/rhythm';
 
 export type VerifiedInputEvent = {
   eventId: string;
@@ -6,7 +6,6 @@ export type VerifiedInputEvent = {
   type: 'keydown' | 'keyup';
   songPositionMs: number;
   receivedAt: string;
-  judgement?: Judgement;
 };
 
 export type TerminalRunStatus = 'completed' | 'failed' | 'abandoned';

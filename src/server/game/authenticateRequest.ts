@@ -2,7 +2,7 @@ import 'server-only';
 
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-export type GameIdentity = { oid: string; tenantId: string };
+export type GameIdentity = { oid: string; tenantId: string; displayName: string };
 
 export class AuthenticationError extends Error {
   constructor(message = 'A valid Entra ID sign-in token is required.') {
@@ -34,7 +34,11 @@ export async function authenticateGameRequest(request: Request): Promise<GameIde
     if (payload.tid !== expectedTenant || typeof payload.oid !== 'string' || !payload.oid) {
       throw new AuthenticationError();
     }
-    return { oid: payload.oid, tenantId: expectedTenant };
+    return {
+      oid: payload.oid,
+      tenantId: expectedTenant,
+      displayName: typeof payload.name === 'string' && payload.name.trim() ? payload.name.trim().slice(0, 80) : 'Office player',
+    };
   } catch {
     throw new AuthenticationError();
   }

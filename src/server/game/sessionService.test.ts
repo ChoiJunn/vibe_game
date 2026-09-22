@@ -6,7 +6,7 @@ import type { GameSessionDocument, StoredCosmosDocument, VerifiedInputEvent } fr
 import { ActiveSessionConflictError, CosmosPreconditionFailedError } from '@/server/cosmos/errors';
 import type { SessionRepository } from '@/server/cosmos/sessionRepository';
 
-const identity: GameIdentity = { oid: 'oid-1', tenantId: 'tenant-1' };
+const identity: GameIdentity = { oid: 'oid-1', tenantId: 'tenant-1', displayName: 'Player One' };
 
 class MemorySessionRepository {
   record?: StoredCosmosDocument<GameSessionDocument>;

@@ -15,7 +15,13 @@ export class ResultRepository {
       return resource as GameResultDocument;
     } catch (error) {
       if (getCosmosStatusCode(error) === 409) {
-        throw new CosmosOperationError(409, 'A result with this id already exists.');
+        try {
+          const existing = await this.container.item(document.id, document.leaderboardKey).read<GameResultDocument>();
+          if (existing.resource && sameAttempt(existing.resource, document)) return existing.resource;
+        } catch {
+          // Fall through to a generic conflict without exposing stored data.
+        }
+        throw new CosmosOperationError(409, 'A different result already exists for this run.');
       }
       throw error;
     }
@@ -40,6 +46,13 @@ export class ResultRepository {
       .sort(compareLeaderboardRows)
       .slice(0, safeLimit);
   }
+}
+
+function sameAttempt(left: GameResultDocument, right: GameResultDocument): boolean {
+  return left.id === right.id && left.userOid === right.userOid && left.beatmapId === right.beatmapId &&
+    left.leaderboardKey === right.leaderboardKey && left.status === right.status && left.score === right.score &&
+    left.perfectCount === right.perfectCount && left.goodCount === right.goodCount &&
+    left.missCount === right.missCount && left.maxCombo === right.maxCombo && left.durationMs === right.durationMs;
 }
 
 function validateResult(document: GameResultDocument): void {

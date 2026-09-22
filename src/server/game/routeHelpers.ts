@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { AuthenticationError, authenticateGameRequest } from './authenticateRequest';
-import { getServiceErrorStatus } from './sessionService';
+import { getServiceErrorStatus, SessionRequestError } from './sessionService';
 
 export function jsonWithSession<T extends { _etag: string }>(session: T, status = 200): Response {
   const { _etag, ...body } = session;
@@ -9,9 +9,18 @@ export function jsonWithSession<T extends { _etag: string }>(session: T, status 
 }
 
 export async function readJson(request: Request): Promise<Record<string, unknown>> {
-  const value: unknown = await request.json();
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('A JSON object is required.');
+  let value: unknown;
+  try {
+    value = await request.json();
+  } catch {
+    throw new SessionRequestError('A valid JSON object is required.');
+  }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new SessionRequestError('A JSON object is required.');
   return value as Record<string, unknown>;
+}
+
+export function invalidSessionRequest(message: string): never {
+  throw new SessionRequestError(message);
 }
 
 export function sessionErrorResponse(error: unknown): Response {

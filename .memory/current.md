@@ -10,7 +10,7 @@
 
 ## Active Task
 
-[T03 Result Validation](./phases/2026-09-21-office-rhythm-game/P03-persistence-competition/T03-result-validation.md)
+[T04 Leaderboard](./phases/2026-09-21-office-rhythm-game/P03-persistence-competition/T04-leaderboard.md)
 
 ## Status
 
@@ -25,10 +25,11 @@
 - P02 Rhythm Gameplay: complete
 - P03 T01 Cosmos DB Data Access: done
 - P03 T02 Session API: done
-- P03 T03 Result Validation: in_progress
+- P03 T03 Result Validation: done
+- P03 T04 Leaderboard: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Read the P03-T03 blueprint and implement only server-side rhythm replay validation and result persistence. Do not implement leaderboard behavior yet.
+Read the P03-T04 blueprint and implement the daily and all-time leaderboard API and authenticated UI.

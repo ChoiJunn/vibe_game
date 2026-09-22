@@ -21,6 +21,16 @@ const ACTIVE_LOCK_ID = '__active__';
 export class SessionRepository {
   constructor(private readonly container: Container) {}
 
+  async getByRunId(userOid: string, tenantId: string, runId: string): Promise<StoredCosmosDocument<GameSessionDocument> | undefined> {
+    try {
+      const session = await this.readSession(userOid, runId);
+      return session.tenantId === tenantId ? session : undefined;
+    } catch (error) {
+      if (getCosmosStatusCode(error) === 404) return undefined;
+      throw error;
+    }
+  }
+
   async getActiveByUser(userOid: string, tenantId: string): Promise<StoredCosmosDocument<GameSessionDocument> | undefined> {
     let lockResponse;
     try {
@@ -141,7 +151,10 @@ export class SessionRepository {
   ): Promise<StoredCosmosDocument<GameSessionDocument>> {
     const current = await this.readSession(userOid, runId);
     assertEtag(expectedEtag);
-    if (current.terminalStatus) return current;
+    if (current.terminalStatus) {
+      if (current.terminalStatus !== status) throw new CosmosOperationError(409, 'The session already has a different terminal status.');
+      return current;
+    }
 
     const now = new Date();
     const updated: GameSessionDocument = {

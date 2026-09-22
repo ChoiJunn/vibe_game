@@ -130,6 +130,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       return;
     }
 
+    setIdToken(null);
+    clearCachedIdToken();
     await client.logoutRedirect({
       postLogoutRedirectUri: entraAuthConfig.redirectUri,
     });
@@ -158,6 +160,14 @@ function cacheIdToken(token: string): void {
     window.sessionStorage.setItem(ID_TOKEN_STORAGE_KEY, token);
   } catch {
     // MSAL's own session cache remains available if browser storage is restricted.
+  }
+}
+
+function clearCachedIdToken(): void {
+  try {
+    window.sessionStorage.removeItem(ID_TOKEN_STORAGE_KEY);
+  } catch {
+    // The MSAL logout still proceeds when browser storage is restricted.
   }
 }
 

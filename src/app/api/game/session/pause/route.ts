@@ -1,4 +1,4 @@
-import { jsonWithSession, readJson, sessionErrorResponse, withGameIdentity } from '@/server/game/routeHelpers';
+import { invalidSessionRequest, jsonWithSession, readJson, sessionErrorResponse, withGameIdentity } from '@/server/game/routeHelpers';
 import { getSessionService, requireVersion, validatePauseReason, validateSnapshot } from '@/server/game/sessionService';
 
 export const runtime = 'nodejs';
@@ -7,7 +7,7 @@ export async function POST(request: Request): Promise<Response> {
   return withGameIdentity(request, async (identity) => {
     try {
       const body = await readJson(request);
-      if (typeof body.runId !== 'string' || !body.runId) throw new Error('runId is required.');
+      if (typeof body.runId !== 'string' || !body.runId) invalidSessionRequest('runId is required.');
       validatePauseReason(body.reason);
       const snapshot = validateSnapshot(body.snapshot, identity, body.runId);
       const version = requireVersion(request.headers.get('if-match') ?? String(body.expectedVersion ?? ''));
