@@ -2,13 +2,14 @@ import 'server-only';
 
 import type { Beatmap, RunState } from '@/domain/rhythm';
 import { combineHoldJudgements, judgeHoldEnd, judgeHoldStart, judgeTap } from '@/game/judgement/judgeInput';
-import type { InputEvent } from '@/game/judgement/types';
+import { JUDGEMENT_WINDOWS, type InputEvent } from '@/game/judgement/types';
 import { reduceRunState } from '@/game/state/reduceRunState';
 
 export type ReplayInputEvent = {
   eventId: string;
   sequence: number;
-  type: InputEvent['type'];
+  type: InputEvent['type'] | 'auto-miss';
+  chartEventId?: string;
   songPositionMs: number;
   inputOffsetMs?: number;
 };
@@ -44,6 +45,33 @@ export function replayInputEvents(
     eventIds.add(input.eventId);
     previousPosition = input.songPositionMs;
 
+    if (input.type === 'auto-miss') {
+      if (state.status !== 'active') return { state, reason: 'invalid_sequence' };
+      const beatmapEvent = beatmap.events[state.nextEventIndex];
+      if (!beatmapEvent || input.chartEventId !== beatmapEvent.id) {
+        return { state, reason: 'invalid_sequence' };
+      }
+      const targetMs = beatmapEvent.type === 'hold' ? beatmapEvent.endMs! : beatmapEvent.startMs;
+      if (input.songPositionMs <= targetMs + JUDGEMENT_WINDOWS.goodMs) {
+        return { state, reason: 'impossible_timing' };
+      }
+      if (pendingHoldEventIndex === state.nextEventIndex) {
+        pendingHoldStart = undefined;
+        pendingHoldEventIndex = -1;
+      }
+      state = reduceRunState(state, {
+        result: { judgement: 'miss', errorMs: input.songPositionMs - targetMs, eventId: beatmapEvent.id },
+        eventIndex: state.nextEventIndex,
+        isFinalEvent: state.nextEventIndex === beatmap.events.length - 1,
+        finalEventEndMs: beatmapEvent.endMs ?? beatmapEvent.startMs,
+        songPositionMs: input.songPositionMs,
+      });
+      continue;
+    }
+
+    // The auto-miss branch above continues before physical key processing.
+    const physicalInput = input as InputEvent;
+
     if (input.type === 'keydown') {
       if (isPressed) return { state, reason: 'invalid_sequence' };
       // Browsers may dispatch one or more inputs after the fifth miss has
@@ -58,14 +86,14 @@ export function replayInputEvents(
       isPressed = true;
       if (beatmapEvent.type === 'tap') {
         state = reduceRunState(state, {
-          result: judgeTap(beatmapEvent, input, input.inputOffsetMs ?? 0),
+          result: judgeTap(beatmapEvent, physicalInput, input.inputOffsetMs ?? 0),
           eventIndex: state.nextEventIndex,
           isFinalEvent: state.nextEventIndex === beatmap.events.length - 1,
           finalEventEndMs: beatmapEvent.startMs,
           songPositionMs: input.songPositionMs,
         });
       } else {
-        pendingHoldStart = judgeHoldStart(beatmapEvent, input, input.inputOffsetMs ?? 0);
+        pendingHoldStart = judgeHoldStart(beatmapEvent, physicalInput, input.inputOffsetMs ?? 0);
         pendingHoldEventIndex = state.nextEventIndex;
       }
       continue;
@@ -77,7 +105,7 @@ export function replayInputEvents(
     if (!pendingHoldStart) continue;
     const beatmapEvent = beatmap.events[pendingHoldEventIndex];
     if (!beatmapEvent || beatmapEvent.type !== 'hold') return { state, reason: 'invalid_sequence' };
-    const end = judgeHoldEnd(beatmapEvent, input, input.inputOffsetMs ?? 0);
+    const end = judgeHoldEnd(beatmapEvent, physicalInput, input.inputOffsetMs ?? 0);
     const result = combineHoldJudgements(pendingHoldStart, end).combined;
     state = reduceRunState(state, {
       result,

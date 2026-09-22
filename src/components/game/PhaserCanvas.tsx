@@ -98,6 +98,7 @@ export function PhaserCanvas() {
     let startedInEffect = false;
     let startGameHandler: (() => void) | undefined;
     let unsubscribeController: () => void = () => undefined;
+    let unsubscribeAutomaticMiss: () => void = () => undefined;
     let unsubscribePause: () => void = () => undefined;
     let unsubscribeAutosave: () => void = () => undefined;
     const beatmap = validateBeatmap(isE2eAuthEnabled() ? testBeatmapJson : beatmapJson);
@@ -150,6 +151,9 @@ export function PhaserCanvas() {
           onPauseRequest: () => controller.pause(),
         });
         controller.attachInputController(input);
+        unsubscribeAutomaticMiss = controller.subscribeAutomaticMiss(({ chartEventId, songPositionMs }) => {
+          input.recordAutomaticMiss(chartEventId, songPositionMs);
+        });
         exitToNewGameRef.current = async () => {
           await terminalSubmissionRef.current?.catch(() => undefined);
           const active = await api.getActive();
@@ -241,6 +245,7 @@ export function PhaserCanvas() {
       exitToNewGameRef.current = null;
       autosaveRef.current?.stop();
       unsubscribeController();
+      unsubscribeAutomaticMiss();
       unsubscribePause();
       unsubscribeAutosave();
       controllerRef.current?.dispose();

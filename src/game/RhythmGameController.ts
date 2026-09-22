@@ -18,6 +18,8 @@ export type RhythmGameSnapshot = {
   lastJudgement?: JudgementResult;
 };
 
+export type AutomaticMissNotification = { chartEventId: string; songPositionMs: number };
+
 export type RhythmGameControllerOptions = {
   beatmap: Beatmap;
   clock?: AudioClock;
@@ -42,6 +44,7 @@ export class RhythmGameController {
   private pendingHoldStart?: JudgementResult;
   private lastJudgement?: JudgementResult;
   private readonly listeners = new Set<(snapshot: RhythmGameSnapshot) => void>();
+  private readonly automaticMissListeners = new Set<(miss: AutomaticMissNotification) => void>();
 
   constructor(options: RhythmGameControllerOptions) {
     this.beatmap = options.beatmap;
@@ -156,6 +159,8 @@ export class RhythmGameController {
       const deadlineMs = targetMs + JUDGEMENT_WINDOWS.goodMs;
       if (songPositionMs <= deadlineMs) return;
 
+      const automaticMiss = { chartEventId: event.id, songPositionMs };
+      this.automaticMissListeners.forEach((listener) => listener(automaticMiss));
       this.pendingHoldStart = undefined;
       if (this.pendingAudioSettings) {
         const pending = this.pendingAudioSettings;
@@ -187,6 +192,11 @@ export class RhythmGameController {
     return () => this.listeners.delete(listener);
   }
 
+  subscribeAutomaticMiss(listener: (miss: AutomaticMissNotification) => void): () => void {
+    this.automaticMissListeners.add(listener);
+    return () => this.automaticMissListeners.delete(listener);
+  }
+
   getSnapshot(): RhythmGameSnapshot {
     const currentEvent = this.beatmap.events[this.runState.nextEventIndex];
     return {
@@ -208,6 +218,7 @@ export class RhythmGameController {
   dispose(): void {
     this.stop();
     this.listeners.clear();
+    this.automaticMissListeners.clear();
   }
 
   private applyResult(result: JudgementResult, event: RhythmEvent, songPositionMs = this.clock.getSongPositionMs()): void {

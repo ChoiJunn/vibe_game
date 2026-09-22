@@ -136,6 +136,17 @@ export class SpaceInputController {
     this.options.onInput({ type, songPositionMs });
   }
 
+  recordAutomaticMiss(chartEventId: string, songPositionMs: number): void {
+    this.options.onPersistInput?.({
+      eventId: globalThis.crypto?.randomUUID?.() ?? `auto-miss-${Date.now()}-${this.sequence}`,
+      clientSequence: this.sequence++,
+      type: 'auto-miss',
+      chartEventId,
+      songPositionMs,
+      receivedAt: new Date().toISOString(),
+    });
+  }
+
   private notifyReleased(): void {
     this.releaseWaiters.forEach((resolve) => resolve());
     this.releaseWaiters.clear();

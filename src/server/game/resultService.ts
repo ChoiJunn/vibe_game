@@ -80,7 +80,9 @@ export class ResultService {
       sequence: event.clientSequence,
       type: event.type,
       songPositionMs: event.songPositionMs,
-      inputOffsetMs: event.inputOffsetMs,
+      ...(event.type === 'auto-miss'
+        ? { chartEventId: event.chartEventId }
+        : { inputOffsetMs: event.inputOffsetMs }),
     }));
     const validation = validateRun(
       beatmap, initialState, replayEvents, claimedSnapshot as never, input.terminalStatus,

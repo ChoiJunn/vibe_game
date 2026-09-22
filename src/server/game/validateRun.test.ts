@@ -21,9 +21,9 @@ function makeFullRun(): ReplayInputEvent[] {
   return events;
 }
 
-function run(events: ReplayInputEvent[]) {
+function run(events: ReplayInputEvent[], terminalStatus: 'completed' | 'failed' | 'abandoned' = 'completed') {
   const initial = createInitialRunState({ runId: 'run-1', userOid: 'user-1', beatmapId: beatmap.id });
-  const replay = replayInputEvents(beatmap, initial, events, 'completed');
+  const replay = replayInputEvents(beatmap, initial, events, terminalStatus);
   return { initial, replay };
 }
 
@@ -80,6 +80,53 @@ describe('server replay validation', () => {
     expect(replay.state.status).toBe('failed');
     expect(replay.state.hearts).toBe(0);
     expect(validateRun(beatmap, initial, events, replay.state, 'failed').valid).toBe(true);
+  });
+
+  it('replays persisted silent misses and verifies an automatic failure exactly', () => {
+    const events: ReplayInputEvent[] = beatmap.events.slice(0, 5).map((note, sequence) => ({
+      eventId: `auto-miss-${sequence}`,
+      sequence,
+      type: 'auto-miss',
+      chartEventId: note.id,
+      songPositionMs: (note.type === 'hold' ? note.endMs! : note.startMs) + 161,
+    }));
+    const { initial, replay } = run(events, 'failed');
+
+    expect(replay.reason).toBeUndefined();
+    expect(replay.state).toMatchObject({ status: 'failed', hearts: 0, missCount: 5, nextEventIndex: 5 });
+    expect(validateRun(beatmap, initial, events, replay.state, 'failed')).toMatchObject({ valid: true });
+  });
+
+  it('rejects early, wrong-note, and post-terminal automatic miss records', () => {
+    const first = beatmap.events[0];
+    const second = beatmap.events[1];
+    const initial = createInitialRunState({ runId: 'run-auto-invalid', userOid: 'user-1', beatmapId: beatmap.id });
+    const validFirst: ReplayInputEvent = {
+      eventId: 'auto-1', sequence: 0, type: 'auto-miss', chartEventId: first.id, songPositionMs: first.startMs + 161,
+    };
+    const early = replayInputEvents(beatmap, initial, [
+      { ...validFirst, songPositionMs: first.startMs + 160 },
+    ], 'failed');
+    expect(early.reason).toBe('impossible_timing');
+
+    const wrongNote = replayInputEvents(beatmap, initial, [
+      { ...validFirst, chartEventId: second.id },
+    ], 'failed');
+    expect(wrongNote.reason).toBe('invalid_sequence');
+
+    const fiveMisses: ReplayInputEvent[] = beatmap.events.slice(0, 5).map((note, sequence) => ({
+      eventId: `auto-terminal-${sequence}`,
+      sequence,
+      type: 'auto-miss',
+      chartEventId: note.id,
+      songPositionMs: (note.type === 'hold' ? note.endMs! : note.startMs) + 161,
+    }));
+    const sixth = beatmap.events[5];
+    const afterTerminal = replayInputEvents(beatmap, initial, [
+      ...fiveMisses,
+      { eventId: 'after-failure', sequence: 5, type: 'auto-miss', chartEventId: sixth.id, songPositionMs: sixth.startMs + 161 },
+    ], 'failed');
+    expect(afterTerminal.reason).toBe('invalid_sequence');
   });
 
   it('accepts the final tap keydown when failure closes the run before browser keyup', () => {

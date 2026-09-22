@@ -39,6 +39,9 @@ function setup(events = makeEvents()) {
     sequence: event.clientSequence,
     type: event.type,
     songPositionMs: event.songPositionMs,
+    ...(event.type === 'auto-miss'
+      ? { chartEventId: event.chartEventId }
+      : { inputOffsetMs: event.inputOffsetMs }),
   }));
   const claim = replayInputEvents(beatmap, initial, replayEvents, 'completed').state;
   const session: GameSessionDocument & { _etag: string } = {
@@ -48,7 +51,7 @@ function setup(events = makeEvents()) {
   };
   const sessions = {
     getByRunId: vi.fn().mockResolvedValue(session),
-    markTerminal: vi.fn().mockResolvedValue({ ...session, terminalStatus: 'completed' }),
+    markTerminal: vi.fn(async (_oid: string, _runId: string, terminalStatus: string) => ({ ...session, terminalStatus })),
   } as unknown as SessionRepository;
   const insertResult = vi.fn(async (result) => result);
   const results = { insertResult } as unknown as ResultRepository;
@@ -100,5 +103,24 @@ describe('ResultService', () => {
       runId: 'run-1', terminalStatus: 'abandoned', claimedSnapshot: claim,
     })).rejects.toThrow(/confirmation/);
     expect(insertResult).not.toHaveBeenCalled();
+  });
+
+  it('persists a failed result whose five misses were automatic and silent', async () => {
+    const events: VerifiedInputEvent[] = beatmap.events.slice(0, 5).map((note, clientSequence) => ({
+      eventId: `auto-miss-${clientSequence}`,
+      clientSequence,
+      type: 'auto-miss',
+      chartEventId: note.id,
+      songPositionMs: (note.type === 'hold' ? note.endMs! : note.startMs) + 161,
+      receivedAt: '2026-09-22T00:00:00.000Z',
+    }));
+    const { service, claim, insertResult } = setup(events);
+    const response = await service.submitResult(identity, {
+      runId: 'run-1', terminalStatus: 'failed', claimedSnapshot: claim,
+    });
+
+    expect(response.result).toMatchObject({ status: 'failed', missCount: 5 });
+    expect(insertResult).toHaveBeenCalledTimes(2);
+    expect(insertResult).toHaveBeenCalledWith(expect.objectContaining({ status: 'failed', missCount: 5 }));
   });
 });

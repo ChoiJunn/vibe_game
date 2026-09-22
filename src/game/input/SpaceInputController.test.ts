@@ -87,6 +87,39 @@ describe('SpaceInputController', () => {
     ]);
     controller.stop();
   });
+
+  it('sequences automatic misses with physical inputs without forwarding them as keys', () => {
+    const inputTarget = new EventTarget();
+    const persisted: Array<{ clientSequence: number; type: string; chartEventId?: string }> = [];
+    const onInput = vi.fn();
+    const controller = new SpaceInputController({
+      inputTarget,
+      blurTarget: new EventTarget(),
+      getGameState: () => 'playing',
+      getSongPositionMs: () => 1300,
+      onInput,
+      onPersistInput: (event) => persisted.push({
+        clientSequence: event.clientSequence,
+        type: event.type,
+        chartEventId: event.chartEventId,
+      }),
+      initialSequence: 4,
+      onPauseRequest: () => undefined,
+    });
+    controller.start();
+
+    controller.recordAutomaticMiss('arrival-01', 979);
+    inputTarget.dispatchEvent(createKeyEvent('keydown'));
+    inputTarget.dispatchEvent(createKeyEvent('keyup'));
+
+    expect(persisted).toEqual([
+      { clientSequence: 4, type: 'auto-miss', chartEventId: 'arrival-01' },
+      { clientSequence: 5, type: 'keydown', chartEventId: undefined },
+      { clientSequence: 6, type: 'keyup', chartEventId: undefined },
+    ]);
+    expect(onInput.mock.calls.map(([event]) => event.type)).toEqual(['keydown', 'keyup']);
+    controller.stop();
+  });
 });
 
 function createKeyEvent(type: 'keydown' | 'keyup', options: { repeat?: boolean; cancelable?: boolean } = {}): Event {

@@ -118,6 +118,28 @@ describe('RhythmGameController', () => {
     expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: holdIndex + 1, missCount: 1 });
   });
 
+  it('notifies persistence before subscribers observe automatic terminal failure', async () => {
+    const event = beatmap.events[0];
+    const initialRunState = { ...createInitialRunState({ runId: 'run-auto-fail', userOid: 'user-1', beatmapId: beatmap.id }), hearts: 1 };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: createFakeClock() as never,
+      scheduler: createFakeScheduler() as never,
+      initialRunState,
+      audioSettings: settings,
+    });
+    const notifications: string[] = [];
+    controller.subscribeAutomaticMiss((miss) => notifications.push(`persist:${miss.chartEventId}`));
+    controller.subscribe((snapshot) => {
+      if (snapshot.runState.status === 'failed') notifications.push('terminal');
+    });
+
+    await controller.start(0, initialRunState);
+    controller.update(event.startMs + 161);
+
+    expect(notifications).toEqual([`persist:${event.id}`, 'terminal']);
+  });
+
   it('does not expire a hold until its end window closes, even without a keydown', async () => {
     const holdIndex = beatmap.events.findIndex((event) => event.type === 'hold');
     const event = beatmap.events[holdIndex];

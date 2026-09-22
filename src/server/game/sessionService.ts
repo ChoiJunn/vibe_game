@@ -123,18 +123,38 @@ export function validateEvents(value: unknown): VerifiedInputEvent[] {
   if (!Array.isArray(value) || value.length > 128) throw new SessionRequestError('events must contain at most 128 input records.');
   return value.map((candidate) => {
     if (!candidate || typeof candidate !== 'object') throw new SessionRequestError('Invalid input event.');
-    const event = candidate as Partial<VerifiedInputEvent>;
+    const event = candidate as Record<string, unknown>;
     if (
       typeof event.eventId !== 'string' || event.eventId.length > 80 || !event.eventId ||
-      !Number.isSafeInteger(event.clientSequence) || (event.clientSequence ?? -1) < 0 ||
-      (event.type !== 'keydown' && event.type !== 'keyup') || !Number.isFinite(event.songPositionMs) || (event.songPositionMs ?? -1) < 0
-      || (event.inputOffsetMs !== undefined && (!Number.isFinite(event.inputOffsetMs) || event.inputOffsetMs < MIN_INPUT_OFFSET_MS || event.inputOffsetMs > MAX_INPUT_OFFSET_MS))
+      !Number.isSafeInteger(event.clientSequence) || Number(event.clientSequence) < 0 ||
+      !Number.isFinite(event.songPositionMs) || Number(event.songPositionMs) < 0
     ) throw new SessionRequestError('Invalid input event fields.');
+
+    if (event.type === 'auto-miss') {
+      if (typeof event.chartEventId !== 'string' || !event.chartEventId || event.chartEventId.length > 80 || event.inputOffsetMs !== undefined) {
+        throw new SessionRequestError('Invalid automatic Miss event fields.');
+      }
+      return {
+        eventId: event.eventId,
+        clientSequence: Number(event.clientSequence),
+        type: 'auto-miss',
+        chartEventId: event.chartEventId,
+        songPositionMs: Number(event.songPositionMs),
+        receivedAt: new Date().toISOString(),
+      };
+    }
+
+    if (
+      (event.type !== 'keydown' && event.type !== 'keyup') ||
+      (event.chartEventId !== undefined) ||
+      (event.inputOffsetMs !== undefined && (!Number.isFinite(event.inputOffsetMs) || Number(event.inputOffsetMs) < MIN_INPUT_OFFSET_MS || Number(event.inputOffsetMs) > MAX_INPUT_OFFSET_MS))
+    ) throw new SessionRequestError('Invalid input event fields.');
+
     return {
-      eventId: event.eventId,
-      clientSequence: event.clientSequence as number,
+      eventId: event.eventId as string,
+      clientSequence: Number(event.clientSequence),
       type: event.type,
-      songPositionMs: event.songPositionMs as number,
+      songPositionMs: Number(event.songPositionMs),
       inputOffsetMs: typeof event.inputOffsetMs === 'number' ? event.inputOffsetMs : 0,
       receivedAt: new Date().toISOString(),
     };

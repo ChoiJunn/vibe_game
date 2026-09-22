@@ -85,4 +85,18 @@ describe('SessionService lifecycle', () => {
     expect(() => validateSnapshot(invalidSnapshot, identity, 'run-1')).toThrow(/snapshot/i);
     expect(() => validateEvents([{ eventId: 'x', clientSequence: -1, type: 'keydown', songPositionMs: 1 }])).toThrow(/event/i);
   });
+
+  it('accepts explicit automatic misses but rejects malformed auto-miss payloads', () => {
+    expect(validateEvents([{
+      eventId: 'miss-1', clientSequence: 0, type: 'auto-miss', chartEventId: 'arrival-01', songPositionMs: 979,
+    }])[0]).toMatchObject({
+      eventId: 'miss-1', clientSequence: 0, type: 'auto-miss', chartEventId: 'arrival-01', songPositionMs: 979,
+    });
+    expect(() => validateEvents([
+      { eventId: 'miss-1', clientSequence: 0, type: 'auto-miss', songPositionMs: 979 },
+    ])).toThrow(/automatic miss/i);
+    expect(() => validateEvents([{
+      eventId: 'miss-1', clientSequence: 0, type: 'auto-miss', chartEventId: 'arrival-01', songPositionMs: 979, inputOffsetMs: 0,
+    }])).toThrow(/automatic miss/i);
+  });
 });

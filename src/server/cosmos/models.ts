@@ -3,8 +3,11 @@ import type { RunState } from '@/domain/rhythm';
 export type VerifiedInputEvent = {
   eventId: string;
   clientSequence: number;
-  type: 'keydown' | 'keyup';
+  type: 'keydown' | 'keyup' | 'auto-miss';
+  /** Required only when type is auto-miss; enforced by validateEvents. */
+  chartEventId?: string;
   songPositionMs: number;
+  /** Physical key offset; forbidden for auto-miss records. */
   inputOffsetMs?: number;
   receivedAt: string;
 };
