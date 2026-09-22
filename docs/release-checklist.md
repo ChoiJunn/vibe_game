@@ -11,7 +11,7 @@ Use this checklist for every candidate release. Attach the CI run, deployment/bu
 | Unit/component/API tests | `npm test -- --run` summary | Pass (latest: 26 files, 70 tests) |
 | Critical user flows | `npm run test:e2e` on Chromium and Edge | Pass (22/22; test auth/API are mocked, so manual production gates remain separate) |
 | Production compilation | `npm run build` output | Pass |
-| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Pass (latest: 2026-09-22; build `6b932db5de17ec5a58e714e351bd32643fb97184`) |
+| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Pass (latest: 2026-09-22; build `7f5036241bdc993a93bf007019cf13a73168fc9b`) |
 
 ## Manual production gates
 
@@ -58,6 +58,13 @@ Local candidate checks completed:
 - **Not run** — real-tenant sign-in, live audio/gameplay, browser/device checks, and remaining manual security/data-retention review.
 
 **Release status remains pending manual production verification.** Automated browser tests use test authentication and mocked APIs and are not evidence of a real Entra login or production Cosmos result write.
+
+## Verification record — 2026-09-22 production redirect correction
+
+- **Pass** — production Entra redirect validation rejects HTTP and loopback URLs; `npm test -- --run src/auth/msalClient.test.ts` (5 tests), full unit suite (26 files, 71 tests), typecheck, and lint (one existing warning).
+- **Pass** — built with the production redirect `https://vibe-game-jun-rhythm-260922.azurewebsites.net`; inspected the production client bundle and confirmed the loopback URL is absent and the production hostname is present.
+- **Pass** — deployment `f09cd9ac-2921-438e-b68b-da3a1b634f8f` completed `RuntimeSuccessful`; live health reports build `7f5036241bdc993a93bf007019cf13a73168fc9b` and Cosmos available; public smoke passed.
+- **Not run** — user must perform a fresh real Entra sign-in and verify the game flow; the old authorization callback shown in the shared screenshot must not be reused.
 
 ## Verification record — 2026-09-22 failed-session recovery
 

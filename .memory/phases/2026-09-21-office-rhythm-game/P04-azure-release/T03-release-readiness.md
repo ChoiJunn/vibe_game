@@ -85,6 +85,7 @@ Task: T03-release-readiness
 - [x] Deployed commit `b00b49e171eb9c65584f18062a4f4ecb55ac77a3`; deployment `258a5cdd-d5b9-42e2-8045-5ad00ad2fd73` is `RuntimeSuccessful`; public smoke confirms healthy Cosmos, the new build ID, and `/game` HTTP 200.
 - [x] Stabilized the leaderboard submission E2E by separating mocked result-API submission/rendering from the gameplay timing test; the complete Chromium+Edge E2E suite now passes 22/22.
 - [x] Latest candidate checks: lint (one existing warning), typecheck, 26 unit-test files / 70 tests, 22 Chromium+Edge E2E tests, production build, and public production smoke all pass; live build is `6b932db5de17ec5a58e714e351bd32643fb97184`.
+- [x] Fixed the production Entra redirect leak: build-time `.env.local` had embedded the loopback URI in the deployed client. Production validation now rejects loopback/HTTP callbacks; the candidate was rebuilt with the App Service HTTPS URL and deployed as `7f5036241bdc993a93bf007019cf13a73168fc9b` (`f09cd9ac-2921-438e-b68b-da3a1b634f8f`, `RuntimeSuccessful`). The live bundle has no loopback redirect, and health/public smoke pass.
 - [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and authenticated smoke remain not run; see `vibe_game/docs/release-checklist.md`.
 - implementation commit: `ffe84ac` (manual production gates remain active)
 
