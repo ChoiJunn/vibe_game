@@ -26,6 +26,7 @@ export class SessionApiClient {
   constructor(
     private readonly getIdToken: IdTokenProvider,
     private readonly fetcher: FetchLike = globalThis.fetch.bind(globalThis),
+    private readonly requestTimeoutMs = 15_000,
   ) {}
 
   createOrResume(): Promise<SessionEnvelope> {
@@ -90,26 +91,52 @@ export class SessionApiClient {
   }
 
   private async request<T>(path: string, init: RequestInit, reloadOnConflict = false): Promise<T> {
-    const token = await this.getIdToken();
-    const response = await this.fetcher(path, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        ...init.headers,
-      },
-      cache: 'no-store',
-    });
-    if (!response.ok) {
-      const payload = await response.json().catch(() => ({})) as ErrorPayload;
-      const latestSession = response.status === 412 && reloadOnConflict ? await this.getActive().catch(() => null) : undefined;
-      throw new SessionApiError(
-        payload.error ?? 'The game session request failed.',
-        response.status,
-        payload.code ?? 'SESSION_SERVICE_ERROR',
-        latestSession,
-      );
+    const controller = new AbortController();
+    let timedOut = false;
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, this.requestTimeoutMs);
+    let tokenTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    try {
+      const token = await Promise.race([
+        this.getIdToken(),
+        new Promise<never>((_, reject) => {
+          tokenTimeout = setTimeout(() => reject(new RequestTimeoutError()), this.requestTimeoutMs);
+        }),
+      ]);
+      const response = await this.fetcher(path, {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          ...init.headers,
+        },
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({})) as ErrorPayload;
+        const latestSession = response.status === 412 && reloadOnConflict ? await this.getActive().catch(() => null) : undefined;
+        throw new SessionApiError(
+          payload.error ?? 'The game session request failed.',
+          response.status,
+          payload.code ?? 'SESSION_SERVICE_ERROR',
+          latestSession,
+        );
+      }
+      return await response.json() as T;
+    } catch (error) {
+      if (timedOut || error instanceof RequestTimeoutError || (error instanceof DOMException && error.name === 'AbortError')) {
+        throw new SessionApiError('The save request timed out. Check your connection and retry.', 408, 'REQUEST_TIMEOUT');
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+      if (tokenTimeout) clearTimeout(tokenTimeout);
     }
-    return response.json() as Promise<T>;
   }
 }
+
+class RequestTimeoutError extends Error {}
