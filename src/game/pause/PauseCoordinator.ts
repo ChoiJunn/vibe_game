@@ -5,11 +5,11 @@ export type PauseReason = 'button' | 'escape' | 'visibility' | 'blur' | 'browser
 export type PauseState = { paused: boolean; reason?: PauseReason; snapshot?: RunState };
 
 export class PauseCoordinator {
-  private readonly controller: Pick<RhythmGameController, 'pause' | 'resume' | 'abandon' | 'getSnapshot'>;
+  private readonly controller: Pick<RhythmGameController, 'pause' | 'resume' | 'abandon' | 'getSnapshot'> & Partial<Pick<RhythmGameController, 'start'>>;
   private state: PauseState = { paused: false };
   private readonly listeners = new Set<(state: PauseState) => void>();
 
-  constructor(controller: Pick<RhythmGameController, 'pause' | 'resume' | 'abandon' | 'getSnapshot'>) {
+  constructor(controller: Pick<RhythmGameController, 'pause' | 'resume' | 'abandon' | 'getSnapshot'> & Partial<Pick<RhythmGameController, 'start'>>) {
     this.controller = controller;
   }
 
@@ -30,8 +30,17 @@ export class PauseCoordinator {
       return;
     }
 
-    await this.controller.resume();
+    if (this.controller.getSnapshot().clockState === 'idle' && this.controller.start && this.state.snapshot) {
+      await this.controller.start(this.state.snapshot.cursorMs, this.state.snapshot);
+    } else {
+      await this.controller.resume();
+    }
     this.state = { paused: false };
+    this.emit();
+  }
+
+  restorePaused(reason: PauseReason, snapshot: RunState): void {
+    this.state = { paused: true, reason, snapshot };
     this.emit();
   }
 

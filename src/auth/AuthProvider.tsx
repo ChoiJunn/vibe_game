@@ -36,7 +36,7 @@ function getAccount(client: PublicClientApplication, redirectAccount?: AccountIn
 
 export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [client] = useState<PublicClientApplication | null>(() => createMsalClient());
-  const [status, setStatus] = useState<AuthStatus>(client ? 'loading' : 'error');
+  const [status, setStatus] = useState<AuthStatus>('loading');
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(client ? null : getAuthErrorMessage());
@@ -57,8 +57,20 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   }, []);
 
   useEffect(() => {
+    if (isE2eAuthEnabled()) {
+      let active = true;
+      queueMicrotask(() => {
+        if (!active) return;
+        setUser({ oid: 'e2e-user', tenantId: 'e2e-tenant', displayName: 'E2E Rhythm Player' });
+        setStatus('authenticated');
+        setErrorMessage(null);
+      });
+      return () => { active = false; };
+    }
     if (!client) {
-      return;
+      let active = true;
+      queueMicrotask(() => { if (active) setStatus('error'); });
+      return () => { active = false; };
     }
 
     let active = true;
@@ -94,6 +106,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   }, [client, syncAccount]);
 
   const getIdToken = useCallback(async () => {
+    if (isE2eAuthEnabled()) return 'e2e-placeholder-token';
     if (!client) throw new Error(getAuthErrorMessage());
     const account = getAccount(client);
     if (!account) throw new Error('로그인이 필요합니다.');
@@ -188,4 +201,13 @@ export function useAuthContext(): AuthContextValue {
   }
 
   return context;
+}
+
+export function isE2eAuthEnabled(): boolean {
+  if (process.env.NODE_ENV === 'production' || typeof window === 'undefined') return false;
+  try {
+    return window.sessionStorage.getItem('office-rhythm:e2e-auth') === 'enabled';
+  } catch {
+    return false;
+  }
 }

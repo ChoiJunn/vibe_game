@@ -452,6 +452,31 @@ h1 {
   gap: 0.8rem;
 }
 
+.audio-settings {
+  width: min(100%, 48rem);
+  margin: 1rem auto;
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+}
+
+.audio-settings summary { padding: 1rem 1.25rem; font-weight: 800; cursor: pointer; }
+.audio-settings__body { display: grid; gap: 1rem; padding: 0 1.25rem 1.25rem; }
+.setting-range { display: grid; gap: 0.45rem; font-weight: 700; }
+.setting-range span { display: flex; justify-content: space-between; gap: 1rem; }
+.setting-range output { color: #625aa9; font-variant-numeric: tabular-nums; }
+.setting-range input { width: 100%; accent-color: #766ed0; }
+.setting-toggle { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; }
+.setting-toggle input { width: 1.15rem; height: 1.15rem; accent-color: #766ed0; }
+.settings-privacy-note { margin: 0; color: var(--muted-ink); font-size: 0.82rem; }
+.latency-calibration { display: grid; justify-items: center; gap: 0.6rem; padding: 1rem; border-radius: 1rem; background: #f5f2ff; text-align: center; }
+.latency-calibration p { margin: 0; color: var(--muted-ink); }
+.latency-calibration button { border: 0; border-radius: 999px; padding: 0.7rem 1rem; background: var(--lavender); color: var(--ink); font: inherit; font-weight: 800; cursor: pointer; }
+.calibration-beat { display: grid; width: 3.5rem; height: 3.5rem; place-items: center; border-radius: 50%; background: var(--yellow); font-size: 1.5rem; transform: scale(0.78); transition: transform 0.18s ease; }
+.calibration-beat.is-pulsing { transform: scale(1); }
+
 .protected-state {
   min-height: calc(100vh - 4rem);
   display: grid;

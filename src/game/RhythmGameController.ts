@@ -1,7 +1,7 @@
 import type { Beatmap, RhythmEvent, RunState, SectionId } from '@/domain/rhythm';
 import { AudioClock } from './audio/AudioClock';
 import { OfficeSoundScheduler } from './audio/OfficeSoundScheduler';
-import { DEFAULT_AUDIO_SETTINGS, type AudioClockState, type AudioSettings } from './audio/types';
+import { clampAudioSettings, DEFAULT_AUDIO_SETTINGS, type AudioClockState, type AudioSettings } from './audio/types';
 import { judgeHoldEnd, judgeHoldStart, judgeTap, combineHoldJudgements } from './judgement/judgeInput';
 import type { InputEvent, JudgementResult } from './judgement/types';
 import { SpaceInputController } from './input/SpaceInputController';
@@ -20,8 +20,9 @@ export type RhythmGameControllerOptions = {
   beatmap: Beatmap;
   clock?: AudioClock;
   scheduler?: OfficeSoundScheduler;
-  inputController?: Pick<SpaceInputController, 'start' | 'stop'>;
+  inputController?: Pick<SpaceInputController, 'start' | 'stop'> & Partial<Pick<SpaceInputController, 'releaseHeld'>>;
   audioSettings?: AudioSettings;
+  initialRunState?: RunState;
   runId?: string;
   userOid?: string;
 };
@@ -30,10 +31,11 @@ export class RhythmGameController {
   private readonly beatmap: Beatmap;
   private readonly clock: AudioClock;
   private readonly scheduler: OfficeSoundScheduler;
-  private readonly audioSettings: AudioSettings;
+  private audioSettings: AudioSettings;
+  private pendingAudioSettings?: AudioSettings;
   private readonly runId: string;
   private readonly userOid: string;
-  private inputController?: Pick<SpaceInputController, 'start' | 'stop'>;
+  private inputController?: Pick<SpaceInputController, 'start' | 'stop'> & Partial<Pick<SpaceInputController, 'releaseHeld'>>;
   private runState: RunState;
   private pendingHoldStart?: JudgementResult;
   private lastJudgement?: JudgementResult;
@@ -43,10 +45,10 @@ export class RhythmGameController {
     this.beatmap = options.beatmap;
     this.clock = options.clock ?? new AudioClock();
     this.scheduler = options.scheduler ?? new OfficeSoundScheduler(this.clock);
-    this.audioSettings = options.audioSettings ?? DEFAULT_AUDIO_SETTINGS;
+    this.audioSettings = clampAudioSettings(options.audioSettings ?? DEFAULT_AUDIO_SETTINGS);
     this.runId = options.runId ?? `run-${Date.now()}`;
     this.userOid = options.userOid ?? 'local-user';
-    this.runState = createInitialRunState({
+    this.runState = options.initialRunState ?? createInitialRunState({
       runId: this.runId,
       userOid: this.userOid,
       beatmapId: this.beatmap.id,
@@ -54,12 +56,12 @@ export class RhythmGameController {
     this.inputController = options.inputController;
   }
 
-  attachInputController(inputController: Pick<SpaceInputController, 'start' | 'stop'>): void {
+  attachInputController(inputController: Pick<SpaceInputController, 'start' | 'stop'> & Partial<Pick<SpaceInputController, 'releaseHeld'>>): void {
     this.inputController = inputController;
   }
 
-  async start(atSongMs = 0): Promise<void> {
-    this.runState = createInitialRunState({
+  async start(atSongMs = 0, restoredState?: RunState): Promise<void> {
+    this.runState = restoredState ? { ...restoredState, status: 'active' } : createInitialRunState({
       runId: this.runId,
       userOid: this.userOid,
       beatmapId: this.beatmap.id,
@@ -67,7 +69,7 @@ export class RhythmGameController {
     this.pendingHoldStart = undefined;
     this.lastJudgement = undefined;
     await this.clock.load(this.beatmap, this.audioSettings);
-    this.scheduler.load(this.beatmap, this.audioSettings);
+    this.scheduler.load(this.beatmap, this.audioSettings, atSongMs);
     await this.clock.start(atSongMs);
     this.scheduler.start();
     this.inputController?.start();
@@ -75,6 +77,7 @@ export class RhythmGameController {
   }
 
   pause(): void {
+    this.inputController?.releaseHeld?.();
     this.clock.pause();
     this.scheduler.pause();
     this.emit();
@@ -129,7 +132,23 @@ export class RhythmGameController {
       const combined = combineHoldJudgements(this.pendingHoldStart, end).combined;
       this.pendingHoldStart = undefined;
       this.applyResult(combined, event);
+      if (this.pendingAudioSettings) {
+        const pending = this.pendingAudioSettings;
+        this.pendingAudioSettings = undefined;
+        this.applyAudioSettings(pending);
+      }
     }
+  }
+
+  setAudioSettings(settings: AudioSettings): void {
+    const next = clampAudioSettings(settings);
+    if (this.pendingHoldStart) {
+      this.pendingAudioSettings = { ...next };
+      next.inputOffsetMs = this.audioSettings.inputOffsetMs;
+    } else {
+      this.pendingAudioSettings = undefined;
+    }
+    this.applyAudioSettings(next);
   }
 
   subscribe(listener: (snapshot: RhythmGameSnapshot) => void): () => void {
@@ -170,6 +189,12 @@ export class RhythmGameController {
     });
     this.lastJudgement = result;
     this.emit();
+  }
+
+  private applyAudioSettings(settings: AudioSettings): void {
+    this.audioSettings = clampAudioSettings(settings);
+    this.clock.setSettings(this.audioSettings);
+    this.scheduler.setSettings(this.audioSettings);
   }
 
   private emit(): void {

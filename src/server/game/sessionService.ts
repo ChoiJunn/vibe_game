@@ -6,6 +6,7 @@ import { createInitialRunState } from '@/game/state/reduceRunState';
 import type { GameIdentity } from './authenticateRequest';
 import { ActiveSessionConflictError, CosmosOperationError, CosmosPreconditionFailedError } from '@/server/cosmos/errors';
 import type { GameSessionDocument, StoredCosmosDocument, TerminalRunStatus, VerifiedInputEvent } from '@/server/cosmos/models';
+import { MAX_INPUT_OFFSET_MS, MIN_INPUT_OFFSET_MS } from '@/game/audio/types';
 import { getGameContainers } from '@/server/cosmos/containers';
 import { SessionRepository } from '@/server/cosmos/sessionRepository';
 
@@ -127,12 +128,14 @@ export function validateEvents(value: unknown): VerifiedInputEvent[] {
       typeof event.eventId !== 'string' || event.eventId.length > 80 || !event.eventId ||
       !Number.isSafeInteger(event.clientSequence) || (event.clientSequence ?? -1) < 0 ||
       (event.type !== 'keydown' && event.type !== 'keyup') || !Number.isFinite(event.songPositionMs) || (event.songPositionMs ?? -1) < 0
+      || (event.inputOffsetMs !== undefined && (!Number.isFinite(event.inputOffsetMs) || event.inputOffsetMs < MIN_INPUT_OFFSET_MS || event.inputOffsetMs > MAX_INPUT_OFFSET_MS))
     ) throw new SessionRequestError('Invalid input event fields.');
     return {
       eventId: event.eventId,
       clientSequence: event.clientSequence as number,
       type: event.type,
       songPositionMs: event.songPositionMs as number,
+      inputOffsetMs: typeof event.inputOffsetMs === 'number' ? event.inputOffsetMs : 0,
       receivedAt: new Date().toISOString(),
     };
   });

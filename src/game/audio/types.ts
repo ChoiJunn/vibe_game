@@ -32,12 +32,15 @@ export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
   inputOffsetMs: 0,
 };
 
+export const MIN_INPUT_OFFSET_MS = -150;
+export const MAX_INPUT_OFFSET_MS = 150;
+
 export function clampAudioSettings(settings: AudioSettings): AudioSettings {
   return {
     musicVolume: clamp(settings.musicVolume, 0, 1),
     sfxVolume: clamp(settings.sfxVolume, 0, 1),
-    muted: settings.muted,
-    inputOffsetMs: Number.isFinite(settings.inputOffsetMs) ? settings.inputOffsetMs : 0,
+    muted: typeof settings.muted === 'boolean' ? settings.muted : DEFAULT_AUDIO_SETTINGS.muted,
+    inputOffsetMs: clamp(settings.inputOffsetMs, MIN_INPUT_OFFSET_MS, MAX_INPUT_OFFSET_MS),
   };
 }
 

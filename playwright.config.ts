@@ -15,6 +15,10 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'edge',
+      use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    },
   ],
   webServer: {
     command: 'npm run dev -- --hostname 127.0.0.1 --port 3000',

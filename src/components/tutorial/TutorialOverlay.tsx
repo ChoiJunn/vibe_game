@@ -12,7 +12,7 @@ export function TutorialOverlay({ onComplete }: { onComplete?: () => void }) {
   const step = getTutorialStep(state, tutorialSteps);
 
   useEffect(() => {
-    setVisible(window.localStorage.getItem(STORAGE_KEY) !== 'true');
+    queueMicrotask(() => setVisible(window.localStorage.getItem(STORAGE_KEY) !== 'true'));
   }, []);
 
   useEffect(() => {
@@ -30,7 +30,6 @@ export function TutorialOverlay({ onComplete }: { onComplete?: () => void }) {
     }
 
     window.localStorage.setItem(STORAGE_KEY, 'true');
-    setVisible(false);
     onComplete?.();
   }, [onComplete, state.completed]);
 

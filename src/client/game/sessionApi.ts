@@ -4,6 +4,7 @@ import type { GameSessionDocument, VerifiedInputEvent } from '@/server/cosmos/mo
 
 export type SessionEnvelope = { session: GameSessionDocument; version: string };
 export type ActiveSessionResponse = SessionEnvelope | null;
+export type ResultSubmissionResponse = { result: { id: string; score: number }; session: GameSessionDocument; version: string; created: boolean };
 export type IdTokenProvider = () => Promise<string>;
 export type FetchLike = typeof fetch;
 
@@ -24,7 +25,7 @@ export class SessionApiError extends Error {
 export class SessionApiClient {
   constructor(
     private readonly getIdToken: IdTokenProvider,
-    private readonly fetcher: FetchLike = fetch,
+    private readonly fetcher: FetchLike = globalThis.fetch.bind(globalThis),
   ) {}
 
   createOrResume(): Promise<SessionEnvelope> {
@@ -74,6 +75,17 @@ export class SessionApiClient {
       method: 'POST',
       headers: { 'If-Match': version },
       body: JSON.stringify({ runId, expectedVersion: version, confirmed }),
+    });
+  }
+
+  submitResult(
+    runId: string,
+    terminalStatus: 'completed' | 'failed' | 'abandoned',
+    claimedSnapshot: RunState,
+  ): Promise<ResultSubmissionResponse> {
+    return this.request('/api/game/results', {
+      method: 'POST',
+      body: JSON.stringify({ runId, terminalStatus, claimedSnapshot, confirmed: terminalStatus === 'abandoned' }),
     });
   }
 

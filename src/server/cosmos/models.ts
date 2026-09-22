@@ -5,6 +5,7 @@ export type VerifiedInputEvent = {
   clientSequence: number;
   type: 'keydown' | 'keyup';
   songPositionMs: number;
+  inputOffsetMs?: number;
   receivedAt: string;
 };
 

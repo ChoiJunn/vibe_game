@@ -10,8 +10,8 @@ export default function GamePage() {
       <main className="protected-state game-page">
         <p className="eyebrow">OFFICE RHYTHM MANAGER</p>
         <TutorialOverlay />
-        <h1>게임 화면 준비 중입니다.</h1>
-        <p>인증이 완료되었습니다. 실제 리듬 플레이는 다음 단계에서 연결됩니다.</p>
+        <h1>오늘의 업무 리듬에 맞춰 연주해요</h1>
+        <p>스페이스바로 박자를 맞추고, 잠깐 자리를 비울 땐 언제든 멈춰도 괜찮아요.</p>
         <Link href="/leaderboard">순위표로 이동</Link>
         <GameViewport>
           <PhaserCanvas />

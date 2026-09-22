@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { AuthProvider } from '@/auth/AuthProvider';
 import { AppShell } from '@/components/layout/AppShell';
 import './globals.css';
+import '@/styles/accessibility.css';
 
 export const metadata: Metadata = {
   title: 'Office Rhythm Manager',

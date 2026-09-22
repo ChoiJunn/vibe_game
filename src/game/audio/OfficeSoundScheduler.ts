@@ -25,10 +25,13 @@ export class OfficeSoundScheduler {
     this.tickMs = options.tickMs ?? 25;
   }
 
-  load(beatmap: Beatmap, settings: AudioSettings = DEFAULT_AUDIO_SETTINGS): void {
+  load(beatmap: Beatmap, settings: AudioSettings = DEFAULT_AUDIO_SETTINGS, fromSongPositionMs = 0): void {
     this.stop();
     this.beatmap = beatmap;
     this.settings = clampAudioSettings(settings);
+    beatmap.events.forEach((event) => {
+      if ((event.endMs ?? event.startMs) < fromSongPositionMs) this.scheduledEventIds.add(event.id);
+    });
   }
 
   start(): void {

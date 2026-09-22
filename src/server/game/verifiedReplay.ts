@@ -10,6 +10,7 @@ export type ReplayInputEvent = {
   sequence: number;
   type: InputEvent['type'];
   songPositionMs: number;
+  inputOffsetMs?: number;
 };
 
 export type ReplayResult = {
@@ -50,14 +51,14 @@ export function replayInputEvents(
       isPressed = true;
       if (beatmapEvent.type === 'tap') {
         state = reduceRunState(state, {
-          result: judgeTap(beatmapEvent, input),
+          result: judgeTap(beatmapEvent, input, input.inputOffsetMs ?? 0),
           eventIndex: state.nextEventIndex,
           isFinalEvent: state.nextEventIndex === beatmap.events.length - 1,
           finalEventEndMs: beatmapEvent.startMs,
           songPositionMs: input.songPositionMs,
         });
       } else {
-        pendingHoldStart = judgeHoldStart(beatmapEvent, input);
+        pendingHoldStart = judgeHoldStart(beatmapEvent, input, input.inputOffsetMs ?? 0);
         pendingHoldEventIndex = state.nextEventIndex;
       }
       continue;
@@ -68,7 +69,7 @@ export function replayInputEvents(
     if (!pendingHoldStart) continue;
     const beatmapEvent = beatmap.events[pendingHoldEventIndex];
     if (!beatmapEvent || beatmapEvent.type !== 'hold') return { state, reason: 'invalid_sequence' };
-    const end = judgeHoldEnd(beatmapEvent, input);
+    const end = judgeHoldEnd(beatmapEvent, input, input.inputOffsetMs ?? 0);
     const result = combineHoldJudgements(pendingHoldStart, end).combined;
     state = reduceRunState(state, {
       result,

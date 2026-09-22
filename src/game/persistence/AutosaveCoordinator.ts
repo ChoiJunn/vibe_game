@@ -75,9 +75,9 @@ export class AutosaveCoordinator {
     if (hidden) void this.saveNow();
   }
 
-  saveNow(): Promise<void> {
+  saveNow(snapshotOverride?: RunState): Promise<void> {
     if (this.inFlight) return this.inFlight;
-    const snapshot = this.readSnapshot();
+    const snapshot = snapshotOverride ?? this.readSnapshot();
     const events = this.pendingEvents;
     this.pendingEvents = [];
     this.setState({ status: 'saving' });
@@ -86,6 +86,18 @@ export class AutosaveCoordinator {
       if (this.pendingEvents.length) this.scheduleSave();
     });
     return this.inFlight;
+  }
+
+  async flush(snapshot: RunState): Promise<void> {
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = undefined;
+    if (this.inFlight) await this.inFlight;
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = undefined;
+    await this.saveNow(snapshot);
+    if (this.state.status === 'error' || this.state.status === 'conflict') {
+      throw new Error(this.state.message ?? 'The latest game state could not be saved.');
+    }
   }
 
   async pause(reason: PauseReason): Promise<void> {
