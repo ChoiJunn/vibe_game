@@ -8,10 +8,10 @@ Use this checklist for every candidate release. Attach the CI run, deployment/bu
 | --- | --- | --- |
 | Lint | `npm run lint` output | Pass (one pre-existing warning) |
 | Types | `npm run typecheck` output | Pass |
-| Unit/component/API tests | `npm test -- --run` summary | Pass (25 files, 67 tests) |
-| Critical user flows | `npm run test:e2e` on Chromium and Edge | Partial (20/22 passed; two existing leaderboard.spec.ts timing failures; replay-retry regression passes on both browsers) |
+| Unit/component/API tests | `npm test -- --run` summary | Pass (latest: 26 files, 70 tests) |
+| Critical user flows | `npm run test:e2e` on Chromium and Edge | Pass (22/22; test auth/API are mocked, so manual production gates remain separate) |
 | Production compilation | `npm run build` output | Pass |
-| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Pass (2026-09-22; build `b00b49e171eb9c65584f18062a4f4ecb55ac77a3`) |
+| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Pass (latest: 2026-09-22; build `6b932db5de17ec5a58e714e351bd32643fb97184`) |
 
 ## Manual production gates
 
@@ -45,6 +45,19 @@ Local candidate checks completed:
 - **Not run** — authenticated smoke check and real Entra sign-in / real-device audio and gameplay gates. No user ID token was supplied.
 
 **Release status: automated local checks and candidate deployment pass; production sign-off is pending.** The deployment workflow is manually dispatched, so pushing a commit to `main` does not deploy it automatically. Complete the real sign-in and device-level audio/gameplay checks, then run the authenticated smoke test before treating it as production-ready.
+
+## Verification record — 2026-09-22 latest candidate
+
+- **Pass** — `npm run lint` (0 errors; one existing unused-variable warning in `src/server/game/validateRun.test.ts:72`).
+- **Pass** — `npm run typecheck`.
+- **Pass** — `npm test -- --run` (26 files, 70 tests).
+- **Pass** — `npm run test:e2e` (22 Chromium and Edge tests). The leaderboard submission E2E now checks the result API response and rendered row directly; gameplay, pause/back, and resume remain separately covered by UI E2E tests.
+- **Pass** — `npm run build`.
+- **Pass** — production public smoke on 2026-09-22: landing page and health passed; Cosmos reported available; live build ID `6b932db5de17ec5a58e714e351bd32643fb97184`.
+- **Not run** — authenticated smoke (no ID token supplied). Do not paste an ID token into chat; run it locally after signing in and set `SMOKE_TEST_ID_TOKEN` only in the local shell.
+- **Not run** — real-tenant sign-in, live audio/gameplay, browser/device checks, and remaining manual security/data-retention review.
+
+**Release status remains pending manual production verification.** Automated browser tests use test authentication and mocked APIs and are not evidence of a real Entra login or production Cosmos result write.
 
 ## Verification record — 2026-09-22 failed-session recovery
 

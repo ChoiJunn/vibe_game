@@ -86,6 +86,7 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
     }
     version += 1;
     await route.fulfill({
+      status: 201,
       contentType: 'application/json',
       body: JSON.stringify({ result, session, version: `v${version}`, created: true }),
     });

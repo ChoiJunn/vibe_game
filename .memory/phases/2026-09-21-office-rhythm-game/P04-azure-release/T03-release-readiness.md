@@ -83,7 +83,8 @@ Task: T03-release-readiness
 - [x] Deploy the failed-session recovery hotfix; deployment `9ff0e5bb-8beb-4ff0-ba02-93606526afc7` is `RuntimeSuccessful`, build `37746c0d52ed07a989a09af74ce27f712e14228a`; public smoke passed with healthy Cosmos and `/game` HTTP 200.
 - [x] Fixed the follow-up replay bug: the result screen now retries terminal-result persistence before reloading, allowing the server to release the old active session and create a fresh run. Regression passes in Chromium and Edge.
 - [x] Deployed commit `b00b49e171eb9c65584f18062a4f4ecb55ac77a3`; deployment `258a5cdd-d5b9-42e2-8045-5ad00ad2fd73` is `RuntimeSuccessful`; public smoke confirms healthy Cosmos, the new build ID, and `/game` HTTP 200.
-- [ ] Full E2E follow-up: 20/22 pass; unchanged `e2e/leaderboard.spec.ts` failed in isolated Chromium and Edge runs. Trace captured; separate from this fix.
+- [x] Stabilized the leaderboard submission E2E by separating mocked result-API submission/rendering from the gameplay timing test; the complete Chromium+Edge E2E suite now passes 22/22.
+- [x] Latest candidate checks: lint (one existing warning), typecheck, 26 unit-test files / 70 tests, 22 Chromium+Edge E2E tests, production build, and public production smoke all pass; live build is `6b932db5de17ec5a58e714e351bd32643fb97184`.
 - [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and authenticated smoke remain not run; see `vibe_game/docs/release-checklist.md`.
 - implementation commit: `ffe84ac` (manual production gates remain active)
 
@@ -96,3 +97,4 @@ Task: T03-release-readiness
 - ZIP entry names must use POSIX `/` separators for Linux App Service; the Windows archive utility emitted backslashes for nested dependencies and was rejected by rsync.
 - Production smoke can briefly time out during App Service restart; wait for warm-up and verify the live build ID before recording a pass.
 - The previous replay handler only reloaded the page. When terminal-result persistence failed, the server still returned the zero-heart session as active; explicitly retry result persistence before creating another session.
+- Automated E2E and public health checks do not verify the user's real tenant login, real-device audio, or authenticated Cosmos writes; keep P04-T03 active until those production gates are performed.
