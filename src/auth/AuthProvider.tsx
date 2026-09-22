@@ -38,6 +38,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [client] = useState<PublicClientApplication | null>(() => createMsalClient());
   const [status, setStatus] = useState<AuthStatus>(client ? 'loading' : 'error');
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
+  const [idToken, setIdToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(client ? null : getAuthErrorMessage());
 
   const syncAccount = useCallback((account: AccountInfo | null) => {
@@ -70,7 +71,13 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
           return;
         }
 
-        syncAccount(getAccount(client, result?.account));
+        const account = getAccount(client, result?.account);
+        const cachedToken = result?.idToken ?? readCachedIdToken();
+        if (cachedToken) {
+          setIdToken(cachedToken);
+          cacheIdToken(cachedToken);
+        }
+        syncAccount(account);
       })
       .catch(() => {
         if (!active) {
@@ -85,6 +92,24 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
       active = false;
     };
   }, [client, syncAccount]);
+
+  const getIdToken = useCallback(async () => {
+    if (!client) throw new Error(getAuthErrorMessage());
+    const account = getAccount(client);
+    if (!account) throw new Error('로그인이 필요합니다.');
+
+    if (idToken && !isNearExpiry(idToken)) return idToken;
+
+    const result = await client.ssoSilent({
+      scopes: [...entraAuthConfig.scopes],
+      account,
+      authority: entraAuthConfig.authority,
+      redirectUri: entraAuthConfig.redirectUri,
+    });
+    setIdToken(result.idToken);
+    cacheIdToken(result.idToken);
+    return result.idToken;
+  }, [client, idToken]);
 
   const signIn = useCallback(async () => {
     if (!client) {
@@ -111,11 +136,38 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   }, [client]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, errorMessage, signIn, signOut }),
-    [errorMessage, signIn, signOut, status, user],
+    () => ({ status, user, errorMessage, signIn, signOut, getIdToken }),
+    [errorMessage, getIdToken, signIn, signOut, status, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+const ID_TOKEN_STORAGE_KEY = 'office-rhythm:entra-id-token';
+
+function readCachedIdToken(): string | null {
+  try {
+    return window.sessionStorage.getItem(ID_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function cacheIdToken(token: string): void {
+  try {
+    window.sessionStorage.setItem(ID_TOKEN_STORAGE_KEY, token);
+  } catch {
+    // MSAL's own session cache remains available if browser storage is restricted.
+  }
+}
+
+function isNearExpiry(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: number };
+    return typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now() + 60_000;
+  } catch {
+    return true;
+  }
 }
 
 export function useAuthContext(): AuthContextValue {

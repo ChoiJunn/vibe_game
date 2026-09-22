@@ -20,6 +20,7 @@
     "@azure/identity": "^4.13.3",
     "@azure/msal-browser": "^5.22.0",
     "ajv": "^8.20.0",
+    "jose": "^6.2.12",
     "next": "^16.3.5",
     "phaser": "^4.2.1",
     "react": "^19.3.0",

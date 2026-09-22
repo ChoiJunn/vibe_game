@@ -96,6 +96,23 @@ export class SessionRepository {
     return this.replaceSession(userOid, runId, updated, expectedEtag, 'Replace session snapshot');
   }
 
+  async pauseSnapshot(
+    userOid: string,
+    runId: string,
+    snapshot: GameSessionDocument['snapshot'],
+    expectedEtag: string,
+  ): Promise<StoredCosmosDocument<GameSessionDocument>> {
+    const current = await this.readSession(userOid, runId);
+    assertEtag(expectedEtag);
+    if (snapshot.runId !== runId || snapshot.userOid !== userOid) {
+      throw new Error('Snapshot identity must match the requested session.');
+    }
+    if (current.terminalStatus) throw new Error('A terminal session cannot be paused.');
+
+    const updated = { ...current, status: 'paused' as const, snapshot: { ...snapshot, status: 'paused' as const }, updatedAt: new Date().toISOString() };
+    return this.replaceSession(userOid, runId, updated, expectedEtag, 'Pause session');
+  }
+
   async appendEvent(
     userOid: string,
     runId: string,
@@ -105,7 +122,7 @@ export class SessionRepository {
     const current = await this.readSession(userOid, runId);
     assertEtag(expectedEtag);
     if (current.terminalStatus) throw new Error('Cannot append input to a terminal session.');
-    if (!event.eventId || !Number.isFinite(event.songPositionMs) || event.songPositionMs < 0 || !Number.isFinite(Date.parse(event.receivedAt))) {
+    if (!event.eventId || !Number.isSafeInteger(event.clientSequence) || event.clientSequence < 0 || !Number.isFinite(event.songPositionMs) || event.songPositionMs < 0 || !Number.isFinite(Date.parse(event.receivedAt))) {
       throw new Error('Input event must have an id, non-negative song position, and valid receivedAt timestamp.');
     }
 

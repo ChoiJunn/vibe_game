@@ -106,7 +106,7 @@ describe('SessionRepository', () => {
   });
 
   it('deduplicates raw events by event id before conditionally appending', async () => {
-    const event = { eventId: 'input-01', type: 'keydown' as const, songPositionMs: 1200, receivedAt: now };
+    const event = { eventId: 'input-01', clientSequence: 0, type: 'keydown' as const, songPositionMs: 1200, receivedAt: now };
     const session = makeSession({ inputEvents: [event] });
     const replace = vi.fn();
     const repository = new SessionRepository({

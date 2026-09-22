@@ -13,4 +13,5 @@ export type AuthContextValue = {
   errorMessage: string | null;
   signIn(): Promise<void>;
   signOut(): Promise<void>;
+  getIdToken(): Promise<string>;
 };

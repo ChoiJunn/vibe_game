@@ -1,6 +1,6 @@
 # Task: T02 Session API
 
-## Status: pending
+## Status: done
 
 ## Goal
 
@@ -78,6 +78,8 @@ Task: T02-session-api
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] 구현 완료
+- [x] 검증 통과 (typecheck, targeted ESLint, 15 tests, production build)
+- Cosmos CRUD smoke skipped: COSMOS_ENDPOINT/DATABASE/KEY/AUTH_MODE are not configured.
+- Full repository lint still reports the two pre-existing TutorialOverlay errors.
+- commit:  feat(storage): add resumable game session api

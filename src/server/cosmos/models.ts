@@ -2,6 +2,7 @@ import type { Judgement, RunState } from '@/domain/rhythm';
 
 export type VerifiedInputEvent = {
   eventId: string;
+  clientSequence: number;
   type: 'keydown' | 'keyup';
   songPositionMs: number;
   receivedAt: string;
