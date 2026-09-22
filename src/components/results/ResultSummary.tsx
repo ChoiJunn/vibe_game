@@ -37,7 +37,7 @@ export function ResultSummary({
           <span>플레이 시간 <strong>{Math.floor(elapsedSeconds / 60)}:{String(elapsedSeconds % 60).padStart(2, '0')}</strong></span>
         </div>
         <p className={'result-submission'} role={submissionError ? 'alert' : 'status'}>
-          {submissionError ? '결과 저장에 실패했습니다. 네트워크 연결을 확인하고 다시 플레이해 주세요.' : pendingSubmission ? '결과를 안전하게 저장하고 있어요…' : '결과가 저장되었습니다.'}
+          {submissionError ? '결과 저장에 실패했습니다. 연결을 확인한 뒤 페이지를 새로고침하면 다시 저장을 시도합니다.' : pendingSubmission ? '결과를 안전하게 저장하고 있어요…' : '결과가 저장되었습니다.'}
         </p>
         <div className={'result-actions'}>
           {onPlayAgain && <button type={'button'} className={'primary'} onClick={onPlayAgain}>다시 플레이</button>}

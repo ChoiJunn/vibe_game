@@ -21,6 +21,24 @@ test('a browser Back action pauses a run and refresh resumes the saved state', a
   await expect(page.getByText('점수 0', { exact: true })).toBeVisible();
 });
 
+test('a saved zero-heart run retries failed-result submission after refresh instead of staying paused', async ({ page }) => {
+  const api = await mockGameApi(page, {
+    existing: true,
+    resultFailures: 1,
+    snapshot: { cursorMs: 6_000, nextEventIndex: 6, score: 100, hearts: 0, missCount: 5 },
+  });
+
+  await page.goto('/game');
+  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await expect(page.getByRole('heading', { name: '오늘의 업무 리듬 결과' })).toBeVisible();
+  await expect(page.locator('.result-submission')).toContainText('페이지를 새로고침하면 다시 저장을 시도합니다');
+  await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByText('결과가 저장되었습니다.')).toBeVisible();
+  expect(api.getResult()?.status).toBe('failed');
+});
+
 test('leaderboard shows each completed attempt as its own row and supports both scopes', async ({ page }) => {
   const playedAt = '2026-09-22T08:00:00.000Z';
   const makeResult = (id: string, score: number): GameResultDocument => ({

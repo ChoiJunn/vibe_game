@@ -86,7 +86,14 @@ export function PhaserCanvas() {
         const activeSession = await api.getActive();
         const envelope = activeSession ?? await api.createOrResume();
         if (disposed) return;
-        const snapshot = envelope.session.snapshot;
+        const storedSnapshot = envelope.session.snapshot;
+        // The result is submitted separately from the autosaved snapshot. If
+        // submission failed before a reload, zero hearts identifies the failed
+        // run so we can show its result and retry submission instead of pausing it.
+        const recoveredFailure = storedSnapshot.hearts <= 0;
+        const snapshot = recoveredFailure
+          ? { ...storedSnapshot, status: 'failed' as const }
+          : storedSnapshot;
         terminalSubmittedRef.current = false;
         setSubmission('idle');
         const controller = new RhythmGameController({
@@ -141,6 +148,7 @@ export function PhaserCanvas() {
         });
 
         const startGame = () => {
+          if (snapshot.status === 'failed') return;
           mount.focus();
           if (startedInEffect) return;
           startedInEffect = true;
@@ -154,7 +162,7 @@ export function PhaserCanvas() {
         startGameHandler = startGame;
         startGameRef.current = startGame;
         mount.addEventListener('pointerdown', startGameHandler);
-        if (activeSession) {
+        if (activeSession && !recoveredFailure) {
           pauseCoordinator.restorePaused('browser-back', snapshot);
         }
         void import('@/game/PhaserGame').then(({ createPhaserGame }) => {

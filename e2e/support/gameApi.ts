@@ -2,7 +2,7 @@ import type { Page, Route } from '@playwright/test';
 import type { GameResultDocument, GameSessionDocument } from '../../src/server/cosmos/models';
 import type { RunState } from '../../src/domain/rhythm';
 
-type MockOptions = { existing?: boolean; snapshot?: Partial<RunState> };
+type MockOptions = { existing?: boolean; snapshot?: Partial<RunState>; resultFailures?: number };
 
 const freshSnapshot = (overrides: Partial<RunState> = {}): RunState => ({
   runId: 'e2e-run-01', userOid: 'e2e-user', beatmapId: 'office-day-01', status: 'active',
@@ -27,6 +27,7 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
     : null;
   let version = 1;
   let result: GameResultDocument | null = null;
+  let remainingResultFailures = options.resultFailures ?? 0;
 
   const envelope = () => ({ session: session ? { ...session, _etag: undefined } : null, version: `v${version}` });
   const fulfillSession = (route: Route, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(envelope()) });
@@ -56,6 +57,10 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
   });
 
   await page.route('**/api/game/results', async (route) => {
+    if (remainingResultFailures > 0) {
+      remainingResultFailures -= 1;
+      return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'Temporary result storage failure.' }) });
+    }
     const body = route.request().postDataJSON() as { terminalStatus: GameResultDocument['status']; claimedSnapshot: RunState };
     const snapshot = body.claimedSnapshot;
     result = {

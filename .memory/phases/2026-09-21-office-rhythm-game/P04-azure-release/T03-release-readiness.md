@@ -78,6 +78,9 @@ Task: T03-release-readiness
 - [x] README, operations/data/auth/game-rule docs, release checklist, and critical-path E2E are implemented.
 - [x] Automated checks passed: lint (one existing warning), typecheck, 25 files / 67 unit tests, 18 Chromium+Edge E2E tests, production build.
 - [x] Candidate deployed `RuntimeSuccessful` (`5f98165a-61c3-494e-b5b7-0eeab0d30878`); public smoke reports healthy Cosmos and build ID `e065b1f604fb75efa8c8e83a3209328fd95ad042`; game/leaderboard routes return 200 and unauthenticated APIs return 401.
+- [x] Fixed zero-heart active-session recovery: restore the session as `failed`, show the result instead of the pause overlay, and retry result submission after refresh; regression covers one transient result API failure.
+- [x] Hotfix validation: lint (one pre-existing warning), typecheck, 25 unit-test files / 67 tests, 20 Chromium+Edge E2E tests, and production build passed.
+- [ ] Deploy the failed-session recovery hotfix and record the deployment/build ID and public smoke result in `docs/release-checklist.md`.
 - [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and authenticated smoke remain not run; see `vibe_game/docs/release-checklist.md`.
 - implementation commit: `ffe84ac` (manual production gates remain active)
 

@@ -6,11 +6,11 @@ Use this checklist for every candidate release. Attach the CI run, deployment/bu
 
 | Gate | Evidence | Status |
 | --- | --- | --- |
-| Lint | `npm run lint` output | Not run |
-| Types | `npm run typecheck` output | Not run |
-| Unit/component/API tests | `npm test -- --run` summary | Not run |
-| Critical user flows | `npm run test:e2e` on Chromium and Edge | Not run |
-| Production compilation | `npm run build` output | Not run |
+| Lint | `npm run lint` output | Pass (one pre-existing warning) |
+| Types | `npm run typecheck` output | Pass |
+| Unit/component/API tests | `npm test -- --run` summary | Pass (25 files, 67 tests) |
+| Critical user flows | `npm run test:e2e` on Chromium and Edge | Pass (20 tests) |
+| Production compilation | `npm run build` output | Pass |
 | Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Not run |
 
 ## Manual production gates
@@ -45,3 +45,14 @@ Local candidate checks completed:
 - **Not run** — authenticated smoke check and real Entra sign-in / real-device audio and gameplay gates. No user ID token was supplied.
 
 **Release status: automated local checks and candidate deployment pass; production sign-off is pending.** The deployment workflow is manually dispatched, so pushing a commit to `main` does not deploy it automatically. Complete the real sign-in and device-level audio/gameplay checks, then run the authenticated smoke test before treating it as production-ready.
+
+## Verification record — 2026-09-22 failed-session recovery
+
+- **Pass** — zero-heart active sessions restore as failed results instead of paused runs; failed result submission is retried after refresh.
+- **Pass** — `npm run lint` (0 errors; one pre-existing unused-variable warning in `src/server/game/validateRun.test.ts:72`).
+- **Pass** — `npm run typecheck`.
+- **Pass** — `npm test -- --run` (25 files, 67 tests).
+- **Pass** — `npm run test:e2e` (20 tests across Chromium and Edge, including one temporary result API failure followed by a successful retry after refresh).
+- **Pass** — `npm run build`.
+- **Pending** — deploy this recovery fix and record its deployment/build ID and public smoke result below.
+- **Not run** — real Entra sign-in, physical-device audio/gameplay, and authenticated smoke; these still require a real user session and device interaction.
