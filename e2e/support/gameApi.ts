@@ -4,8 +4,8 @@ import type { RunState } from '../../src/domain/rhythm';
 
 type MockOptions = { existing?: boolean; snapshot?: Partial<RunState>; resultFailures?: number };
 
-const freshSnapshot = (overrides: Partial<RunState> = {}): RunState => ({
-  runId: 'e2e-run-01', userOid: 'e2e-user', beatmapId: 'office-day-01', status: 'active',
+const freshSnapshot = (overrides: Partial<RunState> = {}, runId = 'e2e-run-01'): RunState => ({
+  runId, userOid: 'e2e-user', beatmapId: 'office-day-01', status: 'active',
   cursorMs: 0, nextEventIndex: 0, hearts: 5, combo: 0, maxCombo: 0,
   consecutivePerfects: 0, score: 0, perfectCount: 0, goodCount: 0, missCount: 0,
   updatedAt: new Date().toISOString(), ...overrides,
@@ -13,7 +13,7 @@ const freshSnapshot = (overrides: Partial<RunState> = {}): RunState => ({
 
 function createSession(snapshot: RunState = freshSnapshot()): GameSessionDocument {
   return {
-    id: 'e2e-run-01', type: 'gameSession', userOid: 'e2e-user', tenantId: 'e2e-tenant',
+    id: snapshot.runId, type: 'gameSession', userOid: 'e2e-user', tenantId: 'e2e-tenant',
     beatmapId: 'office-day-01', status: snapshot.status === 'paused' ? 'paused' : 'active',
     snapshot, inputEvents: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
   };
@@ -26,6 +26,7 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
     ? createSession(freshSnapshot({ ...options.snapshot, status: 'paused' }))
     : null;
   let version = 1;
+  let runNumber = 1;
   let result: GameResultDocument | null = null;
   let remainingResultFailures = options.resultFailures ?? 0;
 
@@ -33,8 +34,17 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
   const fulfillSession = (route: Route, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(envelope()) });
 
   await page.route('**/api/game/session', async (route) => {
-    if (route.request().method() === 'GET') return fulfillSession(route);
-    if (!session) session = createSession(freshSnapshot(options.snapshot));
+    if (route.request().method() === 'GET') {
+      if (session?.terminalStatus) {
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ session: null }) });
+      }
+      return fulfillSession(route);
+    }
+    if (!session || session.terminalStatus) {
+      runNumber += 1;
+      const runId = `e2e-run-${String(runNumber).padStart(2, '0')}`;
+      session = createSession(freshSnapshot({}, runId));
+    }
     return fulfillSession(route, 201);
   });
 
@@ -70,7 +80,10 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
       missCount: snapshot.missCount, maxCombo: snapshot.maxCombo, durationMs: 2100,
       playedAt: new Date().toISOString(), schemaVersion: 1,
     };
-    if (session) session.snapshot = snapshot;
+    if (session) {
+      session.snapshot = snapshot;
+      session.terminalStatus = body.terminalStatus;
+    }
     version += 1;
     await route.fulfill({
       contentType: 'application/json',

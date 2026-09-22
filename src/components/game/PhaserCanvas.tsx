@@ -34,6 +34,8 @@ export function PhaserCanvas() {
   const startGameRef = useRef<(() => void) | null>(null);
   const controllerRef = useRef<RhythmGameController | null>(null);
   const autosaveRef = useRef<AutosaveCoordinator | null>(null);
+  const retryTerminalRef = useRef<(() => Promise<void>) | null>(null);
+  const restartingRef = useRef(false);
   const settingsRef = useRef<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
   const terminalSubmittedRef = useRef(false);
   const { getIdToken, user } = useAuth();
@@ -45,6 +47,7 @@ export function PhaserCanvas() {
   const [settings, setSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
   const [settingsReady, setSettingsReady] = useState(false);
   const [started, setStarted] = useState(false);
+  const [restarting, setRestarting] = useState(false);
   const [submission, setSubmission] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [loadError, setLoadError] = useState<string>();
   useEffect(() => {
@@ -67,6 +70,23 @@ export function PhaserCanvas() {
     setSettings(saved);
     controllerRef.current?.setAudioSettings(saved);
   }, []);
+
+  const handlePlayAgain = useCallback(async () => {
+    if (restartingRef.current || submission === 'idle' || submission === 'saving') return;
+    restartingRef.current = true;
+    setRestarting(true);
+    try {
+      if (submission === 'error') {
+        const retryTerminal = retryTerminalRef.current;
+        if (!retryTerminal) throw new Error('The failed result cannot be retried yet.');
+        await retryTerminal();
+      }
+      window.location.reload();
+    } catch {
+      restartingRef.current = false;
+      setRestarting(false);
+    }
+  }, [submission]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -172,12 +192,16 @@ export function PhaserCanvas() {
         function submitTerminal(status: TerminalRunStatus, finalSnapshot: RhythmGameSnapshot['runState']) {
           if (terminalSubmittedRef.current) return;
           terminalSubmittedRef.current = true;
-          setSubmission('saving');
           autosave.stop();
-          void autosave.flush({ ...finalSnapshot, status: 'active' })
-            .then(() => api.submitResult(envelope.session.id, status, finalSnapshot))
-            .then(() => { setSubmission('saved'); controller.stop(); })
-            .catch(() => setSubmission('error'));
+          const saveTerminalResult = async () => {
+            setSubmission('saving');
+            await autosave.flush({ ...finalSnapshot, status: 'active' });
+            await api.submitResult(envelope.session.id, status, finalSnapshot);
+            setSubmission('saved');
+            controller.stop();
+          };
+          retryTerminalRef.current = saveTerminalResult;
+          void saveTerminalResult().catch(() => setSubmission('error'));
         }
       } catch (error) {
         if (!disposed) setLoadError(error instanceof Error ? error.message : '저장된 게임을 불러오지 못했습니다.');
@@ -189,6 +213,7 @@ export function PhaserCanvas() {
       disposed = true;
       if (startGameHandler) mount.removeEventListener('pointerdown', startGameHandler);
       startGameRef.current = null;
+      retryTerminalRef.current = null;
       autosaveRef.current?.stop();
       unsubscribeController();
       unsubscribePause();
@@ -235,7 +260,9 @@ export function PhaserCanvas() {
       elapsedMs={snapshot.songPositionMs}
       pendingSubmission={submission === 'idle' || submission === 'saving'}
       submissionError={submission === 'error'}
-      onPlayAgain={() => window.location.reload()}
+      onPlayAgain={() => void handlePlayAgain()}
+      playAgainDisabled={submission === 'idle' || submission === 'saving' || restarting}
+      playAgainLabel={restarting ? '새 게임 준비 중…' : submission === 'error' ? '저장 후 다시 플레이' : '다시 플레이'}
       onExit={() => router.push('/leaderboard')}
     /> : null}
     <AudioSettingsPanel value={settings} onChange={changeSettings} />

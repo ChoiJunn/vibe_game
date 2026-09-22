@@ -31,12 +31,33 @@ test('a saved zero-heart run retries failed-result submission after refresh inst
   await page.goto('/game');
   await page.getByRole('button', { name: '건너뛰기' }).click();
   await expect(page.getByRole('heading', { name: '오늘의 업무 리듬 결과' })).toBeVisible();
-  await expect(page.locator('.result-submission')).toContainText('페이지를 새로고침하면 다시 저장을 시도합니다');
+  await expect(page.locator('.result-submission')).toContainText('다시 플레이를 누르면 저장을 재시도');
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toHaveCount(0);
 
   await page.reload();
   await expect(page.getByText('결과가 저장되었습니다.')).toBeVisible();
   expect(api.getResult()?.status).toBe('failed');
+});
+
+test('retrying a failed result from the summary finalizes it before starting a fresh run', async ({ page }) => {
+  const api = await mockGameApi(page, {
+    existing: true,
+    resultFailures: 1,
+    snapshot: { cursorMs: 6_000, nextEventIndex: 6, score: 100, hearts: 0, missCount: 5 },
+  });
+
+  await page.goto('/game');
+  const tutorial = page.getByRole('dialog');
+  await expect(tutorial).toBeVisible();
+  await tutorial.locator('.tutorial-actions button').first().click();
+  await expect(page.locator('.result-submission')).toContainText('결과 저장에 실패했습니다');
+  await page.locator('.result-actions').getByRole('button', { name: '저장 후 다시 플레이' }).click();
+
+  await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
+  await expect(page.locator('.result-summary')).toHaveCount(0);
+  expect(api.getResult()?.status).toBe('failed');
+  expect(api.getSession()?.id).toBe('e2e-run-02');
+  expect(api.getSession()?.snapshot.hearts).toBe(5);
 });
 
 test('leaderboard shows each completed attempt as its own row and supports both scopes', async ({ page }) => {
