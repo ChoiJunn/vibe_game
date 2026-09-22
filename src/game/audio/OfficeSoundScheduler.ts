@@ -1,6 +1,6 @@
 import type { Beatmap, RhythmEvent } from '@/domain/rhythm';
 import { AudioClock } from './AudioClock';
-import { createBeatAccent, createSectionSound, type ScheduledAudioNode } from './instruments';
+import { createBeatAccent, createMusicNote, createSectionSound, type ScheduledAudioNode } from './instruments';
 import { clampAudioSettings, DEFAULT_AUDIO_SETTINGS, type AudioSettings } from './types';
 
 export type OfficeSoundSchedulerOptions = {
@@ -16,6 +16,8 @@ export class OfficeSoundScheduler {
   private settings: AudioSettings = DEFAULT_AUDIO_SETTINGS;
   private timer: ReturnType<typeof setInterval> | null = null;
   private running = false;
+  private musicStepMs = 0;
+  private nextMusicStepIndex = 0;
   private readonly scheduledEventIds = new Set<string>();
   private readonly activeNodes = new Set<ScheduledAudioNode>();
 
@@ -29,6 +31,8 @@ export class OfficeSoundScheduler {
     this.stop();
     this.beatmap = beatmap;
     this.settings = clampAudioSettings(settings);
+    this.musicStepMs = 60_000 / beatmap.bpm / 2;
+    this.nextMusicStepIndex = Math.ceil(fromSongPositionMs / this.musicStepMs);
     beatmap.events.forEach((event) => {
       if ((event.endMs ?? event.startMs) < fromSongPositionMs) this.scheduledEventIds.add(event.id);
     });
@@ -61,6 +65,7 @@ export class OfficeSoundScheduler {
     this.clearTimer();
     this.running = false;
     this.scheduledEventIds.clear();
+    this.nextMusicStepIndex = 0;
     this.activeNodes.forEach((node) => {
       try {
         node.stop();
@@ -90,9 +95,45 @@ export class OfficeSoundScheduler {
     const context = this.clock.getAudioContext();
     const horizonMs = songPositionMs + this.lookaheadMs;
 
+    while (this.nextMusicStepIndex * this.musicStepMs <= horizonMs) {
+      const stepIndex = this.nextMusicStepIndex++;
+      this.scheduleMusicStep(stepIndex, songPositionMs, context);
+    }
+
     beatmap.events
       .filter((event) => !this.scheduledEventIds.has(event.id) && event.startMs <= horizonMs)
       .forEach((event) => this.scheduleEvent(event, songPositionMs, context));
+  }
+
+  private scheduleMusicStep(stepIndex: number, songPositionMs: number, context: AudioContext): void {
+    const beatmap = this.beatmap;
+    if (!beatmap || this.settings.muted || this.settings.musicVolume <= 0) return;
+    const stepMs = stepIndex * this.musicStepMs;
+    const endMs = beatmap.sections.at(-1)?.endMs ?? 0;
+    if (stepMs > endMs) return;
+
+    const sectionIndex = beatmap.sections.findIndex((section) => stepMs < section.endMs);
+    const section = beatmap.sections[Math.max(0, sectionIndex)];
+    if (!section) return;
+
+    // Original pentatonic arpeggio: a steady backing motif that changes root
+    // with each office-day scene instead of relying on a licensed music file.
+    const motif = [0, 2, 4, 7, 4, 2, 0, 7];
+    const sectionRoot = [0, 7, 5, 2, 9, 0][Math.max(0, sectionIndex)] ?? 0;
+    const semitones = sectionRoot + motif[stepIndex % motif.length];
+    const frequency = 261.63 * (2 ** (semitones / 12));
+    const delayMs = Math.max(0, stepMs - songPositionMs);
+    const nodes = createMusicNote({
+      context,
+      when: context.currentTime + delayMs / 1000,
+      durationSec: Math.min(0.18, this.musicStepMs / 1000 * 0.8),
+      volume: this.settings.musicVolume * 0.12,
+      destination: context.destination,
+    }, frequency);
+    nodes.forEach((node) => {
+      this.activeNodes.add(node);
+      node.addEventListener('ended', () => this.activeNodes.delete(node), { once: true });
+    });
   }
 
   private scheduleEvent(event: RhythmEvent, songPositionMs: number, context: AudioContext): void {

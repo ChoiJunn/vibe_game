@@ -58,6 +58,35 @@ describe('SpaceInputController', () => {
     expect(onPauseRequest).toHaveBeenCalledTimes(1);
     controller.stop();
   });
+
+  it('persists a matching keyup when the final judgement ends the run on keydown', async () => {
+    const inputTarget = new EventTarget();
+    const persisted: Array<{ clientSequence: number; type: string }> = [];
+    let gameState = 'playing';
+    const controller = new SpaceInputController({
+      inputTarget,
+      blurTarget: new EventTarget(),
+      getGameState: () => gameState,
+      getSongPositionMs: () => 1234,
+      onInput: () => { gameState = 'failed'; },
+      onPersistInput: ({ clientSequence, type }) => persisted.push({ clientSequence, type }),
+      onPauseRequest: () => undefined,
+    });
+    controller.start();
+
+    inputTarget.dispatchEvent(createKeyEvent('keydown'));
+    const released = controller.waitForRelease();
+    inputTarget.dispatchEvent(createKeyEvent('keyup'));
+    await released;
+    inputTarget.dispatchEvent(createKeyEvent('keydown'));
+    inputTarget.dispatchEvent(createKeyEvent('keyup'));
+
+    expect(persisted).toEqual([
+      { clientSequence: 0, type: 'keydown' },
+      { clientSequence: 1, type: 'keyup' },
+    ]);
+    controller.stop();
+  });
 });
 
 function createKeyEvent(type: 'keydown' | 'keyup', options: { repeat?: boolean; cancelable?: boolean } = {}): Event {

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import beatmapJson from '@/content/beatmaps/office-day-01.json';
 import { validateBeatmap } from '@/domain/validateBeatmap';
+import { createInitialRunState } from '@/game/state/reduceRunState';
 import { RhythmGameController } from './RhythmGameController';
 import type { AudioClockState, AudioSettings } from './audio/types';
 
@@ -34,6 +35,33 @@ describe('RhythmGameController', () => {
     controller.handleInput({ type: 'keydown', songPositionMs: 1091 });
 
     expect(controller.getSnapshot().runState.nextEventIndex).toBe(0);
+  });
+
+  it('pauses clock and scheduler immediately when the final heart is lost', async () => {
+    const clock = createFakeClock();
+    const scheduler = createFakeScheduler();
+    const inputController = { start: vi.fn(), stop: vi.fn(), releaseHeld: vi.fn() };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: clock as never,
+      scheduler: scheduler as never,
+      inputController,
+      initialRunState: {
+        ...createInitialRunState({ runId: 'run-fail', userOid: 'user-1', beatmapId: beatmap.id }),
+        hearts: 1,
+        missCount: 4,
+        nextEventIndex: 4,
+      },
+      audioSettings: settings,
+    });
+    await controller.start(0, controller.getSnapshot().runState);
+
+    controller.handleInput({ type: 'keydown', songPositionMs: 5000 });
+
+    expect(controller.getSnapshot().runState.status).toBe('failed');
+    expect(inputController.releaseHeld).toHaveBeenCalledTimes(1);
+    expect(clock.pause).toHaveBeenCalledTimes(1);
+    expect(scheduler.pause).toHaveBeenCalledTimes(1);
   });
 });
 

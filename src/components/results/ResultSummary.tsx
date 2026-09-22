@@ -11,6 +11,9 @@ export function ResultSummary({
   playAgainDisabled = false,
   playAgainLabel = '다시 플레이',
   onExit,
+  exitError,
+  exitDisabled = false,
+  exitLabel = '\uc0c8 \uac8c\uc784',
 }: {
   runState: RunState;
   elapsedMs: number;
@@ -20,6 +23,9 @@ export function ResultSummary({
   playAgainDisabled?: boolean;
   playAgainLabel?: string;
   onExit?: () => void;
+  exitError?: string;
+  exitDisabled?: boolean;
+  exitLabel?: string;
 }) {
   const elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
 
@@ -43,9 +49,10 @@ export function ResultSummary({
         <p className={'result-submission'} role={submissionError ? 'alert' : 'status'}>
           {submissionError ? '결과 저장에 실패했습니다. 연결을 확인하고 다시 플레이를 누르면 저장을 재시도한 뒤 새 게임을 시작합니다.' : pendingSubmission ? '결과를 안전하게 저장하고 있어요…' : '결과가 저장되었습니다.'}
         </p>
+        {exitError ? <p className={'result-submission'} role={'alert'}>{exitError}</p> : null}
         <div className={'result-actions'}>
           {onPlayAgain && <button type={'button'} className={'primary'} disabled={playAgainDisabled} onClick={onPlayAgain}>{playAgainLabel}</button>}
-          {onExit && <button type={'button'} onClick={onExit}>나가기</button>}
+          {onExit && <button type={'button'} disabled={exitDisabled} onClick={onExit}>{exitLabel}</button>}
         </div>
       </div>
     </section>

@@ -31,6 +31,17 @@ export function createBeatAccent(options: InstrumentOptions): ScheduledAudioNode
   return createTone(options, 'square', 880, 660);
 }
 
+export function createMusicNote(options: InstrumentOptions, frequency: number): ScheduledAudioNode[] {
+  const oscillator = options.context.createOscillator();
+  const gain = createEnvelope(options, 0.0001);
+  oscillator.type = 'triangle';
+  oscillator.frequency.setValueAtTime(frequency, options.when);
+  oscillator.connect(gain);
+  oscillator.start(options.when);
+  oscillator.stop(options.when + options.durationSec);
+  return [oscillator];
+}
+
 function createTone(
   options: InstrumentOptions,
   type: OscillatorType,

@@ -45,7 +45,14 @@ export function replayInputEvents(
     previousPosition = input.songPositionMs;
 
     if (input.type === 'keydown') {
-      if (isPressed || state.status !== 'active') return { state, reason: 'invalid_sequence' };
+      if (isPressed) return { state, reason: 'invalid_sequence' };
+      // Browsers may dispatch one or more inputs after the fifth miss has
+      // already ended the run. Keep validating their sequence/pairing, but do
+      // not apply any post-terminal input to the score.
+      if (state.status !== 'active') {
+        isPressed = true;
+        continue;
+      }
       const beatmapEvent = beatmap.events[state.nextEventIndex];
       if (!beatmapEvent) return { state, reason: 'invalid_sequence' };
       isPressed = true;
@@ -66,6 +73,7 @@ export function replayInputEvents(
 
     if (!isPressed) return { state, reason: 'invalid_sequence' };
     isPressed = false;
+    if (state.status !== 'active') continue;
     if (!pendingHoldStart) continue;
     const beatmapEvent = beatmap.events[pendingHoldEventIndex];
     if (!beatmapEvent || beatmapEvent.type !== 'hold') return { state, reason: 'invalid_sequence' };
@@ -82,7 +90,15 @@ export function replayInputEvents(
     pendingHoldEventIndex = -1;
   }
 
-  if (isPressed || pendingHoldStart) return { state, reason: 'invalid_sequence' };
+  const lastInput = events.at(-1);
+  const lastJudgedEvent = beatmap.events[state.nextEventIndex - 1];
+  const terminalTapPress = isPressed && !pendingHoldStart && lastInput?.type === 'keydown' &&
+    lastJudgedEvent?.type === 'tap' && (terminalStatus === 'failed' || terminalStatus === 'completed') &&
+    state.status === terminalStatus;
+  // Taps are judged on keydown. The fifth miss (or final completed tap) can
+  // close the run before the browser dispatches keyup, so accept only that
+  // harmless trailing release omission. Holds still require a complete pair.
+  if ((isPressed && !terminalTapPress) || pendingHoldStart) return { state, reason: 'invalid_sequence' };
   if (terminalStatus === 'completed' && state.status === 'active' && state.nextEventIndex === beatmap.events.length) {
     state = { ...state, status: 'completed' };
   }

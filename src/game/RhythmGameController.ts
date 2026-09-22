@@ -188,6 +188,13 @@ export class RhythmGameController {
       songPositionMs: this.clock.getSongPositionMs(),
     });
     this.lastJudgement = result;
+    if (this.runState.status === 'completed' || this.runState.status === 'failed') {
+      // Freeze the run immediately. Release a recorded held key first so its
+      // matching keyup is autosaved before the terminal result is submitted.
+      this.inputController?.releaseHeld?.();
+      this.clock.pause();
+      this.scheduler.pause();
+    }
     this.emit();
   }
 

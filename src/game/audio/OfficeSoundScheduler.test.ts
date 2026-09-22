@@ -24,8 +24,22 @@ describe('OfficeSoundScheduler', () => {
     scheduler.load(beatmap, settings);
     scheduler.start();
 
-    expect(fakeContext.createOscillator).toHaveBeenCalledTimes(4);
+    expect(fakeContext.createOscillator.mock.calls.length).toBeGreaterThan(4);
     expect(fakeContext.createGain).toHaveBeenCalled();
+    scheduler.stop();
+  });
+
+  it('schedules the backing motif from the start of a run', async () => {
+    const fakeContext = createFakeAudioContext();
+    const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+    await clock.load(beatmap, settings);
+    await clock.start();
+    const scheduler = new OfficeSoundScheduler(clock, { lookaheadMs: 120 });
+
+    scheduler.load(beatmap, settings);
+    scheduler.start();
+
+    expect(fakeContext.createOscillator).toHaveBeenCalled();
     scheduler.stop();
   });
 

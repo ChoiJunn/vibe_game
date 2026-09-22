@@ -21,7 +21,9 @@ export class SpaceInputController {
   private readonly options: Pick<SpaceInputControllerOptions, 'getGameState' | 'getSongPositionMs' | 'onInput' | 'onPauseRequest' | 'onPersistInput' | 'getInputOffsetMs'>;
   private attached = false;
   private spaceHeld = false;
+  private persistedSpaceDown = false;
   private sequence: number;
+  private releaseWaiters = new Set<() => void>();
 
   constructor(options: SpaceInputControllerOptions) {
     this.inputTarget = options.inputTarget ?? (typeof window !== 'undefined' ? window : new EventTarget());
@@ -52,12 +54,24 @@ export class SpaceInputController {
     this.blurTarget.removeEventListener('blur', this.handleBlur);
     this.attached = false;
     this.spaceHeld = false;
+    this.persistedSpaceDown = false;
   }
 
   releaseHeld(): void {
     if (!this.spaceHeld) return;
     this.spaceHeld = false;
-    if (this.options.getGameState() === 'playing') this.forwardInput('keyup');
+    // Keep recorded keydown/keyup pairs complete even if the final judgement
+    // ended the run while Space was held; ignore keys pressed while paused.
+    if (this.persistedSpaceDown) {
+      this.persistedSpaceDown = false;
+      this.forwardInput('keyup');
+    }
+    this.notifyReleased();
+  }
+
+  waitForRelease(): Promise<void> {
+    if (!this.spaceHeld) return Promise.resolve();
+    return new Promise((resolve) => this.releaseWaiters.add(resolve));
   }
 
   private readonly handleKeyDown = (event: Event): void => {
@@ -76,6 +90,7 @@ export class SpaceInputController {
 
     this.spaceHeld = true;
     if (this.options.getGameState() === 'playing') {
+      this.persistedSpaceDown = true;
       this.forwardInput('keydown');
     }
   };
@@ -95,13 +110,15 @@ export class SpaceInputController {
     }
 
     this.spaceHeld = false;
-    if (this.options.getGameState() === 'playing') {
+    if (this.persistedSpaceDown) {
+      this.persistedSpaceDown = false;
       this.forwardInput('keyup');
     }
+    this.notifyReleased();
   };
 
   private readonly handleBlur = (): void => {
-    this.spaceHeld = false;
+    this.releaseHeld();
     this.options.onPauseRequest();
   };
 
@@ -117,5 +134,10 @@ export class SpaceInputController {
       receivedAt: new Date().toISOString(),
     });
     this.options.onInput({ type, songPositionMs });
+  }
+
+  private notifyReleased(): void {
+    this.releaseWaiters.forEach((resolve) => resolve());
+    this.releaseWaiters.clear();
   }
 }

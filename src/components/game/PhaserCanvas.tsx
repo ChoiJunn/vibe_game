@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import beatmapJson from '@/content/beatmaps/office-day-01.json';
 import testBeatmapJson from '@/content/beatmaps/e2e-quick-beatmap';
 import { useAuth } from '@/auth/useAuth';
@@ -35,11 +34,12 @@ export function PhaserCanvas() {
   const controllerRef = useRef<RhythmGameController | null>(null);
   const autosaveRef = useRef<AutosaveCoordinator | null>(null);
   const retryTerminalRef = useRef<(() => Promise<void>) | null>(null);
+  const exitToNewGameRef = useRef<(() => Promise<void>) | null>(null);
+  const terminalSubmissionRef = useRef<Promise<void> | null>(null);
   const restartingRef = useRef(false);
   const settingsRef = useRef<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
   const terminalSubmittedRef = useRef(false);
   const { getIdToken, user } = useAuth();
-  const router = useRouter();
   const userOid = user?.oid;
   const tokenProviderRef = useRef(getIdToken);
   const [runtime, setRuntime] = useState<GameRuntime | null>(null);
@@ -48,6 +48,8 @@ export function PhaserCanvas() {
   const [settingsReady, setSettingsReady] = useState(false);
   const [started, setStarted] = useState(false);
   const [restarting, setRestarting] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const [exitError, setExitError] = useState<string>();
   const [submission, setSubmission] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [loadError, setLoadError] = useState<string>();
   useEffect(() => {
@@ -115,6 +117,7 @@ export function PhaserCanvas() {
           ? { ...storedSnapshot, status: 'failed' as const }
           : storedSnapshot;
         terminalSubmittedRef.current = false;
+        terminalSubmissionRef.current = null;
         setSubmission('idle');
         const controller = new RhythmGameController({
           beatmap,
@@ -135,7 +138,10 @@ export function PhaserCanvas() {
           inputTarget: mount,
           blurTarget: window,
           isViewportFocused: () => document.activeElement === mount,
-          getGameState: () => controller.getSnapshot().clockState,
+          getGameState: () => {
+            const current = controller.getSnapshot();
+            return current.runState.status === 'active' ? current.clockState : 'ended';
+          },
           getSongPositionMs: () => controller.getSongPositionMs(),
           getInputOffsetMs: () => settingsRef.current.inputOffsetMs,
           initialSequence: envelope.session.inputEvents.length,
@@ -144,6 +150,19 @@ export function PhaserCanvas() {
           onPauseRequest: () => controller.pause(),
         });
         controller.attachInputController(input);
+        exitToNewGameRef.current = async () => {
+          await terminalSubmissionRef.current?.catch(() => undefined);
+          const active = await api.getActive();
+          if (active?.session.id === envelope.session.id) {
+            try {
+              await api.abandon(active.session.id, active.version, true);
+            } catch (error) {
+              const latest = await api.getActive();
+              if (latest?.session.id === envelope.session.id) throw error;
+            }
+          }
+          window.location.replace('/game');
+        };
         const pauseCoordinator = new PauseCoordinator(controller);
         setCoordinator(pauseCoordinator);
         setRuntime({ controller, snapshot: controller.getSnapshot(), pauseState: pauseCoordinator.getState(), autosaveState: autosave.getState() });
@@ -195,14 +214,19 @@ export function PhaserCanvas() {
           autosave.stop();
           const saveTerminalResult = async () => {
             setSubmission('saving');
+            // A tap can spend the final heart on keydown. Wait for its physical
+            // keyup before flushing the input log used for server verification.
+            await input.waitForRelease();
             await autosave.flush({ ...finalSnapshot, status: 'active' });
             await api.submitResult(envelope.session.id, status, finalSnapshot);
             setSubmission('saved');
             controller.stop();
           };
           retryTerminalRef.current = saveTerminalResult;
-          void saveTerminalResult().catch(() => setSubmission('error'));
+          terminalSubmissionRef.current = saveTerminalResult().catch(() => setSubmission('error'));
         }
+
+        if (recoveredFailure) submitTerminal('failed', snapshot);
       } catch (error) {
         if (!disposed) setLoadError(error instanceof Error ? error.message : '저장된 게임을 불러오지 못했습니다.');
       }
@@ -214,6 +238,7 @@ export function PhaserCanvas() {
       if (startGameHandler) mount.removeEventListener('pointerdown', startGameHandler);
       startGameRef.current = null;
       retryTerminalRef.current = null;
+      exitToNewGameRef.current = null;
       autosaveRef.current?.stop();
       unsubscribeController();
       unsubscribePause();
@@ -263,7 +288,18 @@ export function PhaserCanvas() {
       onPlayAgain={() => void handlePlayAgain()}
       playAgainDisabled={submission === 'idle' || submission === 'saving' || restarting}
       playAgainLabel={restarting ? '새 게임 준비 중…' : submission === 'error' ? '저장 후 다시 플레이' : '다시 플레이'}
-      onExit={() => router.push('/leaderboard')}
+      exitError={exitError}
+      exitDisabled={exiting}
+      exitLabel={exiting ? '새 게임 준비 중…' : '새 게임'}
+      onExit={() => {
+        if (exiting) return;
+        setExiting(true);
+        setExitError(undefined);
+        void exitToNewGameRef.current?.().catch(() => {
+          setExitError('새 게임을 준비하지 못했습니다. 다시 시도해 주세요.');
+          setExiting(false);
+        });
+      }}
     /> : null}
     <AudioSettingsPanel value={settings} onChange={changeSettings} />
   </>;

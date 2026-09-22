@@ -1,6 +1,6 @@
 # Task: T03 Release Readiness
 
-## Status: in_progress
+## Status: done
 
 ## Goal
 
@@ -45,11 +45,11 @@
 
 ## Acceptance Criteria
 
-- [ ] 새 개발자가 README만 보고 로컬 앱을 실행할 수 있다.
-- [ ] 운영자가 Entra·Cosmos·App Service 설정을 문서대로 재현할 수 있다.
-- [ ] 필수 3조건인 실제 플레이, 중간저장·뒤로가기 복원, 독창적 차별화가 release checklist에서 모두 통과한다.
-- [ ] Chrome과 Edge의 critical path가 통과한다.
-- [ ] 비밀값·사용자 토큰·raw event가 문서나 로그에 노출되지 않는다.
+- [x] 새 개발자가 README만 보고 로컬 앱을 실행할 수 있다.
+- [x] 운영자가 Entra·Cosmos·App Service 설정을 문서대로 재현할 수 있다.
+- [x] 필수 3조건인 실제 플레이, 중간저장·뒤로가기 복원, 독창적 차별화가 release checklist에서 모두 통과한다.
+- [x] Chrome과 Edge의 critical path가 통과한다.
+- [x] 비밀값·사용자 토큰·raw event가 문서나 로그에 노출되지 않는다.
 
 ## Validation
 
@@ -86,16 +86,18 @@ Task: T03-release-readiness
 - [x] Stabilized the leaderboard submission E2E by separating mocked result-API submission/rendering from the gameplay timing test; the complete Chromium+Edge E2E suite now passes 22/22.
 - [x] Latest candidate checks: lint (one existing warning), typecheck, 26 unit-test files / 70 tests, 22 Chromium+Edge E2E tests, production build, and public production smoke all pass; live build is `6b932db5de17ec5a58e714e351bd32643fb97184`.
 - [x] Fixed the production Entra redirect leak: build-time `.env.local` had embedded the loopback URI in the deployed client. Production validation now rejects loopback/HTTP callbacks; the candidate was rebuilt with the App Service HTTPS URL and deployed as `7f5036241bdc993a93bf007019cf13a73168fc9b` (`f09cd9ac-2921-438e-b68b-da3a1b634f8f`, `RuntimeSuccessful`). The live bundle has no loopback redirect, and health/public smoke pass.
-- [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and authenticated smoke remain not run; see `vibe_game/docs/release-checklist.md`.
-- implementation commit: `ffe84ac` (manual production gates remain active)
+- [x] Fixed terminal input replay and stuck-result recovery: post-terminal input is no longer recorded by the client, older complete trailing input pairs are ignored by replay scoring, recovered failed sessions retry result persistence, and the result screen can abandon the stale session before opening a fresh game. Deployed directly to App Service (`776b0bfe-2b2f-465a-b003-523d07852d35`, `RuntimeSuccessful`); public smoke reports healthy Cosmos and build `hotfix-terminal-save-retry-2026-09-22`.
+- [x] Latest automated validation: lint, typecheck, 26 unit-test files / 76 tests, 22 Chromium+Edge E2E tests, production build, and public production smoke passed. Authenticated smoke was skipped because no user ID token was available in this session.
+- [x] User confirmed on 2026-09-22 that real Entra sign-in, live audio/gameplay, and authenticated production verification are complete.
+- implementation commit: `ffe84ac`; release readiness confirmed 2026-09-22.
 
 ### Execution Notes
 
 - Leaderboard repository queries now return completed attempts only; failed and abandoned outcomes remain stored but are not ranked.
 - Corrected the result E2E fixture to use the last hold in the short test beatmap; the previous timings never reached the terminal event.
-- GitHub deploy workflow is `workflow_dispatch` only. A main push does not deploy the candidate. The candidate is now deployed directly to the verified App Service; do not mark the release signed off until the remaining manual checks pass.
+- GitHub deploy workflow is `workflow_dispatch` only. A main push does not deploy the candidate. The latest candidate was deployed directly to the verified App Service; the user confirmed the remaining manual checks on 2026-09-22.
 - Local `.env.local` points Entra sign-in at loopback; production builds must override `NEXT_PUBLIC_ENTRA_REDIRECT_URI` with the registered HTTPS app URL.
 - ZIP entry names must use POSIX `/` separators for Linux App Service; the Windows archive utility emitted backslashes for nested dependencies and was rejected by rsync.
 - Production smoke can briefly time out during App Service restart; wait for warm-up and verify the live build ID before recording a pass.
 - The previous replay handler only reloaded the page. When terminal-result persistence failed, the server still returned the zero-heart session as active; explicitly retry result persistence before creating another session.
-- Automated E2E and public health checks do not verify the user's real tenant login, real-device audio, or authenticated Cosmos writes; keep P04-T03 active until those production gates are performed.
+- Automated E2E and public health checks do not verify the user's real tenant login, real-device audio, or authenticated Cosmos writes; the user separately confirmed those production gates on 2026-09-22.

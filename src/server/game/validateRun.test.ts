@@ -69,7 +69,7 @@ describe('server replay validation', () => {
 
   it('replays five misses into a failed terminal run', () => {
     const events: ReplayInputEvent[] = [];
-    for (const note of beatmap.events.slice(0, 5)) {
+    for (let index = 0; index < 5; index += 1) {
       events.push({ eventId: `miss-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: events.length });
       events.push({ eventId: `miss-${events.length}`, sequence: events.length, type: 'keyup', songPositionMs: events.length });
     }
@@ -79,6 +79,40 @@ describe('server replay validation', () => {
     expect(replay.reason).toBeUndefined();
     expect(replay.state.status).toBe('failed');
     expect(replay.state.hearts).toBe(0);
+    expect(validateRun(beatmap, initial, events, replay.state, 'failed').valid).toBe(true);
+  });
+
+  it('accepts the final tap keydown when failure closes the run before browser keyup', () => {
+    const events: ReplayInputEvent[] = [];
+    for (const [index, note] of beatmap.events.slice(0, 5).entries()) {
+      events.push({ eventId: `tap-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: index });
+      if (note.type === 'hold' || index < 4) {
+        events.push({ eventId: `tap-${events.length}`, sequence: events.length, type: 'keyup', songPositionMs: index + 0.5 });
+      }
+    }
+    const initial = createInitialRunState({ runId: 'run-terminal-keydown', userOid: 'user-1', beatmapId: beatmap.id });
+    const replay = replayInputEvents(beatmap, initial, events, 'failed');
+
+    expect(replay.reason).toBeUndefined();
+    expect(replay.state.status).toBe('failed');
+    expect(validateRun(beatmap, initial, events, replay.state, 'failed').valid).toBe(true);
+  });
+
+  it('ignores complete input pairs recorded after the fifth miss without changing the final score', () => {
+    const events: ReplayInputEvent[] = [];
+    for (let index = 0; index < 5; index += 1) {
+      events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: events.length });
+      events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keyup', songPositionMs: events.length });
+    }
+    events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: events.length });
+    events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keyup', songPositionMs: events.length });
+    const initial = createInitialRunState({ runId: 'run-late-input', userOid: 'user-1', beatmapId: beatmap.id });
+    const replay = replayInputEvents(beatmap, initial, events, 'failed');
+
+    expect(replay.reason).toBeUndefined();
+    expect(replay.state.status).toBe('failed');
+    expect(replay.state.missCount).toBe(5);
+    expect(replay.state.nextEventIndex).toBe(5);
     expect(validateRun(beatmap, initial, events, replay.state, 'failed').valid).toBe(true);
   });
 });
