@@ -24,7 +24,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
 
   create(): void {
     this.background = new OfficeBackground(this);
-    this.character = new OfficeCharacter(this, 640, 430);
+    this.character = new OfficeCharacter(this, 430, 668);
     this.gauge = new TimingGauge(this, 640, 180, 520);
     this.prompt = new WorkIconPrompt(this, 640, 300);
     this.hud = new GameHud(this);
@@ -44,7 +44,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
     }
 
     renderOfficeBackground(this.background, snapshot.section);
-    this.character.update(snapshot.clockState, snapshot.lastJudgement?.judgement);
+    this.character.update(snapshot.clockState, snapshot.lastJudgement, snapshot.section, this.time.now);
     this.gauge.update(snapshot.currentEvent, snapshot.songPositionMs);
     this.prompt.update(snapshot.section, snapshot.currentEvent?.type, snapshot.clockState);
     this.hud.update(snapshot);

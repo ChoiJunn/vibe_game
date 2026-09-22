@@ -1,41 +1,48 @@
 import Phaser from 'phaser';
+import type { SectionId, Judgement } from '@/domain/rhythm';
 import type { AudioClockState } from '@/game/audio/types';
-import type { Judgement } from '@/domain/rhythm';
+import { GAME_ASSETS } from '@/game/assets';
+import type { JudgementResult } from '@/game/judgement/types';
 
 export class OfficeCharacter {
-  private readonly graphics: Phaser.GameObjects.Graphics;
-  private readonly label: Phaser.GameObjects.Text;
-  private lastJudgement?: Judgement;
+  private readonly protagonist: Phaser.GameObjects.Image;
+  private readonly moka: Phaser.GameObjects.Image;
+  private lastJudgementEventId?: string;
+  private reactionUntil = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    this.graphics = scene.add.graphics();
-    this.label = scene.add.text(x, y + 92, '업무 담당자', {
-      color: '#24323b',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '18px',
-    }).setOrigin(0.5);
-    this.draw(x, y, 1);
+    this.protagonist = scene.add.image(x, y, GAME_ASSETS.protagonist.walkA.key)
+      .setOrigin(0.5, 1)
+      .setDisplaySize(220, 220)
+      .setDepth(2);
+    this.moka = scene.add.image(x + 430, y, GAME_ASSETS.moka.tumbler.key)
+      .setOrigin(0.5, 1)
+      .setDisplaySize(112, 112)
+      .setDepth(2);
   }
 
-  update(state: AudioClockState, judgement?: Judgement): void {
-    if (judgement && judgement !== this.lastJudgement) {
-      this.lastJudgement = judgement;
-      this.draw(640, 430, judgement === 'miss' ? 0.94 : 1.06);
-    } else if (state === 'playing') {
-      this.draw(640, 430, 1);
+  update(state: AudioClockState, result: JudgementResult | undefined, section: SectionId, now: number): void {
+    if (result && result.eventId !== this.lastJudgementEventId) {
+      this.lastJudgementEventId = result.eventId;
+      this.reactionUntil = now + 520;
     }
-  }
 
-  private draw(x: number, y: number, scale: number): void {
-    this.graphics.clear();
-    this.graphics.fillStyle(0x263742, 1);
-    this.graphics.fillCircle(x, y - 55 * scale, 32 * scale);
-    this.graphics.fillStyle(0xf2b880, 1);
-    this.graphics.fillCircle(x, y - 55 * scale, 24 * scale);
-    this.graphics.fillStyle(0x4d6a7a, 1);
-    this.graphics.fillRoundedRect(x - 48 * scale, y - 22 * scale, 96 * scale, 100 * scale, 22);
-    this.graphics.fillStyle(0xf2b880, 1);
-    this.graphics.fillCircle(x - 56 * scale, y + 2 * scale, 12 * scale);
-    this.graphics.fillCircle(x + 56 * scale, y + 2 * scale, 12 * scale);
+    const reacting = now < this.reactionUntil;
+    const judgement: Judgement | undefined = reacting ? result?.judgement : undefined;
+    const protagonistPose = judgement
+      ? GAME_ASSETS.protagonist[judgement]
+      : state === 'playing' && Math.floor(now / 260) % 2 === 1
+        ? GAME_ASSETS.protagonist.walkB
+        : GAME_ASSETS.protagonist.walkA;
+    const mokaPose = judgement
+      ? GAME_ASSETS.moka[judgement]
+      : section === 'arrival' ? GAME_ASSETS.moka.tumbler : GAME_ASSETS.moka.deskCup;
+
+    if (this.protagonist.texture.key !== protagonistPose.key) {
+      this.protagonist.setTexture(protagonistPose.key);
+    }
+    if (this.moka.texture.key !== mokaPose.key) {
+      this.moka.setTexture(mokaPose.key);
+    }
   }
 }
