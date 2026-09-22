@@ -81,6 +81,9 @@ Task: T03-release-readiness
 - [x] Fixed zero-heart active-session recovery: restore the session as `failed`, show the result instead of the pause overlay, and retry result submission after refresh; regression covers one transient result API failure.
 - [x] Hotfix validation: lint (one pre-existing warning), typecheck, 25 unit-test files / 67 tests, 20 Chromium+Edge E2E tests, and production build passed.
 - [x] Deploy the failed-session recovery hotfix; deployment `9ff0e5bb-8beb-4ff0-ba02-93606526afc7` is `RuntimeSuccessful`, build `37746c0d52ed07a989a09af74ce27f712e14228a`; public smoke passed with healthy Cosmos and `/game` HTTP 200.
+- [x] Fixed the follow-up replay bug: the result screen now retries terminal-result persistence before reloading, allowing the server to release the old active session and create a fresh run. Regression passes in Chromium and Edge.
+- [x] Deployed commit `b00b49e171eb9c65584f18062a4f4ecb55ac77a3`; deployment `258a5cdd-d5b9-42e2-8045-5ad00ad2fd73` is `RuntimeSuccessful`; public smoke confirms healthy Cosmos, the new build ID, and `/game` HTTP 200.
+- [ ] Full E2E follow-up: 20/22 pass; unchanged `e2e/leaderboard.spec.ts` failed in isolated Chromium and Edge runs. Trace captured; separate from this fix.
 - [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and authenticated smoke remain not run; see `vibe_game/docs/release-checklist.md`.
 - implementation commit: `ffe84ac` (manual production gates remain active)
 
@@ -92,3 +95,4 @@ Task: T03-release-readiness
 - Local `.env.local` points Entra sign-in at loopback; production builds must override `NEXT_PUBLIC_ENTRA_REDIRECT_URI` with the registered HTTPS app URL.
 - ZIP entry names must use POSIX `/` separators for Linux App Service; the Windows archive utility emitted backslashes for nested dependencies and was rejected by rsync.
 - Production smoke can briefly time out during App Service restart; wait for warm-up and verify the live build ID before recording a pass.
+- The previous replay handler only reloaded the page. When terminal-result persistence failed, the server still returned the zero-heart session as active; explicitly retry result persistence before creating another session.

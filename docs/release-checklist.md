@@ -9,9 +9,9 @@ Use this checklist for every candidate release. Attach the CI run, deployment/bu
 | Lint | `npm run lint` output | Pass (one pre-existing warning) |
 | Types | `npm run typecheck` output | Pass |
 | Unit/component/API tests | `npm test -- --run` summary | Pass (25 files, 67 tests) |
-| Critical user flows | `npm run test:e2e` on Chromium and Edge | Pass (20 tests) |
+| Critical user flows | `npm run test:e2e` on Chromium and Edge | Partial (20/22 passed; two existing leaderboard.spec.ts timing failures; replay-retry regression passes on both browsers) |
 | Production compilation | `npm run build` output | Pass |
-| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Pass (2026-09-22; build `37746c0d52ed07a989a09af74ce27f712e14228a`) |
+| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Pass (2026-09-22; build `b00b49e171eb9c65584f18062a4f4ecb55ac77a3`) |
 
 ## Manual production gates
 
@@ -56,3 +56,12 @@ Local candidate checks completed:
 - **Pass** — `npm run build`.
 - **Pass** — recovery fix deployed 2026-09-22; deployment `9ff0e5bb-8beb-4ff0-ba02-93606526afc7` is `RuntimeSuccessful`, build `37746c0d52ed07a989a09af74ce27f712e14228a`; public smoke passed with healthy Cosmos and `/game` HTTP 200.
 - **Not run** — real Entra sign-in, physical-device audio/gameplay, and authenticated smoke; these still require a real user session and device interaction.
+
+## Verification record - 2026-09-22 replay retry hotfix
+
+- **Pass** — failed-result replay now retries saving the terminal result; after success, the app opens a new session instead of reloading the same zero-heart active session.
+- **Pass** — the failed-result replay regression passed in Chromium and Edge; typecheck, 67 unit tests, and lint (one existing warning) passed.
+- **Partial** — full E2E run passed 20 of 22 tests. The unchanged `e2e/leaderboard.spec.ts` failed in isolated Chromium and Edge runs; a trace was captured. That unrelated timing failure was not changed in this hotfix.
+- **Pass** — deployed commit `b00b49e171eb9c65584f18062a4f4ecb55ac77a3` via deployment `258a5cdd-d5b9-42e2-8045-5ad00ad2fd73` (`RuntimeSuccessful`, one successful instance, zero failed instances).
+- **Pass** — public smoke reports healthy Cosmos and the new build ID; `/game` returns HTTP 200. Client bundle contains the production Entra redirect URI and no localhost redirect.
+- **Not run** — real Entra sign-in, physical-device audio/gameplay, and authenticated smoke remain user-verification gates.
