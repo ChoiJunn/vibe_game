@@ -80,7 +80,7 @@ Task: T03-release-readiness
 - [x] Candidate deployed `RuntimeSuccessful` (`5f98165a-61c3-494e-b5b7-0eeab0d30878`); public smoke reports healthy Cosmos and build ID `e065b1f604fb75efa8c8e83a3209328fd95ad042`; game/leaderboard routes return 200 and unauthenticated APIs return 401.
 - [x] Fixed zero-heart active-session recovery: restore the session as `failed`, show the result instead of the pause overlay, and retry result submission after refresh; regression covers one transient result API failure.
 - [x] Hotfix validation: lint (one pre-existing warning), typecheck, 25 unit-test files / 67 tests, 20 Chromium+Edge E2E tests, and production build passed.
-- [ ] Deploy the failed-session recovery hotfix and record the deployment/build ID and public smoke result in `docs/release-checklist.md`.
+- [x] Deploy the failed-session recovery hotfix; deployment `9ff0e5bb-8beb-4ff0-ba02-93606526afc7` is `RuntimeSuccessful`, build `37746c0d52ed07a989a09af74ce27f712e14228a`; public smoke passed with healthy Cosmos and `/game` HTTP 200.
 - [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and authenticated smoke remain not run; see `vibe_game/docs/release-checklist.md`.
 - implementation commit: `ffe84ac` (manual production gates remain active)
 
@@ -89,3 +89,6 @@ Task: T03-release-readiness
 - Leaderboard repository queries now return completed attempts only; failed and abandoned outcomes remain stored but are not ranked.
 - Corrected the result E2E fixture to use the last hold in the short test beatmap; the previous timings never reached the terminal event.
 - GitHub deploy workflow is `workflow_dispatch` only. A main push does not deploy the candidate. The candidate is now deployed directly to the verified App Service; do not mark the release signed off until the remaining manual checks pass.
+- Local `.env.local` points Entra sign-in at loopback; production builds must override `NEXT_PUBLIC_ENTRA_REDIRECT_URI` with the registered HTTPS app URL.
+- ZIP entry names must use POSIX `/` separators for Linux App Service; the Windows archive utility emitted backslashes for nested dependencies and was rejected by rsync.
+- Production smoke can briefly time out during App Service restart; wait for warm-up and verify the live build ID before recording a pass.

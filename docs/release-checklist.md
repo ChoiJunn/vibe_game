@@ -11,7 +11,7 @@ Use this checklist for every candidate release. Attach the CI run, deployment/bu
 | Unit/component/API tests | `npm test -- --run` summary | Pass (25 files, 67 tests) |
 | Critical user flows | `npm run test:e2e` on Chromium and Edge | Pass (20 tests) |
 | Production compilation | `npm run build` output | Pass |
-| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Not run |
+| Deployed public smoke | `npm run smoke-test -- --base-url https://<app-host>`; landing + healthy Cosmos dependency + build metadata | Pass (2026-09-22; build `37746c0d52ed07a989a09af74ce27f712e14228a`) |
 
 ## Manual production gates
 
@@ -54,5 +54,5 @@ Local candidate checks completed:
 - **Pass** — `npm test -- --run` (25 files, 67 tests).
 - **Pass** — `npm run test:e2e` (20 tests across Chromium and Edge, including one temporary result API failure followed by a successful retry after refresh).
 - **Pass** — `npm run build`.
-- **Pending** — deploy this recovery fix and record its deployment/build ID and public smoke result below.
+- **Pass** — recovery fix deployed 2026-09-22; deployment `9ff0e5bb-8beb-4ff0-ba02-93606526afc7` is `RuntimeSuccessful`, build `37746c0d52ed07a989a09af74ce27f712e14228a`; public smoke passed with healthy Cosmos and `/game` HTTP 200.
 - **Not run** — real Entra sign-in, physical-device audio/gameplay, and authenticated smoke; these still require a real user session and device interaction.
