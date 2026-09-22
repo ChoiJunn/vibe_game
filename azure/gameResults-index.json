@@ -1,0 +1,20 @@
+{
+  "automatic": true,
+  "indexingMode": "consistent",
+  "includedPaths": [
+    { "path": "/*" }
+  ],
+  "excludedPaths": [
+    { "path": "/\"_etag\"/?" }
+  ],
+  "compositeIndexes": [
+    [
+      { "path": "/leaderboardKey", "order": "ascending" },
+      { "path": "/score", "order": "descending" },
+      { "path": "/perfectCount", "order": "descending" },
+      { "path": "/durationMs", "order": "ascending" },
+      { "path": "/playedAt", "order": "ascending" },
+      { "path": "/id", "order": "ascending" }
+    ]
+  ]
+}

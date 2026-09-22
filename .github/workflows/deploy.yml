@@ -1,0 +1,125 @@
+name: Deploy Office Rhythm Manager
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: office-rhythm-production
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NEXT_PUBLIC_ENTRA_CLIENT_ID: ${{ vars.NEXT_PUBLIC_ENTRA_CLIENT_ID }}
+      NEXT_PUBLIC_ENTRA_TENANT_ID: ${{ vars.NEXT_PUBLIC_ENTRA_TENANT_ID }}
+      NEXT_PUBLIC_ENTRA_REDIRECT_URI: ${{ vars.NEXT_PUBLIC_ENTRA_REDIRECT_URI }}
+      APP_VERSION: ${{ vars.APP_VERSION }}
+      COSMOS_ENDPOINT: ${{ vars.COSMOS_ENDPOINT }}
+      COSMOS_DATABASE: ${{ vars.COSMOS_DATABASE }}
+      APP_BUILD_ID: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Validate public Entra build settings
+        shell: bash
+        run: |
+          missing=()
+          for name in NEXT_PUBLIC_ENTRA_CLIENT_ID NEXT_PUBLIC_ENTRA_TENANT_ID NEXT_PUBLIC_ENTRA_REDIRECT_URI APP_VERSION COSMOS_ENDPOINT COSMOS_DATABASE; do
+            if [[ -z ${!name:-} ]]; then missing+=($name); fi
+          done
+          if (( ${#missing[@]} )); then
+            printf 'Missing GitHub Variables: %s\n' ${missing[*]} >&2
+            exit 1
+          fi
+          if [[ $NEXT_PUBLIC_ENTRA_REDIRECT_URI != https://* ]]; then
+            printf 'NEXT_PUBLIC_ENTRA_REDIRECT_URI must use HTTPS for production.\n' >&2
+            exit 1
+          fi
+          if [[ $COSMOS_ENDPOINT != https://* ]]; then
+            printf 'COSMOS_ENDPOINT must use HTTPS for production.\n' >&2
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --run
+      - run: npm run build
+      - name: Package standalone Next.js server
+        shell: bash
+        run: |
+          mkdir -p .next/standalone/.next
+          cp -a .next/static .next/standalone/.next/static
+          if [[ -d public ]]; then cp -a public .next/standalone/public; fi
+          (cd .next/standalone && zip -qr $GITHUB_WORKSPACE/release.zip .)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: office-rhythm-${{ github.sha }}
+          path: release.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_WEBAPP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
+      APP_VERSION: ${{ vars.APP_VERSION }}
+      COSMOS_ENDPOINT: ${{ vars.COSMOS_ENDPOINT }}
+      COSMOS_DATABASE: ${{ vars.COSMOS_DATABASE }}
+      APP_BUILD_ID: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: office-rhythm-${{ github.sha }}
+          path: release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Validate Azure deployment variables
+        shell: bash
+        run: |
+          missing=()
+          for name in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID AZURE_RESOURCE_GROUP AZURE_WEBAPP_NAME; do
+            if [[ -z ${!name:-} ]]; then missing+=($name); fi
+          done
+          if (( ${#missing[@]} )); then
+            printf 'Missing GitHub Variables: %s\n' ${missing[*]} >&2
+            exit 1
+          fi
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: Configure Node runtime and deployment metadata
+        shell: bash
+        run: |
+          az webapp config set --resource-group $AZURE_RESOURCE_GROUP --name $AZURE_WEBAPP_NAME --linux-fx-version 'NODE|24-lts' --startup-file 'node server.js'
+          az webapp config appsettings set --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_WEBAPP_NAME" --settings NODE_ENV=production APP_NAME='Office Rhythm Manager' COSMOS_AUTH_MODE=managed-identity "COSMOS_ENDPOINT=$COSMOS_ENDPOINT" "COSMOS_DATABASE=$COSMOS_DATABASE" APP_VERSION="$APP_VERSION" APP_BUILD_ID="$APP_BUILD_ID"
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: release/release.zip
+      - name: Public landing and readiness smoke test
+        shell: bash
+        run: npm run smoke-test -- --base-url https://${AZURE_WEBAPP_NAME}.azurewebsites.net

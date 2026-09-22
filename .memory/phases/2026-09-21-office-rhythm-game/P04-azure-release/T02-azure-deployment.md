@@ -1,6 +1,6 @@
 # Task: T02 Azure Deployment
 
-## Status: pending
+## Status: in_progress
 
 ## Goal
 
@@ -78,3 +78,13 @@ Task: T02-azure-deployment
 - [ ] 구현 완료
 - [ ] 검증 통과
 - commit: pending
+
+### Progress Notes (2026-09-22)
+
+- Implemented App Service, Key Vault, rollback, standalone Next.js, security headers, runtime metadata, health endpoint, smoke-test runner, and manual OIDC deployment workflow.
+- Local validation: lint completed with 0 errors (one pre-existing warning); typecheck, all 67 tests, and production build passed. Standalone server started; local landing check passed.
+- Created `Vibe-Coding-Game-Jun` in West US 2, a Linux F1 Node 24 App Service (`vibe-game-jun-rhythm-260922.azurewebsites.net`), and Cosmos DB NoSQL account `vibe-coding-game-jun-cosmos` with free tier enabled and a strict 1,000 RU/s account throughput limit. Created `office-rhythm` with shared 1,000 RU/s and the `gameSessions` / `gameResults` containers; the latter has the leaderboard composite index. App Service system identity has database-scoped Cosmos Built-in Data Contributor; HTTPS-only is enabled.
+- Added the Azure HTTPS origin to the existing Entra SPA redirect list while preserving localhost redirects. Production deployment and hosted smoke test remain to be completed.
+- Local health smoke returned HTTP 503 because no production Cosmos Managed Identity connection is configured here; this is expected locally. Azure hosted health and authenticated API checks remain unverified.
+- Current design has no production secret: Entra SPA IDs and Cosmos endpoint/database are configuration, while Cosmos uses Managed Identity. No empty Key Vault was provisioned; public IDs and Cosmos keys were not misclassified as vault secrets. The guide documents least-privilege Key Vault references for a future genuine server secret.
+- Remaining: deploy the current verified source to the F1 web app, confirm hosted Cosmos health and Entra sign-in, then complete the task and advance the pointer.
