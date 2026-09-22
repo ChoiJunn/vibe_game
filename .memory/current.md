@@ -10,7 +10,7 @@
 
 ## Active Task
 
-[T01 Cosmos DB Data Access](./phases/2026-09-21-office-rhythm-game/P03-persistence-competition/T01-cosmos-data-access.md)
+[T02 Session API](./phases/2026-09-21-office-rhythm-game/P03-persistence-competition/T02-session-api.md)
 
 ## Status
 
@@ -23,10 +23,11 @@
 - P02 T03 Phaser Office Scene: done
 - P02 T04 Pause Tutorial Results: done
 - P02 Rhythm Gameplay: complete
-- P03 T01 Cosmos DB Data Access: in_progress
+- P03 T01 Cosmos DB Data Access: done
+- P03 T02 Session API: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Read the P03-T01 blueprint and implement only Cosmos DB client, container/document contracts, and Managed Identity access boundaries. Do not implement session APIs, result validation, or leaderboard behavior yet.
+Read the P03-T02 blueprint and implement only the resumable game-session API and autosave client. Do not implement result validation or leaderboard behavior yet.

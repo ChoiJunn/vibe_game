@@ -1,6 +1,6 @@
 # Task: T01 Cosmos Data Access
 
-## Status: pending
+## Status: done
 
 ## Goal
 
@@ -110,6 +110,6 @@ Task: T01-cosmos-data-access
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
+- [x] 구현 완료
+- [x] 검증 통과
 - commit: pending
