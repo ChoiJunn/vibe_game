@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getMokaForm, getMokaSize } from './MokaCompanion';
-import { getCharacterReactionPose, getComboEnergyTier, getWalkPoseKey } from './OfficeCharacter';
+import { getCharacterReactionFace, getCharacterReactionPose, getComboEnergyTier, getWalkPoseKey } from './OfficeCharacter';
 import { GAME_ASSETS } from '@/game/assets';
 
 describe('Office journey characters', () => {
@@ -29,5 +29,7 @@ describe('Office journey characters', () => {
     expect(getCharacterReactionPose('perfect').yOffset).toBeLessThan(0);
     expect(getCharacterReactionPose('good').rotation).toBeGreaterThan(0);
     expect(getCharacterReactionPose('miss').yOffset).toBeGreaterThan(0);
+    expect(getCharacterReactionFace('perfect').text).not.toBe(getCharacterReactionFace('miss').text);
+    expect(getCharacterReactionFace('good').color).not.toBe(getCharacterReactionFace('miss').color);
   });
 });

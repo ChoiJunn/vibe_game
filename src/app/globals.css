@@ -442,6 +442,11 @@ h1 {
   color: #fff;
   background: var(--ink);
   font-weight: 700;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.login-placeholder:disabled {
   opacity: 0.82;
   cursor: not-allowed;
 }

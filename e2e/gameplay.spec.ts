@@ -17,6 +17,9 @@ test('player can tune audio, start a run, pause, and continue without losing the
   await page.getByRole('checkbox', { name: '모든 소리 음소거' }).check();
   await expect(page.getByText('설정은 이 브라우저에만 저장되며 로그인 토큰이나 프로필 정보는 저장하지 않습니다.')).toBeVisible();
 
+  await page.locator('button.primary').click();
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(500);
   await page.reload();
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toBeVisible();
   await page.getByText('사운드와 판정 설정').click();

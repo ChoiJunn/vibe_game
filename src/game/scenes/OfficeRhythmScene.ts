@@ -27,8 +27,8 @@ export class OfficeRhythmScene extends Phaser.Scene {
 
   create(): void {
     this.background = new OfficeBackground(this);
-    this.character = new OfficeCharacter(this, 430, 668);
-    this.moka = new MokaCompanion(this, 430, 668);
+    this.character = new OfficeCharacter(this, 320, 690);
+    this.moka = new MokaCompanion(this, 320, 690);
     this.lane = new RhythmLane(this);
     this.prompt = new WorkIconPrompt(this, 640, 300);
     this.hud = new GameHud(this);

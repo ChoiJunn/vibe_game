@@ -15,6 +15,7 @@ import { createMsalClient, mapAccountToUser } from './msalClient';
 import type { AuthContextValue, AuthStatus, AuthenticatedUser } from './types';
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const AUTH_RETURN_PATH_KEY = 'office-rhythm:auth-return-path';
 
 export function getAuthErrorMessage(): string {
   if (!entraAuthConfig.isConfigured) {
@@ -90,6 +91,10 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
           cacheIdToken(cachedToken);
         }
         syncAccount(account);
+        const returnPath = result?.account ? consumeAuthReturnPath() : null;
+        if (returnPath && window.location.pathname !== returnPath) {
+          window.location.replace(returnPath);
+        }
       })
       .catch(() => {
         if (!active) {
@@ -132,9 +137,11 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     }
 
     setStatus('loading');
+    rememberAuthReturnPath('/game');
     await client.loginRedirect({
       scopes: [...entraAuthConfig.scopes],
       redirectUri: entraAuthConfig.redirectUri,
+      redirectStartPage: `${window.location.origin}/game`,
     });
   }, [client]);
 
@@ -181,6 +188,24 @@ function clearCachedIdToken(): void {
     window.sessionStorage.removeItem(ID_TOKEN_STORAGE_KEY);
   } catch {
     // The MSAL logout still proceeds when browser storage is restricted.
+  }
+}
+
+function rememberAuthReturnPath(path: string): void {
+  try {
+    window.sessionStorage.setItem(AUTH_RETURN_PATH_KEY, path);
+  } catch {
+    // The redirectStartPage still provides a fallback when session storage is restricted.
+  }
+}
+
+function consumeAuthReturnPath(): string | null {
+  try {
+    const path = window.sessionStorage.getItem(AUTH_RETURN_PATH_KEY);
+    window.sessionStorage.removeItem(AUTH_RETURN_PATH_KEY);
+    return path;
+  } catch {
+    return null;
   }
 }
 

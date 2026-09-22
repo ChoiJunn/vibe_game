@@ -20,6 +20,7 @@ import { AutosaveCoordinator, type AutosaveState } from '@/game/persistence/Auto
 import { PauseCoordinator, type PauseState } from '@/game/pause/PauseCoordinator';
 import { usePageLifecyclePause } from '@/hooks/usePageLifecyclePause';
 import type { TerminalRunStatus } from '@/server/cosmos/models';
+import type { RunState } from '@/domain/rhythm';
 
 type GameRuntime = {
   controller: RhythmGameController;
@@ -27,6 +28,18 @@ type GameRuntime = {
   pauseState: PauseState;
   autosaveState: AutosaveState;
 };
+
+export function hasSavedProgress(snapshot: RunState, inputEventCount: number): boolean {
+  return snapshot.status === 'paused'
+    || snapshot.cursorMs > 0
+    || snapshot.nextEventIndex > 0
+    || snapshot.score > 0
+    || snapshot.combo > 0
+    || snapshot.maxCombo > 0
+    || snapshot.missCount > 0
+    || snapshot.hearts < 5
+    || inputEventCount > 0;
+}
 
 export function PhaserCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -206,7 +219,7 @@ export function PhaserCanvas() {
         startGameHandler = startGame;
         startGameRef.current = startGame;
         mount.addEventListener('pointerdown', startGameHandler);
-        if (activeSession && !recoveredFailure) {
+        if (activeSession && !recoveredFailure && hasSavedProgress(snapshot, envelope.session.inputEvents.length)) {
           pauseCoordinator.restorePaused('browser-back', snapshot);
         }
         void import('@/game/PhaserGame').then(({ createPhaserGame }) => {

@@ -27,7 +27,7 @@ export class MokaCompanion {
     this.sprite = scene.add.image(this.carryX, this.carryY, GAME_ASSETS.moka.tumbler.key)
       .setOrigin(0.5, 1)
       .setDisplaySize(72, 72)
-      .setDepth(3);
+      .setDepth(11);
   }
 
   update(section: SectionId, judgement: Judgement | undefined, combo: number): void {
