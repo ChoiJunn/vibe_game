@@ -21,7 +21,7 @@ export class GameHud {
     this.text.setText([
       `HEARTS  ${'♥'.repeat(runState.hearts)}${'♡'.repeat(Math.max(0, 5 - runState.hearts))}`,
       `SCORE  ${runState.score.toString().padStart(5, '0')}   COMBO  ${runState.combo}   x${multiplier}`,
-      `${status}  ·  ${runState.nextEventIndex}/12`,
+      `${status}  ·  ${runState.nextEventIndex}/${snapshot.totalEvents}`,
     ]);
   }
 }

@@ -34,6 +34,7 @@ export class OfficeRhythmScene extends Phaser.Scene {
   }
 
   update(): void {
+    this.controller.update();
     this.renderSnapshot(this.controller.getSnapshot());
   }
 

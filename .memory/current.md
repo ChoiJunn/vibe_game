@@ -10,7 +10,7 @@
 
 ## Active Task
 
-[T02 Note Lifecycle and Automatic Miss](../../.memory/phases/2026-09-22-office-rhythm-visual-gameplay/P01-illustrated-rhythm-experience/T02-note-lifecycle-and-miss.md)
+[T03 Original Art Asset Pack](../../.memory/phases/2026-09-22-office-rhythm-visual-gameplay/P01-illustrated-rhythm-experience/T03-original-art-asset-pack.md)
 
 ## Status
 
@@ -32,10 +32,11 @@
 - P04 T02 Azure Deployment: done
 - P04 T03 Release Readiness: complete (user-confirmed 2026-09-22)
 - 2026-09-22 P01 T01 Two-Minute Beatmap: done
-- 2026-09-22 P01 T02 Note Lifecycle and Automatic Miss: in_progress
+- 2026-09-22 P01 T02 Note Lifecycle and Automatic Miss: done
+- 2026-09-22 P01 T03 Original Art Asset Pack: in_progress
 - Repository: `vibe_game/`
 - Remote: `https://github.com/ChoiJunn/vibe_game.git`
 
 ## Next Step (IMPORTANT)
 
-Execute only P01-T02: advance overdue notes as automatic Misses and expose chart events to the Phaser scene.
+Execute only P01-T03: create an original character, mascot, environment, and rhythm-note illustration pack with an asset manifest.

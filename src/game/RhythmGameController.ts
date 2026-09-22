@@ -3,7 +3,7 @@ import { AudioClock } from './audio/AudioClock';
 import { OfficeSoundScheduler } from './audio/OfficeSoundScheduler';
 import { clampAudioSettings, DEFAULT_AUDIO_SETTINGS, type AudioClockState, type AudioSettings } from './audio/types';
 import { judgeHoldEnd, judgeHoldStart, judgeTap, combineHoldJudgements } from './judgement/judgeInput';
-import type { InputEvent, JudgementResult } from './judgement/types';
+import { JUDGEMENT_WINDOWS, type InputEvent, type JudgementResult } from './judgement/types';
 import { SpaceInputController } from './input/SpaceInputController';
 import { createInitialRunState, reduceRunState } from './state/reduceRunState';
 
@@ -12,6 +12,8 @@ export type RhythmGameSnapshot = {
   songPositionMs: number;
   runState: RunState;
   currentEvent?: RhythmEvent;
+  events: readonly RhythmEvent[];
+  totalEvents: number;
   section: SectionId;
   lastJudgement?: JudgementResult;
 };
@@ -140,6 +142,34 @@ export class RhythmGameController {
     }
   }
 
+  update(songPositionMs = this.clock.getSongPositionMs()): void {
+    if (this.runState.status !== 'active' || this.clock.getState() !== 'playing') {
+      return;
+    }
+
+    while (this.runState.status === 'active') {
+      if (this.clock.getState() !== 'playing') return;
+      const event = this.beatmap.events[this.runState.nextEventIndex];
+      if (!event) return;
+
+      const targetMs = event.type === 'hold' ? event.endMs! : event.startMs;
+      const deadlineMs = targetMs + JUDGEMENT_WINDOWS.goodMs;
+      if (songPositionMs <= deadlineMs) return;
+
+      this.pendingHoldStart = undefined;
+      if (this.pendingAudioSettings) {
+        const pending = this.pendingAudioSettings;
+        this.pendingAudioSettings = undefined;
+        this.applyAudioSettings(pending);
+      }
+      this.applyResult({
+        judgement: 'miss',
+        errorMs: songPositionMs - targetMs,
+        eventId: event.id,
+      }, event, songPositionMs);
+    }
+  }
+
   setAudioSettings(settings: AudioSettings): void {
     const next = clampAudioSettings(settings);
     if (this.pendingHoldStart) {
@@ -164,6 +194,8 @@ export class RhythmGameController {
       songPositionMs: this.clock.getSongPositionMs(),
       runState: this.runState,
       currentEvent,
+      events: this.beatmap.events,
+      totalEvents: this.beatmap.events.length,
       section: currentEvent?.section ?? this.beatmap.sections[this.beatmap.sections.length - 1]?.id ?? 'arrival',
       lastJudgement: this.lastJudgement,
     };
@@ -178,14 +210,14 @@ export class RhythmGameController {
     this.listeners.clear();
   }
 
-  private applyResult(result: JudgementResult, event: RhythmEvent): void {
+  private applyResult(result: JudgementResult, event: RhythmEvent, songPositionMs = this.clock.getSongPositionMs()): void {
     const eventIndex = this.runState.nextEventIndex;
     this.runState = reduceRunState(this.runState, {
       result,
       eventIndex,
       isFinalEvent: eventIndex === this.beatmap.events.length - 1,
       finalEventEndMs: event.endMs ?? event.startMs,
-      songPositionMs: this.clock.getSongPositionMs(),
+      songPositionMs,
     });
     this.lastJudgement = result;
     if (this.runState.status === 'completed' || this.runState.status === 'failed') {

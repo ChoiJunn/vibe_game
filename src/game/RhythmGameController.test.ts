@@ -37,6 +37,120 @@ describe('RhythmGameController', () => {
     expect(controller.getSnapshot().runState.nextEventIndex).toBe(0);
   });
 
+  it('exposes the stable chart list and total event count in every snapshot', async () => {
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: createFakeClock() as never,
+      scheduler: createFakeScheduler() as never,
+      audioSettings: settings,
+    });
+
+    await controller.start();
+    const first = controller.getSnapshot();
+    const second = controller.getSnapshot();
+
+    expect(first.events).toBe(beatmap.events);
+    expect(second.events).toBe(first.events);
+    expect(first.totalEvents).toBe(beatmap.events.length);
+    expect(first.totalEvents).toBe(96);
+  });
+
+  it('misses a tap only strictly after the late Good deadline and never twice', async () => {
+    const clock = createFakeClock();
+    const controller = new RhythmGameController({ beatmap, clock: clock as never, scheduler: createFakeScheduler() as never, audioSettings: settings });
+    const event = beatmap.events[0];
+    const deadlineMs = event.startMs + 160;
+
+    await controller.start();
+    clock.getSongPositionMs.mockReturnValue(deadlineMs);
+    controller.update();
+    expect(controller.getSnapshot().runState.nextEventIndex).toBe(0);
+
+    clock.getSongPositionMs.mockReturnValue(deadlineMs + 1);
+    controller.update();
+    controller.update();
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: 1, missCount: 1, hearts: 4 });
+    expect(controller.getSnapshot().lastJudgement).toEqual({ judgement: 'miss', errorMs: 161, eventId: event.id });
+  });
+
+  it('advances every already-expired event during one update', async () => {
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: createFakeClock() as never,
+      scheduler: createFakeScheduler() as never,
+      audioSettings: settings,
+    });
+
+    await controller.start();
+    controller.update(7000);
+
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: 4, missCount: 4, hearts: 1 });
+    controller.update(7000);
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: 4, missCount: 4, hearts: 1 });
+  });
+
+  it('uses the hold end deadline, clears a pending hold and applies the final-heart failure once', async () => {
+    const clock = createFakeClock();
+    const scheduler = createFakeScheduler();
+    const holdIndex = beatmap.events.findIndex((event) => event.type === 'hold');
+    const event = beatmap.events[holdIndex];
+    const initialRunState = { ...createInitialRunState({ runId: 'run-hold', userOid: 'user-1', beatmapId: beatmap.id }), hearts: 1, nextEventIndex: holdIndex };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: clock as never,
+      scheduler: scheduler as never,
+      initialRunState,
+      audioSettings: settings,
+    });
+
+    await controller.start(0, initialRunState);
+    controller.handleInput({ type: 'keydown', songPositionMs: event.startMs });
+    controller.update(event.endMs! + 160);
+    expect(controller.getSnapshot().runState.nextEventIndex).toBe(holdIndex);
+
+    controller.update(event.endMs! + 161);
+    expect(controller.getSnapshot().runState).toMatchObject({ status: 'failed', nextEventIndex: holdIndex + 1, missCount: 1, hearts: 0 });
+    expect(clock.pause).toHaveBeenCalledTimes(1);
+    expect(scheduler.pause).toHaveBeenCalledTimes(1);
+
+    controller.handleInput({ type: 'keyup', songPositionMs: event.endMs! + 170 });
+    controller.update(event.endMs! + 500);
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: holdIndex + 1, missCount: 1 });
+  });
+
+  it('does not expire a hold until its end window closes, even without a keydown', async () => {
+    const holdIndex = beatmap.events.findIndex((event) => event.type === 'hold');
+    const event = beatmap.events[holdIndex];
+    const initialRunState = { ...createInitialRunState({ runId: 'run-hold-unpressed', userOid: 'user-1', beatmapId: beatmap.id }), nextEventIndex: holdIndex };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: createFakeClock() as never,
+      scheduler: createFakeScheduler() as never,
+      initialRunState,
+      audioSettings: settings,
+    });
+
+    await controller.start(0, initialRunState);
+    controller.update(event.endMs! + 161);
+
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: holdIndex + 1, missCount: 1 });
+  });
+
+  it('freezes automatic misses while paused and resumes from the same run state', async () => {
+    const clock = createFakeClock();
+    const controller = new RhythmGameController({ beatmap, clock: clock as never, scheduler: createFakeScheduler() as never, audioSettings: settings });
+    const deadlineMs = beatmap.events[0].startMs + 160;
+
+    await controller.start();
+    controller.pause();
+    controller.update(deadlineMs + 1000);
+    expect(controller.getSnapshot().runState.nextEventIndex).toBe(0);
+
+    await controller.resume();
+    controller.update(deadlineMs + 1);
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: 1, missCount: 1 });
+  });
+
   it('pauses clock and scheduler immediately when the final heart is lost', async () => {
     const clock = createFakeClock();
     const scheduler = createFakeScheduler();
@@ -81,8 +195,8 @@ function createFakeClock(): {
     set state(nextState: AudioClockState) { state = nextState; },
     load: vi.fn().mockResolvedValue(undefined),
     start: vi.fn().mockResolvedValue(undefined),
-    pause: vi.fn(),
-    resume: vi.fn().mockResolvedValue(undefined),
+    pause: vi.fn(() => { state = 'paused'; }),
+    resume: vi.fn(async () => { state = 'playing'; }),
     stop: vi.fn(),
     getState: vi.fn(() => state),
     getSongPositionMs: vi.fn().mockReturnValue(1091),
