@@ -40,7 +40,8 @@ Local candidate checks completed:
 - **Pass** — `npm test -- --run` (25 files, 67 tests).
 - **Pass** — `npm run test:e2e` (18 tests across Chromium and Edge; test-only auth and mocked APIs).
 - **Pass** — `npm run build`.
-- **Pass, deployed baseline only** — public smoke test found the landing page and healthy Cosmos readiness on the then-current deployment, build ID `f41eeb1232233fe29fb6c4da8ca8d7ae1f4ad8b4`. This is not the candidate commit; the candidate has not been deployed.
-- **Not run** — authenticated smoke check and all manual production gates above. No real Entra sign-in or real-device audio/gameplay verification was performed in this run.
+- **Pass** — deployed candidate via ZIP to the confirmed App Service on 2026-09-22; deployment `5f98165a-61c3-494e-b5b7-0eeab0d30878` finished `RuntimeSuccessful` with one successful instance and no failed instances.
+- **Pass** — post-deployment public smoke reports healthy Cosmos readiness and build ID `e065b1f604fb75efa8c8e83a3209328fd95ad042`. `/game` and `/leaderboard` returned 200; unauthenticated session and leaderboard APIs returned 401.
+- **Not run** — authenticated smoke check and real Entra sign-in / real-device audio and gameplay gates. No user ID token was supplied.
 
-**Release status: automated local checks pass; production sign-off is pending.** The deployment workflow is manually dispatched, so pushing a commit to `main` does not deploy it automatically. After an authorized deployment of the candidate, rerun the public and authenticated smoke checks and complete the manual gates before treating it as production-ready.
+**Release status: automated local checks and candidate deployment pass; production sign-off is pending.** The deployment workflow is manually dispatched, so pushing a commit to `main` does not deploy it automatically. Complete the real sign-in and device-level audio/gameplay checks, then run the authenticated smoke test before treating it as production-ready.

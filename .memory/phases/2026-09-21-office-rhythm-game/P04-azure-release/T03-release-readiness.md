@@ -77,12 +77,12 @@ Task: T03-release-readiness
 
 - [x] README, operations/data/auth/game-rule docs, release checklist, and critical-path E2E are implemented.
 - [x] Automated checks passed: lint (one existing warning), typecheck, 25 files / 67 unit tests, 18 Chromium+Edge E2E tests, production build.
-- [x] Public smoke passed against the current deployed baseline (`f41eeb1232233fe29fb6c4da8ca8d7ae1f4ad8b4`); authenticated smoke skipped.
-- [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and deployed-candidate verification remain not run; see `vibe_game/docs/release-checklist.md`.
+- [x] Candidate deployed `RuntimeSuccessful` (`5f98165a-61c3-494e-b5b7-0eeab0d30878`); public smoke reports healthy Cosmos and build ID `e065b1f604fb75efa8c8e83a3209328fd95ad042`; game/leaderboard routes return 200 and unauthenticated APIs return 401.
+- [ ] Manual production gates: real Entra sign-in, live audio/gameplay, and authenticated smoke remain not run; see `vibe_game/docs/release-checklist.md`.
 - implementation commit: `ffe84ac` (manual production gates remain active)
 
 ### Execution Notes
 
 - Leaderboard repository queries now return completed attempts only; failed and abandoned outcomes remain stored but are not ranked.
 - Corrected the result E2E fixture to use the last hold in the short test beatmap; the previous timings never reached the terminal event.
-- GitHub deploy workflow is `workflow_dispatch` only. A main push does not deploy the candidate; do not mark the live production release signed off until a deploy and manual checks are completed.
+- GitHub deploy workflow is `workflow_dispatch` only. A main push does not deploy the candidate. The candidate is now deployed directly to the verified App Service; do not mark the release signed off until the remaining manual checks pass.

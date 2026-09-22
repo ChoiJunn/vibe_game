@@ -36,4 +36,4 @@
 
 ## Next Step (IMPORTANT)
 
-Finish the active P04-T03 manual release gates: deploy the pushed candidate through the manually dispatched production workflow, then verify real Entra sign-in, live gameplay/audio, and authenticated persistence/leaderboard behavior. Until then, production release sign-off is pending.
+Finish the active P04-T03 manual release gates: sign in with a real Entra user, verify live gameplay/audio, and run the authenticated smoke check against the deployed candidate. Until then, production release sign-off is pending.
