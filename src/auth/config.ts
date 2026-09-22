@@ -10,8 +10,25 @@ function isPlaceholder(value: string | undefined): boolean {
   return !value || value.includes('<') || value.includes('>') || value.startsWith('your-');
 }
 
-export function isValidEntraConfig({ clientId, tenantId, redirectUri }: EntraConfigInput): boolean {
-  return !isPlaceholder(clientId) && !isPlaceholder(tenantId) && !isPlaceholder(redirectUri);
+export function isValidEntraConfig(
+  { clientId, tenantId, redirectUri }: EntraConfigInput,
+  production = process.env.NODE_ENV === 'production',
+): boolean {
+  if (isPlaceholder(clientId) || isPlaceholder(tenantId) || isPlaceholder(redirectUri)) {
+    return false;
+  }
+
+  if (!production) {
+    return true;
+  }
+
+  try {
+    const url = new URL(redirectUri!);
+    const loopbackHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+    return url.protocol === 'https:' && !loopbackHosts.has(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 const clientId = process.env.NEXT_PUBLIC_ENTRA_CLIENT_ID?.trim();

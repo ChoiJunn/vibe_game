@@ -44,6 +44,10 @@ jobs:
             printf 'NEXT_PUBLIC_ENTRA_REDIRECT_URI must use HTTPS for production.\n' >&2
             exit 1
           fi
+          if ! node -e "const url = new URL(process.env.NEXT_PUBLIC_ENTRA_REDIRECT_URI); if (['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) process.exit(1)"; then
+            printf 'NEXT_PUBLIC_ENTRA_REDIRECT_URI must not target a loopback host in production.\n' >&2
+            exit 1
+          fi
           if [[ $COSMOS_ENDPOINT != https://* ]]; then
             printf 'COSMOS_ENDPOINT must use HTTPS for production.\n' >&2
             exit 1

@@ -27,6 +27,20 @@ describe('Entra authentication configuration', () => {
       }),
     ).toBe(false);
   });
+
+  it('rejects loopback redirects in production while allowing the deployed HTTPS origin', () => {
+    const baseConfig = { clientId: 'client-id', tenantId: 'tenant-id' };
+
+    expect(isValidEntraConfig({ ...baseConfig, redirectUri: 'http://127.0.0.1:3000' }, true)).toBe(false);
+    expect(isValidEntraConfig({ ...baseConfig, redirectUri: 'http://localhost:3000' }, true)).toBe(false);
+    expect(
+      isValidEntraConfig({
+        ...baseConfig,
+        redirectUri: 'https://vibe-game-jun-rhythm-260922.azurewebsites.net',
+      }, true),
+    ).toBe(true);
+    expect(isValidEntraConfig({ ...baseConfig, redirectUri: 'http://localhost:3000' }, false)).toBe(true);
+  });
 });
 
 describe('mapAccountToUser', () => {
