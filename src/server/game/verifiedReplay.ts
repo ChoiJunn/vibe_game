@@ -1,14 +1,24 @@
-import 'server-only';
+import "server-only";
 
-import { isBurstRhythmEvent, type Beatmap, type RunState } from '@/domain/rhythm';
-import { combineHoldJudgements, judgeBurst, judgeHoldEnd, judgeHoldStart, judgeTap } from '@/game/judgement/judgeInput';
-import { JUDGEMENT_WINDOWS, type InputEvent } from '@/game/judgement/types';
-import { reduceRunState } from '@/game/state/reduceRunState';
+import {
+  isBurstRhythmEvent,
+  type Beatmap,
+  type RunState,
+} from "@/domain/rhythm";
+import {
+  combineHoldJudgements,
+  judgeBurst,
+  judgeHoldEnd,
+  judgeHoldStart,
+  judgeTap,
+} from "@/game/judgement/judgeInput";
+import { JUDGEMENT_WINDOWS, type InputEvent } from "@/game/judgement/types";
+import { normalizeRunState, reduceRunState } from "@/game/state/reduceRunState";
 
 export type ReplayInputEvent = {
   eventId: string;
   sequence: number;
-  type: InputEvent['type'] | 'auto-miss';
+  type: InputEvent["type"] | "auto-miss";
   chartEventId?: string;
   songPositionMs: number;
   inputOffsetMs?: number;
@@ -16,16 +26,17 @@ export type ReplayInputEvent = {
 
 export type ReplayResult = {
   state: RunState;
-  reason?: 'invalid_sequence' | 'impossible_timing';
+  reason?: "invalid_sequence" | "impossible_timing";
 };
 
 export function replayInputEvents(
   beatmap: Beatmap,
   initialState: RunState,
   events: ReplayInputEvent[],
-  terminalStatus: 'completed' | 'failed' | 'abandoned',
+  terminalStatus: "completed" | "failed" | "abandoned",
 ): ReplayResult {
-  if (events.length > 2048) return { state: initialState, reason: 'invalid_sequence' };
+  if (events.length > 2048)
+    return { state: initialState, reason: "invalid_sequence" };
   const eventIds = new Set<string>();
   const maxSongPosition = beatmap.sections.at(-1)?.endMs ?? 0;
   let previousPosition = -1;
@@ -34,28 +45,40 @@ export function replayInputEvents(
   let pendingHoldEventIndex = -1;
   let pendingBurstInputs: InputEvent[] = [];
   let pendingBurstEventIndex = -1;
-  let state = initialState;
+  let state = normalizeRunState(initialState);
 
   for (let index = 0; index < events.length; index += 1) {
     const input = events[index];
-    if (input.sequence !== index || !input.eventId || eventIds.has(input.eventId)) {
-      return { state, reason: 'invalid_sequence' };
+    if (
+      input.sequence !== index ||
+      !input.eventId ||
+      eventIds.has(input.eventId)
+    ) {
+      return { state, reason: "invalid_sequence" };
     }
-    if (!Number.isFinite(input.songPositionMs) || input.songPositionMs < previousPosition || input.songPositionMs > maxSongPosition) {
-      return { state, reason: 'impossible_timing' };
+    if (
+      !Number.isFinite(input.songPositionMs) ||
+      input.songPositionMs < previousPosition ||
+      input.songPositionMs > maxSongPosition
+    ) {
+      return { state, reason: "impossible_timing" };
     }
     eventIds.add(input.eventId);
     previousPosition = input.songPositionMs;
 
-    if (input.type === 'auto-miss') {
-      if (state.status !== 'active') return { state, reason: 'invalid_sequence' };
+    if (input.type === "auto-miss") {
+      if (state.status !== "active")
+        return { state, reason: "invalid_sequence" };
       const beatmapEvent = beatmap.events[state.nextEventIndex];
       if (!beatmapEvent || input.chartEventId !== beatmapEvent.id) {
-        return { state, reason: 'invalid_sequence' };
+        return { state, reason: "invalid_sequence" };
       }
-      const targetMs = beatmapEvent.type === 'tap' ? beatmapEvent.startMs : beatmapEvent.endMs!;
+      const targetMs =
+        beatmapEvent.type === "tap"
+          ? beatmapEvent.startMs
+          : beatmapEvent.endMs!;
       if (input.songPositionMs <= targetMs + JUDGEMENT_WINDOWS.goodMs) {
-        return { state, reason: 'impossible_timing' };
+        return { state, reason: "impossible_timing" };
       }
       if (pendingHoldEventIndex === state.nextEventIndex) {
         pendingHoldStart = undefined;
@@ -66,7 +89,12 @@ export function replayInputEvents(
         pendingBurstEventIndex = -1;
       }
       state = reduceRunState(state, {
-        result: { judgement: 'miss', errorMs: input.songPositionMs - targetMs, eventId: beatmapEvent.id },
+        result: {
+          judgement: "miss",
+          errorMs: input.songPositionMs - targetMs,
+          eventId: beatmapEvent.id,
+        },
+        event: beatmapEvent,
         eventIndex: state.nextEventIndex,
         isFinalEvent: state.nextEventIndex === beatmap.events.length - 1,
         finalEventEndMs: beatmapEvent.endMs ?? beatmapEvent.startMs,
@@ -78,28 +106,37 @@ export function replayInputEvents(
     // The auto-miss branch above continues before physical key processing.
     const physicalInput = input as InputEvent;
 
-    if (input.type === 'keydown') {
-      if (isPressed) return { state, reason: 'invalid_sequence' };
+    if (input.type === "keydown") {
+      if (isPressed) return { state, reason: "invalid_sequence" };
       // Browsers may dispatch one or more inputs after the fifth miss has
       // already ended the run. Keep validating their sequence/pairing, but do
       // not apply any post-terminal input to the score.
-      if (state.status !== 'active') {
+      if (state.status !== "active") {
         isPressed = true;
         continue;
       }
       const beatmapEvent = beatmap.events[state.nextEventIndex];
-      if (!beatmapEvent) return { state, reason: 'invalid_sequence' };
+      if (!beatmapEvent) return { state, reason: "invalid_sequence" };
       isPressed = true;
-      if (beatmapEvent.type === 'tap') {
+      if (beatmapEvent.type === "tap") {
         state = reduceRunState(state, {
-          result: judgeTap(beatmapEvent, physicalInput, input.inputOffsetMs ?? 0),
+          result: judgeTap(
+            beatmapEvent,
+            physicalInput,
+            input.inputOffsetMs ?? 0,
+          ),
+          event: beatmapEvent,
           eventIndex: state.nextEventIndex,
           isFinalEvent: state.nextEventIndex === beatmap.events.length - 1,
           finalEventEndMs: beatmapEvent.startMs,
           songPositionMs: input.songPositionMs,
         });
-      } else if (beatmapEvent.type === 'hold') {
-        pendingHoldStart = judgeHoldStart(beatmapEvent, physicalInput, input.inputOffsetMs ?? 0);
+      } else if (beatmapEvent.type === "hold") {
+        pendingHoldStart = judgeHoldStart(
+          beatmapEvent,
+          physicalInput,
+          input.inputOffsetMs ?? 0,
+        );
         pendingHoldEventIndex = state.nextEventIndex;
       } else {
         pendingBurstInputs.push(physicalInput);
@@ -108,17 +145,28 @@ export function replayInputEvents(
       continue;
     }
 
-    if (!isPressed) return { state, reason: 'invalid_sequence' };
+    if (!isPressed) return { state, reason: "invalid_sequence" };
     isPressed = false;
-    if (state.status !== 'active') continue;
+    if (state.status !== "active") continue;
     if (pendingBurstEventIndex === state.nextEventIndex) {
       const beatmapEvent = beatmap.events[pendingBurstEventIndex];
-      if (!beatmapEvent || !isBurstRhythmEvent(beatmapEvent)) return { state, reason: 'invalid_sequence' };
+      if (!beatmapEvent || !isBurstRhythmEvent(beatmapEvent))
+        return { state, reason: "invalid_sequence" };
       pendingBurstInputs.push(physicalInput);
-      const completedPresses = pendingBurstInputs.filter((candidate) => candidate.type === 'keyup').length;
-      if (completedPresses >= beatmapEvent.requiredPresses! && input.songPositionMs + (input.inputOffsetMs ?? 0) >= beatmapEvent.endMs!) {
+      const completedPresses = pendingBurstInputs.filter(
+        (candidate) => candidate.type === "keyup",
+      ).length;
+      if (
+        completedPresses >= beatmapEvent.requiredPresses! &&
+        input.songPositionMs + (input.inputOffsetMs ?? 0) >= beatmapEvent.endMs!
+      ) {
         state = reduceRunState(state, {
-          result: judgeBurst(beatmapEvent, pendingBurstInputs, input.inputOffsetMs ?? 0),
+          result: judgeBurst(
+            beatmapEvent,
+            pendingBurstInputs,
+            input.inputOffsetMs ?? 0,
+          ),
+          event: beatmapEvent,
           eventIndex: pendingBurstEventIndex,
           isFinalEvent: pendingBurstEventIndex === beatmap.events.length - 1,
           finalEventEndMs: beatmapEvent.endMs,
@@ -131,11 +179,17 @@ export function replayInputEvents(
     }
     if (!pendingHoldStart) continue;
     const beatmapEvent = beatmap.events[pendingHoldEventIndex];
-    if (!beatmapEvent || beatmapEvent.type !== 'hold') return { state, reason: 'invalid_sequence' };
-    const end = judgeHoldEnd(beatmapEvent, physicalInput, input.inputOffsetMs ?? 0);
+    if (!beatmapEvent || beatmapEvent.type !== "hold")
+      return { state, reason: "invalid_sequence" };
+    const end = judgeHoldEnd(
+      beatmapEvent,
+      physicalInput,
+      input.inputOffsetMs ?? 0,
+    );
     const result = combineHoldJudgements(pendingHoldStart, end).combined;
     state = reduceRunState(state, {
       result,
+      event: beatmapEvent,
       eventIndex: pendingHoldEventIndex,
       isFinalEvent: pendingHoldEventIndex === beatmap.events.length - 1,
       finalEventEndMs: beatmapEvent.endMs,
@@ -145,12 +199,23 @@ export function replayInputEvents(
     pendingHoldEventIndex = -1;
   }
 
-  if (pendingBurstEventIndex === state.nextEventIndex && state.status === 'active') {
+  if (
+    pendingBurstEventIndex === state.nextEventIndex &&
+    state.status === "active"
+  ) {
     const beatmapEvent = beatmap.events[pendingBurstEventIndex];
-    const completedPresses = pendingBurstInputs.filter((candidate) => candidate.type === 'keyup').length;
-    if (beatmapEvent && isBurstRhythmEvent(beatmapEvent) && completedPresses >= beatmapEvent.requiredPresses && terminalStatus === 'completed') {
+    const completedPresses = pendingBurstInputs.filter(
+      (candidate) => candidate.type === "keyup",
+    ).length;
+    if (
+      beatmapEvent &&
+      isBurstRhythmEvent(beatmapEvent) &&
+      completedPresses >= beatmapEvent.requiredPresses &&
+      terminalStatus === "completed"
+    ) {
       state = reduceRunState(state, {
         result: judgeBurst(beatmapEvent, pendingBurstInputs),
+        event: beatmapEvent,
         eventIndex: pendingBurstEventIndex,
         isFinalEvent: pendingBurstEventIndex === beatmap.events.length - 1,
         finalEventEndMs: beatmapEvent.endMs,
@@ -163,18 +228,31 @@ export function replayInputEvents(
 
   const lastInput = events.at(-1);
   const lastJudgedEvent = beatmap.events[state.nextEventIndex - 1];
-  const terminalTapPress = isPressed && !pendingHoldStart && lastInput?.type === 'keydown' &&
-    lastJudgedEvent?.type === 'tap' && (terminalStatus === 'failed' || terminalStatus === 'completed') &&
+  const terminalTapPress =
+    isPressed &&
+    !pendingHoldStart &&
+    lastInput?.type === "keydown" &&
+    lastJudgedEvent?.type === "tap" &&
+    (terminalStatus === "failed" || terminalStatus === "completed") &&
     state.status === terminalStatus;
   // Taps are judged on keydown. The fifth miss (or final completed tap) can
   // close the run before the browser dispatches keyup, so accept only that
   // harmless trailing release omission. Holds still require a complete pair.
-  if ((isPressed && !terminalTapPress) || pendingHoldStart || pendingBurstEventIndex !== -1) return { state, reason: 'invalid_sequence' };
-  if (terminalStatus === 'completed' && state.status === 'active' && state.nextEventIndex === beatmap.events.length) {
-    state = { ...state, status: 'completed' };
+  if (
+    (isPressed && !terminalTapPress) ||
+    pendingHoldStart ||
+    pendingBurstEventIndex !== -1
+  )
+    return { state, reason: "invalid_sequence" };
+  if (
+    terminalStatus === "completed" &&
+    state.status === "active" &&
+    state.nextEventIndex === beatmap.events.length
+  ) {
+    state = { ...state, status: "completed" };
   }
-  if (terminalStatus === 'abandoned' && state.status === 'active') {
-    state = { ...state, status: 'abandoned' };
+  if (terminalStatus === "abandoned" && state.status === "active") {
+    state = { ...state, status: "abandoned" };
   }
   return { state };
 }

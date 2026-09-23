@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import beatmapInput from '@/content/beatmaps/office-day-01.json';
+import { isBurstRhythmEvent } from '@/domain/rhythm';
 import { validateBeatmap } from '@/domain/validateBeatmap';
 import { createInitialRunState } from '@/game/state/reduceRunState';
 import type { GameSessionDocument, VerifiedInputEvent } from '@/server/cosmos/models';
@@ -15,6 +16,14 @@ const identity: GameIdentity = { oid: 'oid-1', tenantId: 'tenant-1', displayName
 function makeEvents(): VerifiedInputEvent[] {
   const events: ReplayInputEvent[] = [];
   for (const note of beatmap.events) {
+    if (isBurstRhythmEvent(note)) {
+      for (let press = 0; press < note.requiredPresses; press += 1) {
+        const position = note.startMs + ((note.endMs - note.startMs) * press) / Math.max(1, note.requiredPresses - 1);
+        events.push({ eventId: `evt-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: position });
+        events.push({ eventId: `evt-${events.length}`, sequence: events.length, type: 'keyup', songPositionMs: position });
+      }
+      continue;
+    }
     events.push({ eventId: `evt-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: note.startMs });
     events.push({
       eventId: `evt-${events.length}`,

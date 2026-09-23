@@ -1,15 +1,16 @@
-import 'server-only';
+import "server-only";
 
-import type { Beatmap, RunState } from '@/domain/rhythm';
-import type { ReplayInputEvent } from './verifiedReplay';
-import { replayInputEvents } from './verifiedReplay';
+import type { Beatmap, RunState } from "@/domain/rhythm";
+import { normalizeRunState } from "@/game/state/reduceRunState";
+import type { ReplayInputEvent } from "./verifiedReplay";
+import { replayInputEvents } from "./verifiedReplay";
 
 export type ValidationReason =
-  | 'unknown_run'
-  | 'invalid_sequence'
-  | 'impossible_timing'
-  | 'score_mismatch'
-  | 'state_mismatch';
+  | "unknown_run"
+  | "invalid_sequence"
+  | "impossible_timing"
+  | "score_mismatch"
+  | "state_mismatch";
 
 export type ValidationResult = {
   valid: boolean;
@@ -18,8 +19,24 @@ export type ValidationResult = {
 };
 
 const STATE_FIELDS: readonly (keyof RunState)[] = [
-  'runId', 'userOid', 'beatmapId', 'cursorMs', 'nextEventIndex', 'hearts', 'combo',
-  'maxCombo', 'consecutivePerfects', 'score', 'perfectCount', 'goodCount', 'missCount',
+  "runId",
+  "userOid",
+  "beatmapId",
+  "cursorMs",
+  "nextEventIndex",
+  "hearts",
+  "combo",
+  "maxCombo",
+  "consecutivePerfects",
+  "score",
+  "perfectCount",
+  "goodCount",
+  "missCount",
+  "riskBonusRemaining",
+  "feverGauge",
+  "feverActiveUntilMs",
+  "riskSuccessCount",
+  "riskFailureCount",
 ];
 
 export function validateRun(
@@ -27,25 +44,50 @@ export function validateRun(
   initialState: RunState,
   events: ReplayInputEvent[],
   claimedState: RunState,
-  terminalStatus: 'completed' | 'failed' | 'abandoned',
+  terminalStatus: "completed" | "failed" | "abandoned",
 ): ValidationResult {
-  if (initialState.runId !== claimedState.runId || initialState.beatmapId !== beatmap.id || initialState.userOid !== claimedState.userOid) {
-    return { valid: false, state: initialState, reason: 'unknown_run' };
+  const normalizedInitialState = normalizeRunState(initialState);
+  const normalizedClaimedState = normalizeRunState(claimedState);
+  if (
+    normalizedInitialState.runId !== normalizedClaimedState.runId ||
+    normalizedInitialState.beatmapId !== beatmap.id ||
+    normalizedInitialState.userOid !== normalizedClaimedState.userOid
+  ) {
+    return { valid: false, state: normalizedInitialState, reason: "unknown_run" };
   }
-  const replay = replayInputEvents(beatmap, initialState, events, terminalStatus);
-  if (replay.reason) return { valid: false, state: replay.state, reason: replay.reason };
-  const scoreFields: readonly (keyof RunState)[] = ['score', 'perfectCount', 'goodCount', 'missCount'];
-  if (scoreFields.some((field) => replay.state[field] !== claimedState[field])) {
-    return { valid: false, state: replay.state, reason: 'score_mismatch' };
+  const replay = replayInputEvents(
+    beatmap,
+    normalizedInitialState,
+    events,
+    terminalStatus,
+  );
+  if (replay.reason)
+    return { valid: false, state: replay.state, reason: replay.reason };
+  const scoreFields: readonly (keyof RunState)[] = [
+    "score",
+    "perfectCount",
+    "goodCount",
+    "missCount",
+  ];
+  if (
+    scoreFields.some((field) => replay.state[field] !== normalizedClaimedState[field])
+  ) {
+    return { valid: false, state: replay.state, reason: "score_mismatch" };
   }
-  if (STATE_FIELDS.some((field) => replay.state[field] !== claimedState[field]) || replay.state.status !== terminalStatus) {
-    return { valid: false, state: replay.state, reason: 'state_mismatch' };
+  if (
+    STATE_FIELDS.some((field) => replay.state[field] !== normalizedClaimedState[field]) ||
+    replay.state.status !== terminalStatus
+  ) {
+    return { valid: false, state: replay.state, reason: "state_mismatch" };
   }
-  if (terminalStatus === 'completed' && replay.state.nextEventIndex !== beatmap.events.length) {
-    return { valid: false, state: replay.state, reason: 'state_mismatch' };
+  if (
+    terminalStatus === "completed" &&
+    replay.state.nextEventIndex !== beatmap.events.length
+  ) {
+    return { valid: false, state: replay.state, reason: "state_mismatch" };
   }
-  if (terminalStatus === 'failed' && replay.state.status !== 'failed') {
-    return { valid: false, state: replay.state, reason: 'state_mismatch' };
+  if (terminalStatus === "failed" && replay.state.status !== "failed") {
+    return { valid: false, state: replay.state, reason: "state_mismatch" };
   }
   return { valid: true, state: replay.state };
 }

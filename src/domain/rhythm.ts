@@ -1,8 +1,10 @@
-export type NoteType = 'tap' | 'hold' | 'burst';
-export type Judgement = 'perfect' | 'good' | 'miss';
-export type PatternKind = 'straight' | 'offbeat' | 'transition' | 'hold' | 'rest' | 'burst';
+export type NoteType = "tap" | "hold" | "burst";
+export type Judgement = "perfect" | "good" | "miss";
+export type PatternKind =
+  "straight" | "offbeat" | "transition" | "hold" | "rest" | "burst";
 
-export type SectionId = 'arrival' | 'keyboard' | 'mail' | 'meeting' | 'copy' | 'departure';
+export type SectionId =
+  "arrival" | "keyboard" | "mail" | "meeting" | "copy" | "departure";
 
 export type RhythmEvent = {
   id: string;
@@ -15,10 +17,20 @@ export type RhythmEvent = {
   requiredPresses?: number;
 };
 
-export type BurstRhythmEvent = RhythmEvent & { type: 'burst'; endMs: number; requiredPresses: number };
+export type BurstRhythmEvent = RhythmEvent & {
+  type: "burst";
+  endMs: number;
+  requiredPresses: number;
+};
 
-export function isBurstRhythmEvent(event: RhythmEvent): event is BurstRhythmEvent {
-  return event.type === 'burst' && typeof event.endMs === 'number' && typeof event.requiredPresses === 'number';
+export function isBurstRhythmEvent(
+  event: RhythmEvent,
+): event is BurstRhythmEvent {
+  return (
+    event.type === "burst" &&
+    typeof event.endMs === "number" &&
+    typeof event.requiredPresses === "number"
+  );
 }
 
 export type BeatmapPattern = {
@@ -31,7 +43,7 @@ export type BeatmapPattern = {
 };
 
 export type Beatmap = {
-  id: 'office-day-01';
+  id: "office-day-01";
   bpm: 110;
   timeSignature: [4, 4];
   events: RhythmEvent[];
@@ -43,7 +55,7 @@ export type RunState = {
   runId: string;
   userOid: string;
   beatmapId: string;
-  status: 'active' | 'paused' | 'completed' | 'failed' | 'abandoned';
+  status: "active" | "paused" | "completed" | "failed" | "abandoned";
   cursorMs: number;
   nextEventIndex: number;
   hearts: number;
@@ -54,14 +66,19 @@ export type RunState = {
   perfectCount: number;
   goodCount: number;
   missCount: number;
+  riskBonusRemaining: number;
+  feverGauge: number;
+  feverActiveUntilMs: number;
+  riskSuccessCount: number;
+  riskFailureCount: number;
   updatedAt: string;
 };
 
 export const SECTION_ORDER: readonly SectionId[] = [
-  'arrival',
-  'keyboard',
-  'mail',
-  'meeting',
-  'copy',
-  'departure',
+  "arrival",
+  "keyboard",
+  "mail",
+  "meeting",
+  "copy",
+  "departure",
 ];

@@ -1,4 +1,4 @@
-import type { JudgementResult } from '@/game/judgement/types';
+import type { JudgementResult } from "@/game/judgement/types";
 
 export const BASE_SCORES = {
   perfect: 100,
@@ -11,6 +11,18 @@ export function getComboMultiplier(combo: number): number {
   return Math.min(1.5, 1 + Math.floor(safeCombo / 10) * 0.1);
 }
 
-export function calculateJudgementScore(result: JudgementResult, comboAfterJudgement: number): number {
-  return Math.round(BASE_SCORES[result.judgement] * getComboMultiplier(comboAfterJudgement));
+export type ScoreBonusContext = {
+  riskBonus?: boolean;
+  feverActive?: boolean;
+};
+
+export function calculateJudgementScore(
+  result: JudgementResult,
+  comboAfterJudgement: number,
+  bonuses: ScoreBonusContext = {},
+): number {
+  const baseScore = BASE_SCORES[result.judgement] * getComboMultiplier(comboAfterJudgement);
+  const riskMultiplier = bonuses.riskBonus ? 2 : 1;
+  const feverBonus = bonuses.feverActive ? baseScore * 0.25 : 0;
+  return Math.round(baseScore * riskMultiplier + feverBonus);
 }
