@@ -10,6 +10,7 @@ export class BootScene extends Phaser.Scene {
   preload(): void {
     const imageAssets = [
       ...Object.values(GAME_ASSETS.backgrounds),
+      ...Object.values(GAME_ASSETS.feverBackgrounds),
       ...Object.values(GAME_ASSETS.protagonist),
       ...Object.values(GAME_ASSETS.moka),
       ...Object.values(GAME_ASSETS.notes),

@@ -14,6 +14,14 @@ export const GAME_ASSETS = {
     departure: { key: 'background-departure', path: '/game/art/background/departure.png' },
     fever: { key: 'background-fever', path: '/game/art/background/fever-stage.png' },
   } satisfies BackgroundAssets,
+  feverBackgrounds: {
+    arrival: { key: 'background-fever-arrival', path: '/game/art/background/fever-arrival.png' },
+    keyboard: { key: 'background-fever-keyboard', path: '/game/art/background/fever-keyboard.png' },
+    mail: { key: 'background-fever-mail', path: '/game/art/background/fever-mail.png' },
+    meeting: { key: 'background-fever-meeting', path: '/game/art/background/fever-meeting.png' },
+    copy: { key: 'background-fever-copy', path: '/game/art/background/fever-copy.png' },
+    departure: { key: 'background-fever-departure', path: '/game/art/background/fever-departure.png' },
+  } satisfies SectionAssets,
   protagonist: {
     walkA: { key: 'protagonist-walk-a', path: '/game/art/character/protagonist-walk-a.png' },
     walkB: { key: 'protagonist-walk-b', path: '/game/art/character/protagonist-walk-b.png' },
