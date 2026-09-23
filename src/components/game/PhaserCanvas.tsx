@@ -152,7 +152,7 @@ export function PhaserCanvas() {
         autosaveRef.current = autosave;
         autosave.start();
         const input = new SpaceInputController({
-          inputTarget: mount,
+          inputTarget: window,
           blurTarget: window,
           isViewportFocused: () => document.activeElement === mount,
           getGameState: () => {

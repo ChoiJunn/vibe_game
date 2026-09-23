@@ -221,7 +221,7 @@ select {
   inset: 0;
   display: grid;
   place-items: center;
-  padding: 1.5rem;
+  padding: 0.75rem;
   background: rgba(22, 33, 43, 0.58);
 }
 
@@ -231,7 +231,9 @@ select {
   width: min(100%, 34rem);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 1.5rem;
-  padding: clamp(1.5rem, 4vw, 2.5rem);
+  max-height: calc(100% - 1rem);
+  overflow: hidden;
+  padding: clamp(0.85rem, 2vw, 1.35rem);
   color: var(--ink);
   background: rgba(255, 252, 247, 0.96);
   box-shadow: 0 1.5rem 3rem rgba(36, 50, 59, 0.2);
@@ -241,7 +243,7 @@ select {
 .result-card h2,
 .tutorial-card h2 {
   margin: 0.35rem 0 0.7rem;
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: clamp(1.45rem, 3vw, 2.05rem);
 }
 
 .pause-card p,
@@ -255,14 +257,14 @@ select {
 .result-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
-  margin: 1.25rem 0;
+  gap: 0.45rem;
+  margin: 0.7rem 0;
 }
 
 .pause-stats span,
 .result-grid span {
   border-radius: 0.75rem;
-  padding: 0.75rem;
+  padding: 0.55rem;
   background: rgba(230, 213, 195, 0.45);
   color: var(--muted-ink);
 }
@@ -271,7 +273,22 @@ select {
   display: block;
   margin-top: 0.25rem;
   color: var(--ink);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
+}
+
+.result-score { font-size: clamp(2.8rem, 7vw, 4.2rem); }
+.rhythm-report { margin-top: 0.7rem; padding: 0.7rem; }
+.rhythm-report__headline strong { font-size: 2.2rem; }
+.rhythm-report__timing, .rhythm-report__extras, .rhythm-report__patterns { margin-top: 0.45rem; gap: 0.35rem; }
+.rhythm-report__timing span, .rhythm-report__extras span { padding: 0.35rem 0.5rem; font-size: 0.68rem; }
+.rhythm-report__patterns p { padding: 0.55rem; font-size: 0.8rem; }
+.rhythm-report__badges, .rhythm-report__next, .rhythm-report__music { margin: 0.5rem 0 0; font-size: 0.78rem; }
+
+@media (max-height: 760px) {
+  .result-card { width: min(100%, 31rem); }
+  .result-card p { line-height: 1.25; }
+  .result-card .result-submission { margin: 0.45rem 0; }
+  .result-actions { margin-top: 0.6rem; }
 }
 
 .pause-actions,

@@ -80,9 +80,11 @@ export class SpaceInputController {
       return;
     }
 
-    if (this.isViewportFocused()) {
-      keyboardEvent.preventDefault();
+    if (isInteractiveElement(keyboardEvent.target)) {
+      return;
     }
+
+    keyboardEvent.preventDefault();
 
     if (keyboardEvent.repeat || this.spaceHeld) {
       return;
@@ -101,9 +103,7 @@ export class SpaceInputController {
       return;
     }
 
-    if (this.isViewportFocused()) {
-      keyboardEvent.preventDefault();
-    }
+    keyboardEvent.preventDefault();
 
     if (!this.spaceHeld) {
       return;
@@ -151,4 +151,10 @@ export class SpaceInputController {
     this.releaseWaiters.forEach((resolve) => resolve());
     this.releaseWaiters.clear();
   }
+}
+
+function isInteractiveElement(target: EventTarget | null): boolean {
+  const element = target as HTMLElement | null;
+  if (!element || typeof element.closest !== 'function') return false;
+  return element.closest('button, a, input, textarea, select, [contenteditable="true"]') !== null;
 }

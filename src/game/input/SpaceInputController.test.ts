@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { SpaceInputController } from './SpaceInputController';
 
 describe('SpaceInputController', () => {
-  it('ignores key repeat, prevents scroll only when focused, and forwards keydown/keyup while playing', () => {
+  it('ignores key repeat, prevents scroll globally, and forwards keydown/keyup while playing', () => {
     const inputTarget = new EventTarget();
     const blurTarget = new EventTarget();
     const onInput = vi.fn();
@@ -31,8 +31,31 @@ describe('SpaceInputController', () => {
     focused = false;
     const up = createKeyEvent('keyup', { cancelable: true });
     inputTarget.dispatchEvent(up);
-    expect(up.defaultPrevented).toBe(false);
+    expect(up.defaultPrevented).toBe(true);
     expect(onInput).toHaveBeenLastCalledWith({ type: 'keyup', songPositionMs: 1234 });
+    controller.stop();
+  });
+
+  it('accepts global Space input but ignores buttons so UI controls remain usable', () => {
+    const inputTarget = new EventTarget();
+    const onInput = vi.fn();
+    const controller = new SpaceInputController({
+      inputTarget,
+      getGameState: () => 'playing',
+      getSongPositionMs: () => 1000,
+      onInput,
+      onPauseRequest: () => undefined,
+    });
+    controller.start();
+    const button = { closest: () => ({}) } as unknown as EventTarget;
+    const buttonDown = createKeyEvent('keydown', { cancelable: true });
+    Object.defineProperty(buttonDown, 'target', { value: button });
+    inputTarget.dispatchEvent(buttonDown);
+    expect(onInput).not.toHaveBeenCalled();
+
+    const globalDown = createKeyEvent('keydown', { cancelable: true });
+    inputTarget.dispatchEvent(globalDown);
+    expect(onInput).toHaveBeenCalledWith({ type: 'keydown', songPositionMs: 1000 });
     controller.stop();
   });
 
