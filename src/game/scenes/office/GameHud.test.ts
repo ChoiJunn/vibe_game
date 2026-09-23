@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { RhythmGameSnapshot } from '@/game/RhythmGameController';
-import { getHudLines, getHudProgress } from './GameHud';
+import { getFeverSecondsRemaining, getHudLines, getHudProgress, isFeverActive } from './GameHud';
 
 describe('GameHud', () => {
   it('shows the actual event total instead of a fixed count', () => {
@@ -23,5 +23,17 @@ describe('GameHud', () => {
       'SCORE  01240   COMBO  20   x1.2',
       'PAUSED | 48/96',
     ]);
+  });
+
+  it('shows risk charges and a live Fever countdown without hiding core stats', () => {
+    const snapshot = {
+      clockState: 'playing',
+      songPositionMs: 2_000,
+      runState: { hearts: 4, score: 500, combo: 3, nextEventIndex: 8, riskBonusRemaining: 2, feverGauge: 70, feverActiveUntilMs: 9_000 },
+      totalEvents: 96,
+    } as unknown as RhythmGameSnapshot;
+    expect(getHudLines(snapshot)).toContain('RISK  x2 2회   FEVER  70%  7s');
+    expect(isFeverActive(snapshot)).toBe(true);
+    expect(getFeverSecondsRemaining(snapshot)).toBe(7);
   });
 });

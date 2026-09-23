@@ -1,13 +1,20 @@
-import Phaser from 'phaser';
-import type { Judgement } from '@/domain/rhythm';
-import type { RhythmGameController, RhythmGameSnapshot } from '../RhythmGameController';
-import { OfficeBackground } from './office/OfficeBackground';
-import { OfficeCharacter } from './office/OfficeCharacter';
-import { MokaCompanion } from './office/MokaCompanion';
-import { GameHud } from './office/GameHud';
-import { isNewJudgementEvent, JudgementFeedback } from './office/JudgementFeedback';
-import { RhythmLane } from './office/RhythmLane';
-import { WorkIconPrompt } from './office/WorkIconPrompt';
+import Phaser from "phaser";
+import type { Judgement } from "@/domain/rhythm";
+import type {
+  RhythmGameController,
+  RhythmGameSnapshot,
+} from "../RhythmGameController";
+import { OfficeBackground } from "./office/OfficeBackground";
+import { OfficeCharacter } from "./office/OfficeCharacter";
+import { MokaCompanion } from "./office/MokaCompanion";
+import { GameHud } from "./office/GameHud";
+import { isFeverActive } from "./office/GameHud";
+import {
+  isNewJudgementEvent,
+  JudgementFeedback,
+} from "./office/JudgementFeedback";
+import { RhythmLane } from "./office/RhythmLane";
+import { WorkIconPrompt } from "./office/WorkIconPrompt";
 
 export class OfficeRhythmScene extends Phaser.Scene {
   private readonly controller: RhythmGameController;
@@ -19,9 +26,10 @@ export class OfficeRhythmScene extends Phaser.Scene {
   private hud!: GameHud;
   private feedback!: JudgementFeedback;
   private unsubscribe?: () => void;
+  private lastFeverActive = false;
 
   constructor(controller: RhythmGameController) {
-    super({ key: 'OfficeRhythmScene' });
+    super({ key: "OfficeRhythmScene" });
     this.controller = controller;
   }
 
@@ -33,7 +41,9 @@ export class OfficeRhythmScene extends Phaser.Scene {
     this.prompt = new WorkIconPrompt(this, 640, 300);
     this.hud = new GameHud(this);
     this.feedback = new JudgementFeedback(this, 640, 115);
-    this.unsubscribe = this.controller.subscribe((snapshot) => this.renderSnapshot(snapshot));
+    this.unsubscribe = this.controller.subscribe((snapshot) =>
+      this.renderSnapshot(snapshot),
+    );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.unsubscribe?.());
   }
 
@@ -48,18 +58,40 @@ export class OfficeRhythmScene extends Phaser.Scene {
     }
 
     let newJudgement: Judgement | undefined;
-    if (isNewJudgementEvent(this.feedback.lastEventId, snapshot.lastJudgement)) {
+    if (
+      isNewJudgementEvent(this.feedback.lastEventId, snapshot.lastJudgement)
+    ) {
       newJudgement = snapshot.lastJudgement.judgement;
       this.feedback.lastEventId = snapshot.lastJudgement.eventId;
       this.feedback.show(newJudgement);
     }
 
-    this.background.update(snapshot.section, snapshot.songPositionMs, snapshot.runState.combo, newJudgement);
-    this.character.update(snapshot.clockState, snapshot.songPositionMs, newJudgement, snapshot.runState.combo);
-    this.moka.update(snapshot.section, newJudgement, snapshot.runState.combo);
-    this.lane.update(snapshot);
-    this.prompt.update(snapshot.section, snapshot.currentEvent?.type, snapshot.clockState);
-    this.hud.update(snapshot);
+    const feverActive = isFeverActive(snapshot);
+    if (feverActive && !this.lastFeverActive) this.feedback.showFever();
+    this.lastFeverActive = feverActive;
 
+    this.background.update(
+      snapshot.section,
+      snapshot.songPositionMs,
+      snapshot.runState.combo,
+      newJudgement,
+      snapshot.runState.feverActiveUntilMs,
+    );
+    this.character.update(
+      snapshot.clockState,
+      snapshot.songPositionMs,
+      newJudgement,
+      snapshot.runState.combo,
+      feverActive,
+    );
+    this.moka.update(snapshot.section, newJudgement, snapshot.runState.combo, feverActive);
+    this.lane.update(snapshot);
+    this.prompt.update(
+      snapshot.section,
+      snapshot.currentEvent?.type,
+      snapshot.clockState,
+      snapshot.currentEvent,
+    );
+    this.hud.update(snapshot);
   }
 }

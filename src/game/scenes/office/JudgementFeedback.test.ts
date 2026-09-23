@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { JudgementResult } from '@/game/judgement/types';
-import { getJudgementCue, isNewJudgementEvent } from './JudgementFeedback';
+import { getFeverCue, getJudgementCue, isNewJudgementEvent } from './JudgementFeedback';
 
 describe('judgement feedback', () => {
   it('uses explicit non-color labels and distinct motion for each judgement', () => {
@@ -21,5 +21,10 @@ describe('judgement feedback', () => {
     expect(isNewJudgementEvent(undefined, first)).toBe(true);
     expect(isNewJudgementEvent(first.eventId, repeated)).toBe(false);
     expect(isNewJudgementEvent(first.eventId, { ...first, eventId: 'event-02' })).toBe(true);
+  });
+
+  it('uses a distinct Fever activation cue', () => {
+    expect(getFeverCue().label).toContain('FEVER');
+    expect(getFeverCue().startScale).toBeLessThan(1);
   });
 });

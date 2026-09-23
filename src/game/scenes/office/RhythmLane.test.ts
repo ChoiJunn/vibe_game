@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { RhythmEvent } from '@/domain/rhythm';
 import { GAME_ASSETS } from '@/game/assets';
-import { getNoteAssetKey, isLaneEventVisible, projectLaneEvent, resolveLaneOptions } from './RhythmLane';
+import { getNoteAssetKey, getPatternCue, isLaneEventVisible, projectLaneEvent, resolveLaneOptions } from './RhythmLane';
 
 const tap: RhythmEvent = { id: 'tap-1', type: 'tap', startMs: 4_000, section: 'mail', patternId: 'p-tap', patternKind: 'offbeat' };
 const hold: RhythmEvent = { id: 'hold-1', type: 'hold', startMs: 4_000, endMs: 5_000, section: 'keyboard', patternId: 'p-hold', patternKind: 'hold' };
+const burst: RhythmEvent = { id: 'burst-1', type: 'burst', startMs: 4_000, endMs: 4_800, section: 'meeting', patternId: 'p-burst', patternKind: 'burst', requiredPresses: 3 };
 
 describe('RhythmLane projection', () => {
   it('keeps a fixed marker in the lower third and moves notes right-to-left', () => {
@@ -26,6 +27,13 @@ describe('RhythmLane projection', () => {
     expect(projection.startX).toBe(900);
     expect(projection.endX).toBeCloseTo(1_116.6667);
     expect(projection.railWidth).toBeCloseTo(216.6667);
+  });
+
+  it('gives burst events a visible window and non-color pattern cue', () => {
+    expect(projectLaneEvent(burst, 2_800).endX).toBeCloseTo(1_073.3333);
+    expect(getPatternCue(burst)).toMatchObject({ symbol: '⚡', label: 'BURST' });
+    expect(getPatternCue({ ...tap, patternKind: 'offbeat' })).toMatchObject({ symbol: '◈', label: 'OFFBEAT' });
+    expect(getPatternCue({ ...tap, patternKind: 'transition' })).toMatchObject({ symbol: '➜', label: 'SHIFT' });
   });
 
   it('derives position solely from song time so pause freezes it, and preserves each event section motif', () => {

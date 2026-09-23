@@ -1,10 +1,13 @@
-import Phaser from 'phaser';
-import type { AudioClockState } from '@/game/audio/types';
-import { GAME_ASSETS } from '@/game/assets';
-import type { Judgement } from '@/domain/rhythm';
+import Phaser from "phaser";
+import type { AudioClockState } from "@/game/audio/types";
+import { GAME_ASSETS } from "@/game/assets";
+import type { Judgement } from "@/domain/rhythm";
 
-export function getWalkPoseKey(state: AudioClockState, songPositionMs: number): string | undefined {
-  if (state !== 'playing') {
+export function getWalkPoseKey(
+  state: AudioClockState,
+  songPositionMs: number,
+): string | undefined {
+  if (state !== "playing") {
     return undefined;
   }
 
@@ -19,11 +22,13 @@ export class OfficeCharacter {
   private readonly baseScaleX: number;
   private readonly baseScaleY: number;
   private reactionActive = false;
+  private feverActive = false;
   private lastWalkPoseKey: string = GAME_ASSETS.protagonist.walkA.key;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.baseY = y;
-    this.sprite = scene.add.image(x, y, GAME_ASSETS.protagonist.walkA.key)
+    this.sprite = scene.add
+      .image(x, y, GAME_ASSETS.protagonist.walkA.key)
       .setOrigin(0.5, 1)
       .setDisplaySize(190, 190)
       .setDepth(11);
@@ -31,17 +36,42 @@ export class OfficeCharacter {
     this.baseScaleY = this.sprite.scaleY;
   }
 
-  update(state: AudioClockState, songPositionMs: number, judgement?: Judgement, combo = 0): void {
+  update(
+    state: AudioClockState,
+    songPositionMs: number,
+    judgement?: Judgement,
+    combo = 0,
+    feverActive = false,
+  ): void {
+    this.setFever(feverActive);
     const poseKey = getWalkPoseKey(state, songPositionMs);
-    if (!this.reactionActive && poseKey && this.sprite.texture.key !== poseKey) {
+    if (
+      !this.reactionActive &&
+      poseKey &&
+      this.sprite.texture.key !== poseKey
+    ) {
       this.sprite.setTexture(poseKey);
       this.lastWalkPoseKey = poseKey;
     }
     const energyTier = getComboEnergyTier(combo);
-    const walking = state === 'playing';
-    const bob = walking ? Math.sin((songPositionMs / 272) * Math.PI) * (2 + Math.min(energyTier, 5) * 1.2) : 0;
+    const walking = state === "playing";
+    const bob = walking
+      ? Math.sin((songPositionMs / 272) * Math.PI) *
+        (2 + Math.min(energyTier, 5) * 1.2)
+      : 0;
     this.sprite.setY(this.baseY + bob);
     if (judgement) this.react(judgement);
+  }
+
+  setFever(active: boolean): void {
+    if (this.feverActive === active) return;
+    this.feverActive = active;
+    this.sprite.setTint(active ? 0xf0c7ff : 0xffffff);
+    if (active) {
+      this.sprite.setScale(this.baseScaleX * 1.04, this.baseScaleY * 1.04);
+    } else if (!this.reactionActive) {
+      this.sprite.setScale(this.baseScaleX, this.baseScaleY);
+    }
   }
 
   react(judgement: Judgement): void {
@@ -73,11 +103,42 @@ export function getComboEnergyTier(combo: number): number {
   return Math.max(0, Math.floor(Math.max(0, combo) / 10));
 }
 
-export function getCharacterReactionPose(judgement: Judgement): { rotation: number; scaleX: number; scaleY: number; yOffset: number; duration: number; ease: string } {
+export function getCharacterReactionPose(judgement: Judgement): {
+  rotation: number;
+  scaleX: number;
+  scaleY: number;
+  yOffset: number;
+  duration: number;
+  ease: string;
+} {
   switch (judgement) {
-    case 'perfect': return { rotation: 0, scaleX: 1.08, scaleY: 1.12, yOffset: -18, duration: 220, ease: 'Back.easeOut' };
-    case 'good': return { rotation: 0.08, scaleX: 1.02, scaleY: 0.96, yOffset: -4, duration: 190, ease: 'Sine.easeInOut' };
-    case 'miss': return { rotation: -0.16, scaleX: 0.97, scaleY: 0.93, yOffset: 8, duration: 300, ease: 'Sine.easeInOut' };
+    case "perfect":
+      return {
+        rotation: 0,
+        scaleX: 1.08,
+        scaleY: 1.12,
+        yOffset: -18,
+        duration: 220,
+        ease: "Back.easeOut",
+      };
+    case "good":
+      return {
+        rotation: 0.08,
+        scaleX: 1.02,
+        scaleY: 0.96,
+        yOffset: -4,
+        duration: 190,
+        ease: "Sine.easeInOut",
+      };
+    case "miss":
+      return {
+        rotation: -0.16,
+        scaleX: 0.97,
+        scaleY: 0.93,
+        yOffset: 8,
+        duration: 300,
+        ease: "Sine.easeInOut",
+      };
   }
 }
 

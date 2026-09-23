@@ -1,28 +1,40 @@
-import Phaser from 'phaser';
-import type { Judgement } from '@/domain/rhythm';
-import type { JudgementResult } from '@/game/judgement/types';
+import Phaser from "phaser";
+import type { Judgement } from "@/domain/rhythm";
+import type { JudgementResult } from "@/game/judgement/types";
 
 export class JudgementFeedback {
   private readonly text: Phaser.GameObjects.Text;
   private readonly originY: number;
   lastEventId?: string;
 
-  constructor(private readonly scene: Phaser.Scene, x: number, y: number) {
+  constructor(
+    private readonly scene: Phaser.Scene,
+    x: number,
+    y: number,
+  ) {
     this.originY = y;
-    this.text = scene.add.text(x, y, '', {
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '34px',
-      fontStyle: 'bold',
-      stroke: '#24323b',
-      strokeThickness: 6,
-    }).setOrigin(0.5).setAlpha(0);
+    this.text = scene.add
+      .text(x, y, "", {
+        color: "#ffffff",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "34px",
+        fontStyle: "bold",
+        stroke: "#24323b",
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5)
+      .setAlpha(0);
   }
 
   show(judgement: Judgement): void {
     const feedback = getJudgementCue(judgement);
     this.scene.tweens.killTweensOf(this.text);
-    this.text.setText(feedback.label).setColor(feedback.color).setAlpha(1).setScale(feedback.startScale).setY(this.originY);
+    this.text
+      .setText(feedback.label)
+      .setColor(feedback.color)
+      .setAlpha(1)
+      .setScale(feedback.startScale)
+      .setY(this.originY);
     this.scene.tweens.add({
       targets: this.text,
       alpha: 0,
@@ -32,6 +44,17 @@ export class JudgementFeedback {
       ease: feedback.ease,
     });
   }
+
+  showFever(): void {
+    const feedback = getFeverCue();
+    this.scene.tweens.killTweensOf(this.text);
+    this.text.setText(feedback.label).setColor(feedback.color).setAlpha(1).setScale(feedback.startScale).setY(this.originY);
+    this.scene.tweens.add({ targets: this.text, alpha: 0, scale: 1.16, y: this.originY - 34, duration: feedback.duration, ease: "Back.easeOut" });
+  }
+}
+
+export function getFeverCue(): { label: string; color: string; startScale: number; duration: number } {
+  return { label: "FEVER!!  x1.25", color: "#f2a7ff", startScale: 0.68, duration: 820 };
 }
 
 export function getJudgementCue(judgement: Judgement): {
@@ -43,12 +66,39 @@ export function getJudgementCue(judgement: Judgement): {
   ease: string;
 } {
   switch (judgement) {
-    case 'perfect': return { label: 'PERFECT  *', color: '#f3bf54', startScale: 0.72, rise: -26, duration: 620, ease: 'Back.easeOut' };
-    case 'good': return { label: 'GOOD  +', color: '#79c7ad', startScale: 0.9, rise: -12, duration: 520, ease: 'Cubic.easeOut' };
-    case 'miss': return { label: 'MISS  !', color: '#f08f83', startScale: 1.05, rise: 16, duration: 680, ease: 'Sine.easeOut' };
+    case "perfect":
+      return {
+        label: "PERFECT  *",
+        color: "#f3bf54",
+        startScale: 0.72,
+        rise: -26,
+        duration: 620,
+        ease: "Back.easeOut",
+      };
+    case "good":
+      return {
+        label: "GOOD  +",
+        color: "#79c7ad",
+        startScale: 0.9,
+        rise: -12,
+        duration: 520,
+        ease: "Cubic.easeOut",
+      };
+    case "miss":
+      return {
+        label: "MISS  !",
+        color: "#f08f83",
+        startScale: 1.05,
+        rise: 16,
+        duration: 680,
+        ease: "Sine.easeOut",
+      };
   }
 }
 
-export function isNewJudgementEvent(lastEventId: string | undefined, result: JudgementResult | undefined): result is JudgementResult {
+export function isNewJudgementEvent(
+  lastEventId: string | undefined,
+  result: JudgementResult | undefined,
+): result is JudgementResult {
   return Boolean(result && result.eventId !== lastEventId);
 }

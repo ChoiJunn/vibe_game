@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getCrossfadeProgress, getJourneyPanOffset } from './OfficeBackground';
+import { getCrossfadeProgress, getJourneyPanOffset, isFeverActiveAt } from './OfficeBackground';
 
 describe('OfficeBackground journey timing', () => {
   it('uses song position for a bounded parallax offset', () => {
@@ -19,5 +19,10 @@ describe('OfficeBackground journey timing', () => {
     expect(getCrossfadeProgress(4_000, 5_000)).toBe(0);
     expect(getCrossfadeProgress(5_380, 5_000)).toBeCloseTo(0.5);
     expect(getCrossfadeProgress(6_000, 5_000)).toBe(1);
+  });
+
+  it('derives the neon stage from the persisted Fever end time', () => {
+    expect(isFeverActiveAt(1_000, 9_000)).toBe(true);
+    expect(isFeverActiveAt(9_000, 9_000)).toBe(false);
   });
 });
