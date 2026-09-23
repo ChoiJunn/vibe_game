@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getCrossfadeProgress, getJourneyPanOffset, isFeverActiveAt } from './OfficeBackground';
+import { getCrossfadeProgress, getFeverBackgroundKey, getJourneyPanOffset, isFeverActiveAt } from './OfficeBackground';
+import { GAME_ASSETS } from '@/game/assets';
 
 describe('OfficeBackground journey timing', () => {
   it('uses song position for a bounded parallax offset', () => {
@@ -24,5 +25,10 @@ describe('OfficeBackground journey timing', () => {
   it('derives the neon stage from the persisted Fever end time', () => {
     expect(isFeverActiveAt(1_000, 9_000)).toBe(true);
     expect(isFeverActiveAt(9_000, 9_000)).toBe(false);
+  });
+
+  it('selects a Fever background from the active journey section', () => {
+    expect(getFeverBackgroundKey('mail')).toBe(GAME_ASSETS.feverBackgrounds.mail.key);
+    expect(getFeverBackgroundKey('meeting')).toBe(GAME_ASSETS.feverBackgrounds.meeting.key);
   });
 });
