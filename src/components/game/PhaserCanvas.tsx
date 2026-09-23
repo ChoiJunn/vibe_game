@@ -6,7 +6,7 @@ import testBeatmapJson from '@/content/beatmaps/e2e-quick-beatmap';
 import { useAuth } from '@/auth/useAuth';
 import { isE2eAuthEnabled } from '@/auth/AuthProvider';
 import { settingsStore } from '@/client/settings/settingsStore';
-import { SessionApiClient } from '@/client/game/sessionApi';
+import { SessionApiClient, SessionApiError } from '@/client/game/sessionApi';
 import { PauseOverlay } from './PauseOverlay';
 import { AudioSettingsPanel } from '@/components/settings/AudioSettingsPanel';
 import { AccessibleGameStatus } from './AccessibleGameStatus';
@@ -117,11 +117,11 @@ export function PhaserCanvas() {
     let unsubscribePause: () => void = () => undefined;
     let unsubscribeAutosave: () => void = () => undefined;
     const isE2e = isE2eAuthEnabled();
-    const beatmap = validateBeatmap(isE2e ? testBeatmapJson : beatmapJson, { allowShortChart: isE2e });
     const api = new SessionApiClient(() => tokenProviderRef.current());
 
     const bootstrap = async () => {
       try {
+        const beatmap = validateBeatmap(isE2e ? testBeatmapJson : beatmapJson, { allowShortChart: isE2e });
         const activeSession = await api.getActive();
         const envelope = activeSession ?? await api.createOrResume();
         if (disposed) return;
@@ -224,9 +224,13 @@ export function PhaserCanvas() {
         if (activeSession && !recoveredFailure && hasSavedProgress(snapshot, envelope.session.inputEvents.length)) {
           pauseCoordinator.restorePaused('browser-back', snapshot);
         }
-        void import('@/game/PhaserGame').then(({ createPhaserGame }) => {
-          if (!disposed) game = createPhaserGame(mount, controller);
-        });
+        void import('@/game/PhaserGame')
+          .then(({ createPhaserGame }) => {
+            if (!disposed) game = createPhaserGame(mount, controller);
+          })
+          .catch((error: unknown) => {
+            if (!disposed) setLoadError(formatGameLoadError(error));
+          });
 
         function submitTerminal(status: TerminalRunStatus, finalSnapshot: RhythmGameSnapshot['runState']) {
           if (terminalSubmittedRef.current) return;
@@ -248,7 +252,7 @@ export function PhaserCanvas() {
 
         if (recoveredFailure) submitTerminal('failed', snapshot);
       } catch (error) {
-        if (!disposed) setLoadError(error instanceof Error ? error.message : '저장된 게임을 불러오지 못했습니다.');
+        if (!disposed) setLoadError(formatGameLoadError(error));
       }
     };
 
@@ -276,9 +280,16 @@ export function PhaserCanvas() {
   const hasResult = runStatus === 'completed' || runStatus === 'failed' || runStatus === 'abandoned';
 
   return <>
-    <div ref={mountRef} className={'phaser-canvas-shell'} tabIndex={0} aria-label={'Office Rhythm Manager 리듬 게임 화면'} />
+    <div ref={mountRef} className={'phaser-canvas-shell'} tabIndex={0} aria-label={'Office Rhythm Manager 리듬 게임 화면'}>
+      {loadError ? (
+        <div className="game-load-error" role="alert">
+          <strong>게임을 불러오지 못했어요.</strong>
+          <span>{loadError}</span>
+          <button type="button" onClick={() => window.location.reload()}>다시 시도</button>
+        </div>
+      ) : null}
+    </div>
     {!runtime && !loadError ? <p role={'status'}>저장된 게임을 불러오는 중이에요…</p> : null}
-    {loadError ? <p role={'alert'}>{loadError}</p> : null}
     {runtime && !started && !runtime.pauseState.paused && !hasResult ? (
       <button className={'primary'} type={'button'} onClick={() => startGameRef.current?.()}>리듬 시작</button>
     ) : null}
@@ -328,4 +339,13 @@ export function PhaserCanvas() {
     /> : null}
     <AudioSettingsPanel value={settings} onChange={changeSettings} />
   </>;
+}
+
+function formatGameLoadError(error: unknown): string {
+  if (error instanceof SessionApiError) {
+    if (error.status === 401) return '로그인 세션이 만료되었거나 서버가 로그인 토큰을 거부했습니다. 페이지를 새로고침한 뒤 다시 로그인해 주세요.';
+    if (error.status === 403) return '게임 세션을 사용할 권한이 없습니다. Entra ID 앱 권한과 서버 설정을 확인해 주세요.';
+    return `${error.message} (${error.status}, ${error.code})`;
+  }
+  return error instanceof Error ? error.message : '게임 초기화 중 알 수 없는 오류가 발생했습니다.';
 }
