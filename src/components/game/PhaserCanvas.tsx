@@ -21,6 +21,8 @@ import { PauseCoordinator, type PauseState } from '@/game/pause/PauseCoordinator
 import { usePageLifecyclePause } from '@/hooks/usePageLifecyclePause';
 import type { TerminalRunStatus } from '@/server/cosmos/models';
 import type { RunState } from '@/domain/rhythm';
+import { buildRhythmReport } from '@/game/results/buildRhythmReport';
+import { createEmptyCodex, loadPatternCodex } from '@/client/game/patternCodexStore';
 
 type GameRuntime = {
   controller: RhythmGameController;
@@ -288,6 +290,8 @@ export function PhaserCanvas() {
       score={snapshot.runState.score}
       hearts={snapshot.runState.hearts}
       judgement={snapshot.lastJudgement}
+      feverSeconds={Math.max(0, Math.ceil((snapshot.runState.feverActiveUntilMs - snapshot.songPositionMs) / 1000))}
+      burstProgress={snapshot.burstState ? { completedPresses: snapshot.burstState.completedPresses, requiredPresses: snapshot.burstState.requiredPresses } : undefined}
     /> : null}
     {runtime && started && !runtime.pauseState.paused && snapshot?.clockState === 'playing' && !hasResult ? (
       <button type={'button'} className={'pause-button'} onClick={() => coordinator?.requestPause('button')}>일시정지</button>
@@ -302,6 +306,8 @@ export function PhaserCanvas() {
     {runtime && snapshot && hasResult ? <ResultSummary
       runState={snapshot.runState}
       elapsedMs={snapshot.songPositionMs}
+      report={buildRhythmReport(snapshot, typeof window === 'undefined' ? createEmptyCodex(snapshot.runState.beatmapId) : loadPatternCodex(window.localStorage, userOid, snapshot.runState.beatmapId))}
+      musicUnavailable={snapshot.musicStatus === 'unavailable'}
       pendingSubmission={submission === 'idle' || submission === 'saving'}
       submissionError={submission === 'error'}
       onPlayAgain={() => void handlePlayAgain()}

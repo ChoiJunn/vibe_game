@@ -960,4 +960,13 @@ a:focus-visible {
 .practice-viewport__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .practice-viewport__actions button { color: #26343a; }
 .practice-viewport__actions .primary { background: #ffdd7a; font-weight: 700; }
+.rhythm-report { margin-top: 18px; padding: 18px; border-radius: 18px; background: #f7eee4; color: #26343a; }
+.rhythm-report__headline { display: flex; align-items: baseline; gap: 8px; }
+.rhythm-report__headline strong { font-size: 42px; }
+.rhythm-report__timing, .rhythm-report__extras, .rhythm-report__patterns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.rhythm-report__timing span, .rhythm-report__extras span { padding: 7px 10px; border-radius: 999px; background: #eadccd; font-size: 12px; }
+.rhythm-report__patterns { display: grid; grid-template-columns: 1fr 1fr; }
+.rhythm-report__patterns p { margin: 0; padding: 12px; background: #fffaf3; border-radius: 12px; }
+.rhythm-report__patterns b { display: block; margin-top: 4px; }
+.rhythm-report__badges, .rhythm-report__next, .rhythm-report__music { margin: 14px 0 0; font-weight: 700; }
 @media (max-width: 700px) { .pattern-codex__intro { display: block; } .pattern-codex__intro a { display: inline-block; margin-top: 18px; } }

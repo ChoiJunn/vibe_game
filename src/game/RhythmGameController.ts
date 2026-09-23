@@ -8,6 +8,7 @@ import {
 } from "@/domain/rhythm";
 import { AudioClock } from "./audio/AudioClock";
 import { OfficeSoundScheduler } from "./audio/OfficeSoundScheduler";
+import type { MusicStatus } from "./audio/OfficeSoundScheduler";
 import {
   clampAudioSettings,
   DEFAULT_AUDIO_SETTINGS,
@@ -40,6 +41,15 @@ export type RhythmGameSnapshot = {
   lastJudgement?: JudgementResult;
   holdState?: HoldState;
   burstState?: BurstState;
+  judgementHistory: readonly JudgementHistoryEntry[];
+  musicStatus: MusicStatus;
+};
+
+export type JudgementHistoryEntry = {
+  eventId: string;
+  patternId: string;
+  patternKind: RhythmEvent["patternKind"];
+  judgement: JudgementResult["judgement"];
 };
 
 export type HoldState = {
@@ -88,6 +98,7 @@ export class RhythmGameController {
   private pendingHoldStart?: JudgementResult;
   private pendingBurstInputs: InputEvent[] = [];
   private lastJudgement?: JudgementResult;
+  private judgementHistory: JudgementHistoryEntry[] = [];
   private readonly listeners = new Set<
     (snapshot: RhythmGameSnapshot) => void
   >();
@@ -132,6 +143,7 @@ export class RhythmGameController {
     this.pendingHoldStart = undefined;
     this.pendingBurstInputs = [];
     this.lastJudgement = undefined;
+    this.judgementHistory = [];
     await this.clock.load(this.beatmap, this.audioSettings);
     this.scheduler.load(this.beatmap, this.audioSettings, atSongMs);
     await this.clock.start(atSongMs);
@@ -368,6 +380,8 @@ export class RhythmGameController {
       lastJudgement: this.lastJudgement,
       holdState,
       burstState,
+      judgementHistory: [...this.judgementHistory],
+      musicStatus: typeof this.scheduler.getMusicStatus === "function" ? this.scheduler.getMusicStatus() : "idle",
     };
   }
 
@@ -397,6 +411,7 @@ export class RhythmGameController {
     });
     if (event.type === "burst") this.pendingBurstInputs = [];
     this.lastJudgement = result;
+    this.judgementHistory.push({ eventId: event.id, patternId: event.patternId, patternKind: event.patternKind, judgement: result.judgement });
     if (
       this.runState.status === "completed" ||
       this.runState.status === "failed"
