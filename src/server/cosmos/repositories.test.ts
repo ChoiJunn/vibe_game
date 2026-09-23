@@ -138,7 +138,7 @@ describe('SessionRepository', () => {
 });
 
 describe('ResultRepository', () => {
-  it('inserts terminal results but ranks only completed attempts in parameterized partition-scoped queries', async () => {
+  it('inserts terminal results and returns every saved attempt in parameterized partition-scoped queries', async () => {
     const result = makeResult();
     const create = vi.fn().mockResolvedValue({ resource: result });
     const fetchNext = vi.fn().mockResolvedValue({
@@ -150,16 +150,15 @@ describe('ResultRepository', () => {
 
     await expect(repository.insertResult(result)).resolves.toEqual(result);
     await expect(repository.queryLeaderboard('all-time', 10)).resolves.toEqual({
-      items: [result],
+      items: [result, makeResult({ id: 'result-02', score: 900, status: 'failed' }), makeResult({ id: 'result-03', score: 800, status: 'abandoned' })],
       continuationToken: 'opaque-page-2',
     });
     expect(query).toHaveBeenCalledWith(
       expect.objectContaining({
         parameters: expect.arrayContaining([
           { name: '@leaderboardKey', value: 'all-time' },
-          { name: '@status', value: 'completed' },
         ]),
-        query: expect.stringContaining('c.status = @status'),
+        query: expect.not.stringContaining('c.status = @status'),
       }),
       { partitionKey: 'all-time', maxItemCount: 10, continuationToken: undefined },
     );
@@ -171,11 +170,11 @@ describe('ResultRepository', () => {
     const query = vi.fn(() => ({ fetchNext }));
     const repository = new ResultRepository({ items: { query } } as unknown as Container);
 
-    expect(getDailyLeaderboardKey(new Date('2026-09-22T23:59:00.000Z'))).toBe('daily:2026-09-22');
+    expect(getDailyLeaderboardKey(new Date('2026-09-22T23:59:00.000Z'))).toBe('daily:2026-09-23');
     await expect(repository.queryLeaderboard('daily:2026-02-30')).rejects.toThrow(/real calendar date/);
-    await repository.queryLeaderboard('daily:2026-09-22', 500);
+    await repository.queryLeaderboard('daily:2026-09-23', 500);
     expect(query).toHaveBeenCalledWith(expect.anything(), {
-      partitionKey: 'daily:2026-09-22', maxItemCount: 100, continuationToken: undefined,
+      partitionKey: 'daily:2026-09-23', maxItemCount: 100, continuationToken: undefined,
     });
   });
 

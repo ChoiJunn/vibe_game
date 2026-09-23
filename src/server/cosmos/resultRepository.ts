@@ -35,10 +35,9 @@ export class ResultRepository {
     const leaderboardKey = normalizeLeaderboardKey(leaderboardKeyInput);
     const safeLimit = Math.max(1, Math.min(100, Math.floor(Number.isFinite(limit) ? limit : 50)));
     const query: SqlQuerySpec = {
-      query: 'SELECT * FROM c WHERE c.leaderboardKey = @leaderboardKey AND c.status = @status ORDER BY c.leaderboardKey ASC, c.score DESC, c.perfectCount DESC, c.durationMs ASC, c.playedAt ASC, c.id ASC',
+      query: 'SELECT * FROM c WHERE c.leaderboardKey = @leaderboardKey ORDER BY c.leaderboardKey ASC, c.score DESC, c.perfectCount DESC, c.durationMs ASC, c.playedAt ASC, c.id ASC',
       parameters: [
         { name: '@leaderboardKey', value: leaderboardKey },
-        { name: '@status', value: 'completed' },
       ],
     };
     const page = await this.container.items
@@ -47,7 +46,7 @@ export class ResultRepository {
 
     return {
       items: (page.resources ?? []).filter(
-        (result) => result.type === 'gameResult' && result.leaderboardKey === leaderboardKey && result.status === 'completed',
+        (result) => result.type === 'gameResult' && result.leaderboardKey === leaderboardKey,
       ),
       ...(page.continuationToken ? { continuationToken: page.continuationToken } : {}),
     };

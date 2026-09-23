@@ -26,13 +26,13 @@ function result(overrides: Partial<GameResultDocument> = {}): GameResultDocument
 describe('LeaderboardService', () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it('queries the UTC daily partition and preserves the opaque continuation token', async () => {
-    const page = { items: [result({ leaderboardKey: 'daily:2026-09-22' })], continuationToken: 'opaque/next' };
+  it('queries the Asia/Seoul daily partition and preserves the opaque continuation token', async () => {
+    const page = { items: [result({ leaderboardKey: 'daily:2026-09-23' })], continuationToken: 'opaque/next' };
     const queryLeaderboard = vi.fn().mockResolvedValue(page);
     const service = new LeaderboardService({ queryLeaderboard }, () => new Date('2026-09-22T23:59:59.000Z'));
 
     await expect(service.getLeaderboard('daily', 25, 'opaque/previous')).resolves.toEqual(page);
-    expect(queryLeaderboard).toHaveBeenCalledWith('daily:2026-09-22', 25, 'opaque/previous');
+    expect(queryLeaderboard).toHaveBeenCalledWith('daily:2026-09-23', 25, 'opaque/previous');
   });
 
   it('queries all attempts from the all-time partition, including non-completed statuses', async () => {

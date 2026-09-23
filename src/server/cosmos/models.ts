@@ -61,6 +61,7 @@ export type GameResultDocument = {
 };
 
 export const RAW_EVENT_RETENTION_SECONDS = 90 * 24 * 60 * 60;
+export const LEADERBOARD_TIME_ZONE = 'Asia/Seoul';
 
 export function normalizeLeaderboardKey(value: string): string {
   if (value === 'all-time') return value;
@@ -75,7 +76,14 @@ export function normalizeLeaderboardKey(value: string): string {
   return value;
 }
 
-export function getDailyLeaderboardKey(date: Date): string {
+export function getDailyLeaderboardKey(date: Date, timeZone = LEADERBOARD_TIME_ZONE): string {
   if (!Number.isFinite(date.getTime())) throw new Error('A valid date is required.');
-  return `daily:${date.toISOString().slice(0, 10)}`;
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `daily:${values.year}-${values.month}-${values.day}`;
 }
