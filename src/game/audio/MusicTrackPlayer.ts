@@ -1,3 +1,5 @@
+const defaultFetcher: typeof fetch = (input, init) => globalThis.fetch(input, init);
+
 /** Plays a locally bundled music bed against the game's shared AudioContext. */
 export class MusicTrackPlayer {
   private readonly context: AudioContext;
@@ -11,7 +13,7 @@ export class MusicTrackPlayer {
   private volume = 1;
   private sourceStartedAt = 0;
 
-  constructor(context: AudioContext, destination: AudioNode = context.destination, fetcher: typeof fetch = fetch) {
+  constructor(context: AudioContext, destination: AudioNode = context.destination, fetcher: typeof fetch = defaultFetcher) {
     this.context = context;
     this.destination = destination;
     this.fetcher = fetcher;

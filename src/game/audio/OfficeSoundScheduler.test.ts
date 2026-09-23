@@ -50,6 +50,36 @@ describe('OfficeSoundScheduler', () => {
     scheduler.stop();
   });
 
+  it('keeps scheduling SFX when the backing track cannot be loaded', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('music unavailable')));
+    const fakeContext = createFakeAudioContext();
+    const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+    await clock.load(beatmap, settings);
+    await clock.start();
+    const scheduler = new OfficeSoundScheduler(clock, { lookaheadMs: 2000, tickMs: 1000 });
+
+    scheduler.load(beatmap, settings);
+    expect(scheduler.getMusicStatus()).toBe('loading');
+    scheduler.start();
+
+    await vi.waitFor(() => expect(scheduler.getMusicStatus()).toBe('unavailable'));
+    expect(fakeContext.createOscillator).toHaveBeenCalled();
+    scheduler.stop();
+    expect(scheduler.getMusicStatus()).toBe('idle');
+  });
+
+  it('reports ready after the backing track is decoded', async () => {
+    const fakeContext = createFakeAudioContext();
+    const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+    await clock.load(beatmap, settings);
+    await clock.start();
+    const scheduler = new OfficeSoundScheduler(clock);
+
+    scheduler.load(beatmap, settings);
+    expect(scheduler.getMusicStatus()).toBe('loading');
+    await vi.waitFor(() => expect(scheduler.getMusicStatus()).toBe('ready'));
+  });
+
   it('resumes at the frozen audio clock offset without restarting the beatmap', async () => {
     const fakeContext = createFakeAudioContext();
     const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });

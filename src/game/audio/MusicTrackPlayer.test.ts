@@ -27,6 +27,30 @@ describe('MusicTrackPlayer', () => {
     expect(fake.sources[1].stop).toHaveBeenCalledTimes(1);
   });
 
+  it('invokes the browser fetch function with its global context', async () => {
+    const fake = createContext();
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) });
+    vi.stubGlobal('fetch', fetcher);
+
+    await new MusicTrackPlayer(fake.context).load('/game/audio/office-groove.wav');
+
+    expect(fetcher).toHaveBeenCalledWith('/game/audio/office-groove.wav', undefined);
+  });
+
+  it('resets a failed load so a later request can retry', async () => {
+    const fake = createContext();
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 503, arrayBuffer: async () => new ArrayBuffer(0) })
+      .mockResolvedValueOnce({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) });
+    const player = new MusicTrackPlayer(fake.context, fake.context.destination, fetcher as typeof fetch);
+
+    await expect(player.load('/game/audio/office-groove.wav')).rejects.toThrow('503');
+    await player.load('/game/audio/office-groove.wav');
+
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fake.decodeAudioData).toHaveBeenCalledTimes(1);
+  });
+
   it('ships a 120-second WAV with a verified 110 BPM pulse', () => {
     const wav = readFileSync(resolve(process.cwd(), 'public/game/audio/office-groove.wav'));
     expect(wav.toString('ascii', 0, 4)).toBe('RIFF');

@@ -9,6 +9,8 @@ export type OfficeSoundSchedulerOptions = {
   tickMs?: number;
 };
 
+export type MusicStatus = 'idle' | 'loading' | 'ready' | 'unavailable';
+
 export class OfficeSoundScheduler {
   private readonly clock: AudioClock;
   private readonly lookaheadMs: number;
@@ -23,6 +25,7 @@ export class OfficeSoundScheduler {
   private readonly activeNodes = new Set<ScheduledAudioNode>();
   private musicTrack: MusicTrackPlayer | null = null;
   private musicLoad: Promise<void> | null = null;
+  private musicStatus: MusicStatus = 'idle';
 
   constructor(clock: AudioClock, options: OfficeSoundSchedulerOptions = {}) {
     this.clock = clock;
@@ -39,9 +42,15 @@ export class OfficeSoundScheduler {
     this.musicTrack?.stop();
     this.musicTrack = new MusicTrackPlayer(this.clock.getAudioContext());
     this.musicTrack.setVolume(this.settings.muted ? 0 : this.settings.musicVolume);
-    this.musicLoad = this.musicTrack.load('/game/audio/office-groove.wav').catch((error: unknown) => {
-      console.error('Unable to load the local office soundtrack.', error);
-    });
+    this.musicStatus = 'loading';
+    this.musicLoad = this.musicTrack.load('/game/audio/office-groove.wav')
+      .then(() => {
+        this.musicStatus = 'ready';
+      })
+      .catch((error: unknown) => {
+        this.musicStatus = 'unavailable';
+        console.error('Unable to load the local office soundtrack.', error);
+      });
     beatmap.events.forEach((event) => {
       if ((event.endMs ?? event.startMs) < fromSongPositionMs) this.scheduledEventIds.add(event.id);
     });
@@ -87,6 +96,7 @@ export class OfficeSoundScheduler {
     this.clearTimer();
     this.running = false;
     this.musicTrack?.stop();
+    this.musicStatus = 'idle';
     this.scheduledEventIds.clear();
     this.nextMusicStepIndex = 0;
     this.activeNodes.forEach((node) => {
@@ -106,6 +116,10 @@ export class OfficeSoundScheduler {
     else if (this.running) {
       void this.musicLoad?.then(() => this.musicTrack?.resume(this.clock.getSongPositionMs()));
     }
+  }
+
+  getMusicStatus(): MusicStatus {
+    return this.musicStatus;
   }
 
   private tick(): void {
