@@ -24,6 +24,9 @@ export function TopBar() {
             <Link className={pathname === '/leaderboard' ? 'is-active' : ''} href="/leaderboard">
               순위표
             </Link>
+            <Link className={pathname === '/practice' ? 'is-active' : ''} href="/practice">
+              패턴 도감
+            </Link>
             <span className="top-bar__user" title={user.email ?? user.displayName}>
               {user.displayName}
             </span>
