@@ -20,7 +20,11 @@ export function PatternCodex() {
   const [selected, setSelected] = useState<string>();
   const [practiceOpen, setPracticeOpen] = useState(false);
   const patterns = useMemo(() => getPatternLibrary(beatmap), []);
-  useEffect(() => { setCodex(loadPatternCodex(window.localStorage, user?.oid, beatmap.id)); }, [user?.oid]);
+  useEffect(() => {
+    let active = true;
+    queueMicrotask(() => { if (active) setCodex(loadPatternCodex(window.localStorage, user?.oid, beatmap.id)); });
+    return () => { active = false; };
+  }, [user?.oid]);
   const visible = patterns.filter((pattern) => filter === "all" || pattern.kind === filter).sort((a, b) => Number(Boolean(codex.patterns[a.id]?.mastered)) - Number(Boolean(codex.patterns[b.id]?.mastered)));
   const selectedPattern = patterns.find((pattern) => pattern.id === selected);
   const onComplete = useCallback((snapshot: { patternId: string; status: string; accuracy: number; perfectCount: number }) => {
