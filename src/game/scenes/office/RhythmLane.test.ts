@@ -3,8 +3,8 @@ import type { RhythmEvent } from '@/domain/rhythm';
 import { GAME_ASSETS } from '@/game/assets';
 import { getNoteAssetKey, isLaneEventVisible, projectLaneEvent, resolveLaneOptions } from './RhythmLane';
 
-const tap: RhythmEvent = { id: 'tap-1', type: 'tap', startMs: 4_000, section: 'mail' };
-const hold: RhythmEvent = { id: 'hold-1', type: 'hold', startMs: 4_000, endMs: 5_000, section: 'keyboard' };
+const tap: RhythmEvent = { id: 'tap-1', type: 'tap', startMs: 4_000, section: 'mail', patternId: 'p-tap', patternKind: 'offbeat' };
+const hold: RhythmEvent = { id: 'hold-1', type: 'hold', startMs: 4_000, endMs: 5_000, section: 'keyboard', patternId: 'p-hold', patternKind: 'hold' };
 
 describe('RhythmLane projection', () => {
   it('keeps a fixed marker in the lower third and moves notes right-to-left', () => {

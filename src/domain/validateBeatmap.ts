@@ -1,4 +1,4 @@
-import { SECTION_ORDER, type Beatmap, type RhythmEvent, type SectionId } from './rhythm';
+import { SECTION_ORDER, type Beatmap, type PatternKind, type RhythmEvent, type SectionId } from './rhythm';
 
 const SECTION_BOUNDARIES = [0, 19_636, 39_273, 58_909, 78_545, 98_182, 120_000] as const;
 
@@ -22,21 +22,79 @@ function assert(condition: unknown, message: string): asserts condition {
 function validateEvent(event: RhythmEvent, index: number, sections: Beatmap['sections']): void {
   assert(event && typeof event === 'object', `events[${index}] must be an object`);
   assert(typeof event.id === 'string' && event.id.length > 0, `events[${index}].id is required`);
-  assert(event.type === 'tap' || event.type === 'hold', `events[${index}].type is invalid`);
+  assert(event.type === 'tap' || event.type === 'hold' || event.type === 'burst', `events[${index}].type is invalid`);
   assert(Number.isInteger(event.startMs) && event.startMs >= 0, `events[${index}].startMs is invalid`);
   assert(isSectionId(event.section), `events[${index}].section is invalid`);
+  assert(typeof event.patternId === 'string' && event.patternId.length > 0, `events[${index}].patternId is required`);
+  assert(isPatternKind(event.patternKind), `events[${index}].patternKind is invalid`);
 
   if (event.type === 'hold') {
     const endMs = event.endMs;
     assert(typeof endMs === 'number' && Number.isInteger(endMs), `events[${index}].endMs is required for hold`);
     assert(endMs > event.startMs, `events[${index}].endMs must be after startMs`);
+    assert(event.patternKind === 'hold', `events[${index}] hold patternKind must be hold`);
+    assert(event.requiredPresses === undefined, `events[${index}].requiredPresses is only valid for burst`);
+  } else if (event.type === 'burst') {
+    const endMs = event.endMs;
+    assert(typeof endMs === 'number' && Number.isInteger(endMs), `events[${index}].endMs is required for burst`);
+    assert(endMs > event.startMs, `events[${index}].endMs must be after startMs`);
+    assert(endMs - event.startMs >= 300, `events[${index}] burst window must be at least 300ms`);
+    const requiredPresses = event.requiredPresses;
+    assert(typeof requiredPresses === 'number' && Number.isInteger(requiredPresses) && requiredPresses >= 2 && requiredPresses <= 5,
+      `events[${index}].requiredPresses must be an integer from 2 to 5`);
+    assert(event.patternKind === 'burst', `events[${index}] burst patternKind must be burst`);
   } else {
     assert(event.endMs === undefined, `events[${index}].endMs is only valid for hold`);
+    assert(event.requiredPresses === undefined, `events[${index}].requiredPresses is only valid for burst`);
+    assert(event.patternKind !== 'hold' && event.patternKind !== 'burst', `events[${index}] patternKind does not match type`);
   }
 
   const section = sections.find((candidate) => candidate.id === event.section && event.startMs >= candidate.startMs && event.startMs < candidate.endMs);
   assert(section, `events[${index}] must be inside its section`);
   assert((event.endMs ?? event.startMs) <= section.endMs, `events[${index}] must end inside its section`);
+}
+
+function isPatternKind(value: unknown): value is PatternKind {
+  return value === 'straight' || value === 'offbeat' || value === 'transition'
+    || value === 'hold' || value === 'rest' || value === 'burst';
+}
+
+function validatePatterns(beatmap: Beatmap): void {
+  assert(Array.isArray(beatmap.patterns) && beatmap.patterns.length > 0, 'beatmap patterns are required');
+  const patternIds = new Set<string>();
+  const eventById = new Map(beatmap.events.map((event) => [event.id, event]));
+  const referencedEventIds = new Set<string>();
+
+  beatmap.patterns.forEach((pattern, index) => {
+    assert(pattern && typeof pattern === 'object', `patterns[${index}] must be an object`);
+    assert(typeof pattern.id === 'string' && pattern.id.length > 0, `patterns[${index}].id is required`);
+    assert(!patternIds.has(pattern.id), `duplicate pattern id: ${pattern.id}`);
+    patternIds.add(pattern.id);
+    assert(isPatternKind(pattern.kind), `patterns[${index}].kind is invalid`);
+    assert(typeof pattern.label === 'string' && pattern.label.length > 0, `patterns[${index}].label is required`);
+    assert(Number.isInteger(pattern.startMs) && Number.isInteger(pattern.endMs) && pattern.endMs > pattern.startMs,
+      `patterns[${index}] times are invalid`);
+    assert(Array.isArray(pattern.eventIds), `patterns[${index}].eventIds is required`);
+
+    let previousStartMs = -1;
+    pattern.eventIds.forEach((eventId, eventIndex) => {
+      const event = eventById.get(eventId);
+      assert(event, `patterns[${index}].eventIds[${eventIndex}] references an unknown event`);
+      assert(!referencedEventIds.has(eventId), `event ${eventId} is referenced by multiple patterns`);
+      referencedEventIds.add(eventId);
+      assert(event!.patternId === pattern.id, `event ${eventId} does not point to pattern ${pattern.id}`);
+      assert(event!.startMs >= pattern.startMs && (event!.endMs ?? event!.startMs) <= pattern.endMs,
+        `event ${eventId} is outside pattern ${pattern.id}`);
+      assert(event!.startMs >= previousStartMs, `patterns[${index}].eventIds are out of order`);
+      previousStartMs = event!.startMs;
+    });
+    if (pattern.kind !== 'rest') assert(pattern.eventIds.length > 0, `patterns[${index}] non-rest pattern must contain events`);
+  });
+
+  beatmap.events.forEach((event) => {
+    assert(patternIds.has(event.patternId), `event ${event.id} references an unknown pattern`);
+    assert(referencedEventIds.has(event.id), `event ${event.id} is not included in its pattern`);
+  });
 }
 
 export type BeatmapValidationOptions = { allowShortChart?: boolean };
@@ -49,6 +107,7 @@ export function validateBeatmap(input: unknown, options: BeatmapValidationOption
   assert(Array.isArray(beatmap.timeSignature) && beatmap.timeSignature[0] === 4 && beatmap.timeSignature[1] === 4, 'time signature must be 4/4');
   assert(Array.isArray(beatmap.sections) && beatmap.sections.length === SECTION_ORDER.length, 'beatmap must contain six sections');
   assert(Array.isArray(beatmap.events), 'beatmap events are required');
+  assert(Array.isArray(beatmap.patterns), 'beatmap patterns are required');
   const minimumEvents = options.allowShortChart ? 1 : 90;
   assert(beatmap.events.length >= minimumEvents && beatmap.events.length <= 120,
     options.allowShortChart ? 'test beatmap must contain at least one event and no more than 120' : 'beatmap must contain between 90 and 120 events');
@@ -81,6 +140,8 @@ export function validateBeatmap(input: unknown, options: BeatmapValidationOption
     previousStartMs = event.startMs;
     validateEvent(event, index, sections);
   });
+
+  validatePatterns(beatmap as Beatmap);
 
   return beatmap as Beatmap;
 }

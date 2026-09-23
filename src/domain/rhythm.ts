@@ -1,5 +1,6 @@
-export type NoteType = 'tap' | 'hold';
+export type NoteType = 'tap' | 'hold' | 'burst';
 export type Judgement = 'perfect' | 'good' | 'miss';
+export type PatternKind = 'straight' | 'offbeat' | 'transition' | 'hold' | 'rest' | 'burst';
 
 export type SectionId = 'arrival' | 'keyboard' | 'mail' | 'meeting' | 'copy' | 'departure';
 
@@ -9,6 +10,18 @@ export type RhythmEvent = {
   startMs: number;
   endMs?: number;
   section: SectionId;
+  patternId: string;
+  patternKind: PatternKind;
+  requiredPresses?: number;
+};
+
+export type BeatmapPattern = {
+  id: string;
+  kind: PatternKind;
+  label: string;
+  startMs: number;
+  endMs: number;
+  eventIds: string[];
 };
 
 export type Beatmap = {
@@ -16,6 +29,7 @@ export type Beatmap = {
   bpm: 110;
   timeSignature: [4, 4];
   events: RhythmEvent[];
+  patterns: BeatmapPattern[];
   sections: Array<{ id: SectionId; startMs: number; endMs: number }>;
 };
 

@@ -31,12 +31,20 @@ describe('office-day-01 beatmap', () => {
       [...beatmap.events.map((event) => event.startMs)].sort((left, right) => left - right),
     );
     expect(new Set(beatmap.events.map((event) => event.id)).size).toBe(96);
+    expect(beatmap.patterns.length).toBeGreaterThan(30);
+    expect(new Set(beatmap.patterns.map((pattern) => pattern.kind))).toEqual(
+      new Set(['straight', 'offbeat', 'transition', 'hold', 'rest', 'burst']),
+    );
+    expect(beatmap.events.filter((event) => event.type === 'burst')).toHaveLength(8);
+    expect(beatmap.events.filter((event) => event.type === 'burst').every((event) =>
+      event.requiredPresses! >= 2 && event.requiredPresses! <= 5 && event.endMs! - event.startMs >= 300,
+    )).toBe(true);
     for (const event of beatmap.events) {
       const section = beatmap.sections.find(({ id }) => id === event.section);
       expect(section).toBeDefined();
       expect(event.startMs).toBeGreaterThanOrEqual(section!.startMs);
       expect(event.startMs).toBeLessThan(section!.endMs);
-      if (event.type === 'hold') {
+      if (event.type === 'hold' || event.type === 'burst') {
         expect(event.endMs).toBeDefined();
         expect(event.endMs!).toBeGreaterThan(event.startMs);
         expect(event.endMs!).toBeLessThanOrEqual(section!.endMs);
@@ -49,6 +57,16 @@ describe('office-day-01 beatmap', () => {
     const sections = beatmapJson.sections.map((section) => ({ ...section }));
     sections[sections.length - 1].endMs += 1;
     expect(() => validateBeatmap({ ...beatmapJson, sections })).toThrow(/chart boundaries/);
+  });
+
+  it('rejects invalid burst metadata and orphan pattern references', () => {
+    const invalidBurst = structuredClone(beatmapJson);
+    invalidBurst.events.find((event) => event.type === 'burst')!.requiredPresses = 1;
+    expect(() => validateBeatmap(invalidBurst)).toThrow(/requiredPresses/);
+
+    const orphan = structuredClone(beatmapJson);
+    orphan.events[0].patternId = 'missing-pattern';
+    expect(() => validateBeatmap(orphan)).toThrow(/unknown pattern|does not point/);
   });
 
   it('accepts the shorter test fixture only when explicitly enabled for E2E', () => {

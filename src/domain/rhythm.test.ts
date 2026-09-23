@@ -11,6 +11,7 @@ describe('beatmap domain contract', () => {
     expect(beatmap.timeSignature).toEqual([4, 4]);
     expect(beatmap.sections).toHaveLength(6);
     expect(beatmap.events).toHaveLength(96);
+    expect(beatmap.patterns.length).toBeGreaterThan(0);
   });
 
   it('rejects duplicate event ids and invalid hold timing', () => {
@@ -23,6 +24,17 @@ describe('beatmap domain contract', () => {
     invalidHold.events[1].endMs = invalidHold.events[1].startMs;
 
     expect(() => validateBeatmap(invalidHold)).toThrow('endMs must be after startMs');
+  });
+
+  it('rejects an invalid burst window or pattern reference', () => {
+    const invalidBurst = structuredClone(beatmapJson);
+    const burst = invalidBurst.events.find((event) => event.type === 'burst')!;
+    burst.endMs = burst.startMs + 100;
+    expect(() => validateBeatmap(invalidBurst)).toThrow(/burst window/);
+
+    const invalidPattern = structuredClone(beatmapJson);
+    invalidPattern.events[0].patternId = 'not-present';
+    expect(() => validateBeatmap(invalidPattern)).toThrow(/unknown pattern|does not point/);
   });
 
   it('rejects sections that are not contiguous and ordered', () => {

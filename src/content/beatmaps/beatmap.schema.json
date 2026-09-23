@@ -3,13 +3,31 @@
   "$id": "https://vibe-game.local/schemas/beatmap.schema.json",
   "title": "Office Rhythm Beatmap",
   "type": "object",
-  "required": ["id", "bpm", "timeSignature", "events", "sections"],
+  "required": [
+    "id",
+    "bpm",
+    "timeSignature",
+    "events",
+    "patterns",
+    "sections"
+  ],
   "properties": {
-    "id": { "const": "office-day-01" },
-    "bpm": { "const": 110 },
+    "id": {
+      "const": "office-day-01"
+    },
+    "bpm": {
+      "const": 110
+    },
     "timeSignature": {
       "type": "array",
-      "prefixItems": [{ "const": 4 }, { "const": 4 }],
+      "prefixItems": [
+        {
+          "const": 4
+        },
+        {
+          "const": 4
+        }
+      ],
       "minItems": 2,
       "maxItems": 2
     },
@@ -17,58 +35,354 @@
       "type": "array",
       "minItems": 90,
       "maxItems": 120,
-      "items": { "$ref": "#/$defs/event" }
+      "items": {
+        "$ref": "#/$defs/event"
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/pattern"
+      }
     },
     "sections": {
       "type": "array",
       "minItems": 6,
       "maxItems": 6,
       "prefixItems": [
-        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "arrival" }, "startMs": { "const": 0 }, "endMs": { "const": 19636 } } }] },
-        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "keyboard" }, "startMs": { "const": 19636 }, "endMs": { "const": 39273 } } }] },
-        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "mail" }, "startMs": { "const": 39273 }, "endMs": { "const": 58909 } } }] },
-        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "meeting" }, "startMs": { "const": 58909 }, "endMs": { "const": 78545 } } }] },
-        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "copy" }, "startMs": { "const": 78545 }, "endMs": { "const": 98182 } } }] },
-        { "allOf": [{ "$ref": "#/$defs/section" }, { "type": "object", "properties": { "id": { "const": "departure" }, "startMs": { "const": 98182 }, "endMs": { "const": 120000 } } }] }
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/section"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "const": "arrival"
+                },
+                "startMs": {
+                  "const": 0
+                },
+                "endMs": {
+                  "const": 19636
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/section"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "const": "keyboard"
+                },
+                "startMs": {
+                  "const": 19636
+                },
+                "endMs": {
+                  "const": 39273
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/section"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "const": "mail"
+                },
+                "startMs": {
+                  "const": 39273
+                },
+                "endMs": {
+                  "const": 58909
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/section"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "const": "meeting"
+                },
+                "startMs": {
+                  "const": 58909
+                },
+                "endMs": {
+                  "const": 78545
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/section"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "const": "copy"
+                },
+                "startMs": {
+                  "const": 78545
+                },
+                "endMs": {
+                  "const": 98182
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/section"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "const": "departure"
+                },
+                "startMs": {
+                  "const": 98182
+                },
+                "endMs": {
+                  "const": 120000
+                }
+              }
+            }
+          ]
+        }
       ],
       "items": false
     }
   },
   "$defs": {
     "sectionId": {
-      "enum": ["arrival", "keyboard", "mail", "meeting", "copy", "departure"]
+      "enum": [
+        "arrival",
+        "keyboard",
+        "mail",
+        "meeting",
+        "copy",
+        "departure"
+      ]
+    },
+    "patternKind": {
+      "enum": [
+        "straight",
+        "offbeat",
+        "transition",
+        "hold",
+        "rest",
+        "burst"
+      ]
     },
     "section": {
       "type": "object",
-      "required": ["id", "startMs", "endMs"],
+      "required": [
+        "id",
+        "startMs",
+        "endMs"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/sectionId" },
-        "startMs": { "type": "integer", "minimum": 0 },
-        "endMs": { "type": "integer", "minimum": 1 }
+        "id": {
+          "$ref": "#/$defs/sectionId"
+        },
+        "startMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endMs": {
+          "type": "integer",
+          "minimum": 1
+        }
       },
       "additionalProperties": false
     },
     "event": {
       "type": "object",
-      "required": ["id", "type", "startMs", "section"],
+      "required": [
+        "id",
+        "type",
+        "startMs",
+        "section",
+        "patternId",
+        "patternKind"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "type": { "enum": ["tap", "hold"] },
-        "startMs": { "type": "integer", "minimum": 0 },
-        "endMs": { "type": "integer", "minimum": 1 },
-        "section": { "$ref": "#/$defs/sectionId" }
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "tap",
+            "hold",
+            "burst"
+          ]
+        },
+        "startMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "section": {
+          "$ref": "#/$defs/sectionId"
+        },
+        "patternId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "patternKind": {
+          "$ref": "#/$defs/patternKind"
+        },
+        "requiredPresses": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 5
+        }
       },
       "allOf": [
         {
-          "if": { "properties": { "type": { "const": "hold" } } },
-          "then": {
-            "required": ["endMs"],
+          "if": {
             "properties": {
-              "endMs": { "type": "integer", "minimum": 1 }
+              "type": {
+                "const": "hold"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "endMs"
+            ],
+            "properties": {
+              "endMs": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "patternKind": {
+                "const": "hold"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "burst"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "endMs",
+              "requiredPresses"
+            ],
+            "properties": {
+              "endMs": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "patternKind": {
+                "const": "burst"
+              },
+              "requiredPresses": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 5
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "tap"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "patternKind": {
+                "enum": [
+                  "straight",
+                  "offbeat",
+                  "transition"
+                ]
+              }
             }
           }
         }
       ],
+      "additionalProperties": false
+    },
+    "pattern": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "startMs",
+        "endMs",
+        "eventIds"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "$ref": "#/$defs/patternKind"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "startMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "eventIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
       "additionalProperties": false
     }
   },
