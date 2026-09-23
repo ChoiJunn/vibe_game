@@ -51,14 +51,14 @@ describe('MusicTrackPlayer', () => {
     expect(fake.decodeAudioData).toHaveBeenCalledTimes(1);
   });
 
-  it('ships a 120-second WAV with a verified 110 BPM pulse', () => {
+  it('ships a 120-second WAV with a verified 155 BPM pulse', () => {
     const wav = readFileSync(resolve(process.cwd(), 'public/game/audio/office-groove.wav'));
     expect(wav.toString('ascii', 0, 4)).toBe('RIFF');
     expect(wav.toString('ascii', 8, 12)).toBe('WAVE');
     const samples = wav.readUInt32LE(40) / (wav.readUInt16LE(34) / 8);
     const seconds = samples / wav.readUInt32LE(24);
     expect(seconds).toBe(120);
-    expect(seconds * 110 / 60).toBe(220);
+    expect(seconds * 155 / 60).toBe(310);
   });
 });
 

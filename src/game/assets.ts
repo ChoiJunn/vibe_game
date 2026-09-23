@@ -2,6 +2,7 @@ import type { SectionId } from '@/domain/rhythm';
 
 type AssetReference = { key: string; path: string };
 type SectionAssets = Record<SectionId, AssetReference>;
+type BackgroundAssets = SectionAssets & { fever: AssetReference };
 
 export const GAME_ASSETS = {
   backgrounds: {
@@ -11,13 +12,15 @@ export const GAME_ASSETS = {
     meeting: { key: 'background-meeting', path: '/game/art/background/meeting.png' },
     copy: { key: 'background-copy', path: '/game/art/background/copy.png' },
     departure: { key: 'background-departure', path: '/game/art/background/departure.png' },
-  } satisfies SectionAssets,
+    fever: { key: 'background-fever', path: '/game/art/background/fever-stage.png' },
+  } satisfies BackgroundAssets,
   protagonist: {
     walkA: { key: 'protagonist-walk-a', path: '/game/art/character/protagonist-walk-a.png' },
     walkB: { key: 'protagonist-walk-b', path: '/game/art/character/protagonist-walk-b.png' },
     good: { key: 'protagonist-good', path: '/game/art/character/protagonist-good.png' },
     perfect: { key: 'protagonist-perfect', path: '/game/art/character/protagonist-perfect.png' },
     miss: { key: 'protagonist-miss', path: '/game/art/character/protagonist-miss.png' },
+    fever: { key: 'protagonist-fever', path: '/game/art/character/protagonist-fever.png' },
   },
   moka: {
     tumbler: { key: 'moka-tumbler', path: '/game/art/mascot/moka-tumbler.png' },
@@ -25,6 +28,7 @@ export const GAME_ASSETS = {
     good: { key: 'moka-good', path: '/game/art/mascot/moka-good.png' },
     perfect: { key: 'moka-perfect', path: '/game/art/mascot/moka-perfect.png' },
     miss: { key: 'moka-miss', path: '/game/art/mascot/moka-miss.png' },
+    fever: { key: 'moka-fever', path: '/game/art/mascot/moka-fever.png' },
   },
   notes: {
     arrival: { key: 'note-arrival', path: '/game/art/notes/arrival.png' },
@@ -35,4 +39,3 @@ export const GAME_ASSETS = {
     departure: { key: 'note-departure', path: '/game/art/notes/departure.png' },
   } satisfies SectionAssets,
 } as const;
-

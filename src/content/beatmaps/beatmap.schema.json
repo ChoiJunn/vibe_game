@@ -16,7 +16,7 @@
       "const": "office-day-01"
     },
     "bpm": {
-      "const": 110
+      "const": 155
     },
     "timeSignature": {
       "type": "array",
@@ -33,8 +33,8 @@
     },
     "events": {
       "type": "array",
-      "minItems": 90,
-      "maxItems": 120,
+      "minItems": 170,
+      "maxItems": 190,
       "items": {
         "$ref": "#/$defs/event"
       }
@@ -66,7 +66,7 @@
                   "const": 0
                 },
                 "endMs": {
-                  "const": 19636
+                "const": 20000
                 }
               }
             }
@@ -84,10 +84,10 @@
                   "const": "keyboard"
                 },
                 "startMs": {
-                  "const": 19636
+                  "const": 20000
                 },
                 "endMs": {
-                  "const": 39273
+                "const": 40000
                 }
               }
             }
@@ -105,10 +105,10 @@
                   "const": "mail"
                 },
                 "startMs": {
-                  "const": 39273
+                  "const": 40000
                 },
                 "endMs": {
-                  "const": 58909
+                "const": 60000
                 }
               }
             }
@@ -126,10 +126,10 @@
                   "const": "meeting"
                 },
                 "startMs": {
-                  "const": 58909
+                  "const": 60000
                 },
                 "endMs": {
-                  "const": 78545
+                "const": 80000
                 }
               }
             }
@@ -147,10 +147,10 @@
                   "const": "copy"
                 },
                 "startMs": {
-                  "const": 78545
+                  "const": 80000
                 },
                 "endMs": {
-                  "const": 98182
+                "const": 100000
                 }
               }
             }
@@ -168,7 +168,7 @@
                   "const": "departure"
                 },
                 "startMs": {
-                  "const": 98182
+                  "const": 100000
                 },
                 "endMs": {
                   "const": 120000

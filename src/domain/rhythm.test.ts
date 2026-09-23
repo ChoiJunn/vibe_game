@@ -7,10 +7,10 @@ describe('beatmap domain contract', () => {
     const beatmap = validateBeatmap(beatmapJson);
 
     expect(beatmap.id).toBe('office-day-01');
-    expect(beatmap.bpm).toBe(110);
+    expect(beatmap.bpm).toBe(155);
     expect(beatmap.timeSignature).toEqual([4, 4]);
     expect(beatmap.sections).toHaveLength(6);
-    expect(beatmap.events).toHaveLength(96);
+    expect(beatmap.events).toHaveLength(180);
     expect(beatmap.patterns.length).toBeGreaterThan(0);
   });
 
@@ -21,7 +21,8 @@ describe('beatmap domain contract', () => {
     expect(() => validateBeatmap(duplicate)).toThrow(BeatmapValidationError);
 
     const invalidHold = structuredClone(beatmapJson);
-    invalidHold.events[1].endMs = invalidHold.events[1].startMs;
+    const invalidHoldEvent = invalidHold.events.find((event) => event.type === 'hold')!;
+    invalidHoldEvent.endMs = invalidHoldEvent.startMs;
 
     expect(() => validateBeatmap(invalidHold)).toThrow('endMs must be after startMs');
   });

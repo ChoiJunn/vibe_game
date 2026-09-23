@@ -2,7 +2,7 @@ import type { Beatmap } from '@/domain/rhythm';
 
 const e2eQuickBeatmap: Beatmap = {
   id: 'office-day-01',
-  bpm: 110,
+  bpm: 155,
   timeSignature: [4, 4],
   sections: [
     { id: 'arrival', startMs: 0, endMs: 17455 },

@@ -52,7 +52,7 @@ describe('RhythmGameController', () => {
     expect(first.events).toBe(beatmap.events);
     expect(second.events).toBe(first.events);
     expect(first.totalEvents).toBe(beatmap.events.length);
-    expect(first.totalEvents).toBe(96);
+    expect(first.totalEvents).toBe(180);
   });
 
   it('misses a tap only strictly after the late Good deadline and never twice', async () => {
@@ -82,10 +82,10 @@ describe('RhythmGameController', () => {
     });
 
     await controller.start();
-    controller.update(7000);
+    controller.update(beatmap.events[4].startMs + 160);
 
     expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: 4, missCount: 4, hearts: 1 });
-    controller.update(7000);
+    controller.update(beatmap.events[4].startMs + 160);
     expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: 4, missCount: 4, hearts: 1 });
   });
 
@@ -114,7 +114,7 @@ describe('RhythmGameController', () => {
     expect(scheduler.pause).toHaveBeenCalledTimes(1);
 
     controller.handleInput({ type: 'keyup', songPositionMs: event.endMs! + 170 });
-    controller.update(event.endMs! + 500);
+    controller.update(event.endMs! + 10);
     expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: holdIndex + 1, missCount: 1 });
   });
 
@@ -173,7 +173,7 @@ describe('RhythmGameController', () => {
     controller.update(event.endMs!);
     expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: burstIndex + 1, perfectCount: 1 });
     const judgedSnapshot = controller.getSnapshot();
-    controller.update(event.endMs! + 500);
+    controller.update(event.endMs! + 10);
     expect(controller.getSnapshot().runState).toEqual(judgedSnapshot.runState);
   });
 

@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const output = resolve(scriptDir, '../public/game/audio/office-groove.wav');
 const sampleRate = 22_050;
-const bpm = 110;
+const bpm = 155;
 const durationSeconds = 120;
 const beatSeconds = 60 / bpm;
 const samples = new Float32Array(sampleRate * durationSeconds);
@@ -60,11 +60,17 @@ for (let beat = 0; beat < beatCount; beat += 1) {
   if (beatInBar === 0 || beatInBar === 2) addKick(start);
   if (beatInBar === 1 || beatInBar === 3) addNoise(start, 0.16, 0.23, beat * 881 + 17);
   addNoise(start, 0.045, 0.075, beat * 991 + 41);
+  const offbeat = start + beatSeconds * 0.5;
+  if (offbeat < durationSeconds) addNoise(offbeat, 0.055, 0.105, beat * 1277 + 73);
   const bassNotes = [chord[0] / 2, chord[0] / 2, chord[1] / 2, chord[0] / 2, chord[2] / 2, chord[1] / 2, chord[0] / 2, chord[1] / 2];
   addTone(start, beatSeconds * 0.34, bassNotes[beat % bassNotes.length], 0.25, true);
   if (beatInBar === 0 || beatInBar === 2) chord.forEach((frequency, note) => addTone(start + 0.035, 0.19, frequency, note === 0 ? 0.07 : 0.045));
   const chop = start + beatSeconds * 0.52;
   if (chop < durationSeconds) addTone(chop, 0.075, chord[(bar + beatInBar) % chord.length] * 2, 0.035);
+  if (bar % 4 === 3) {
+    const lift = start + beatSeconds * 0.25;
+    if (lift < durationSeconds) addTone(lift, 0.09, chord[(beat + 1) % chord.length] * 3, 0.055);
+  }
 }
 
 const pcmBytes = samples.length * 2;

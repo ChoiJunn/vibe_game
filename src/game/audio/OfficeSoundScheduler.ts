@@ -1,6 +1,6 @@
 import type { Beatmap, RhythmEvent } from '@/domain/rhythm';
 import { AudioClock } from './AudioClock';
-import { createBeatAccent, createSectionSound, type ScheduledAudioNode } from './instruments';
+import { createBeatAccent, createFeverAccent, createSectionSound, type ScheduledAudioNode } from './instruments';
 import { MusicTrackPlayer } from './MusicTrackPlayer';
 import { clampAudioSettings, DEFAULT_AUDIO_SETTINGS, type AudioSettings } from './types';
 
@@ -26,6 +26,7 @@ export class OfficeSoundScheduler {
   private musicTrack: MusicTrackPlayer | null = null;
   private musicLoad: Promise<void> | null = null;
   private musicStatus: MusicStatus = 'idle';
+  private feverActive = false;
 
   constructor(clock: AudioClock, options: OfficeSoundSchedulerOptions = {}) {
     this.clock = clock;
@@ -97,6 +98,7 @@ export class OfficeSoundScheduler {
     this.running = false;
     this.musicTrack?.stop();
     this.musicStatus = 'idle';
+    this.feverActive = false;
     this.scheduledEventIds.clear();
     this.nextMusicStepIndex = 0;
     this.activeNodes.forEach((node) => {
@@ -120,6 +122,10 @@ export class OfficeSoundScheduler {
 
   getMusicStatus(): MusicStatus {
     return this.musicStatus;
+  }
+
+  setFeverActive(active: boolean): void {
+    this.feverActive = active;
   }
 
   private tick(): void {
@@ -169,6 +175,15 @@ export class OfficeSoundScheduler {
             context,
             when,
             durationSec: Math.min(0.08, durationSec),
+            volume: this.settings.sfxVolume,
+          destination: context.destination,
+        })
+        : []),
+      ...(this.settings.sfxVolume > 0 && this.feverActive
+        ? createFeverAccent({
+            context,
+            when,
+            durationSec: Math.min(0.16, durationSec),
             volume: this.settings.sfxVolume,
             destination: context.destination,
           })

@@ -54,7 +54,7 @@ export class JudgementFeedback {
 }
 
 export function getFeverCue(): { label: string; color: string; startScale: number; duration: number } {
-  return { label: "FEVER!!  x1.25", color: "#f2a7ff", startScale: 0.68, duration: 820 };
+  return { label: "FEVER!!  x1.5", color: "#f2a7ff", startScale: 0.68, duration: 820 };
 }
 
 export function getJudgementCue(judgement: Judgement): {

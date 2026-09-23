@@ -25,7 +25,7 @@ export default function GamePage() {
         <p>스페이스바로 박자를 맞추고, 잠깐 자리를 비울 땐 언제든 멈춰도 괜찮아요.</p>
         <Link href="/leaderboard">순위표로 이동</Link>
         <div className="game-stage-shell">
-          <div className="game-stage-shell__topline"><span>OFFICE MORNING MIX</span><span>06 SCENES <i /> 96 BEATS</span></div>
+          <div className="game-stage-shell__topline"><span>OFFICE MORNING MIX</span><span>06 SCENES <i /> 180 BEATS</span></div>
         <GameViewport className="game-frame--stage">
           <PhaserCanvas />
         </GameViewport>

@@ -1,6 +1,6 @@
 {
   "id": "office-day-01",
-  "bpm": 110,
+  "bpm": 155,
   "timeSignature": [
     4,
     4
@@ -9,1920 +9,2110 @@
     {
       "id": "arrival",
       "startMs": 0,
-      "endMs": 19636
+      "endMs": 20000
     },
     {
       "id": "keyboard",
-      "startMs": 19636,
-      "endMs": 39273
+      "startMs": 20000,
+      "endMs": 40000
     },
     {
       "id": "mail",
-      "startMs": 39273,
-      "endMs": 58909
+      "startMs": 40000,
+      "endMs": 60000
     },
     {
       "id": "meeting",
-      "startMs": 58909,
-      "endMs": 78545
+      "startMs": 60000,
+      "endMs": 80000
     },
     {
       "id": "copy",
-      "startMs": 78545,
-      "endMs": 98182
+      "startMs": 80000,
+      "endMs": 100000
     },
     {
       "id": "departure",
-      "startMs": 98182,
+      "startMs": 100000,
       "endMs": 120000
     }
   ],
   "events": [
     {
-      "id": "arrival-01",
+      "id": "arrival-001",
       "type": "tap",
-      "startMs": 818,
+      "startMs": 968,
       "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-01"
-    },
-    {
-      "id": "arrival-02",
-      "type": "hold",
-      "startMs": 2455,
-      "section": "arrival",
-      "endMs": 3000,
-      "patternKind": "hold",
-      "patternId": "arrival-hold-01"
-    },
-    {
-      "id": "arrival-03",
-      "type": "tap",
-      "startMs": 4091,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-02"
-    },
-    {
-      "id": "arrival-04",
-      "type": "tap",
-      "startMs": 5727,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-02"
-    },
-    {
-      "id": "arrival-05",
-      "type": "tap",
-      "startMs": 7364,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-02"
-    },
-    {
-      "id": "arrival-06",
-      "type": "tap",
-      "startMs": 9000,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-03"
-    },
-    {
-      "id": "arrival-07",
-      "type": "hold",
-      "startMs": 10636,
-      "section": "arrival",
-      "endMs": 11182,
-      "patternKind": "hold",
-      "patternId": "arrival-hold-02"
-    },
-    {
-      "id": "arrival-08",
-      "type": "tap",
-      "startMs": 12273,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-04"
-    },
-    {
-      "id": "arrival-09",
-      "type": "tap",
-      "startMs": 13909,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-04"
-    },
-    {
-      "id": "arrival-10",
-      "type": "tap",
-      "startMs": 15545,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-04"
-    },
-    {
-      "id": "arrival-11",
-      "type": "tap",
-      "startMs": 17182,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-05"
-    },
-    {
-      "id": "arrival-12",
-      "type": "tap",
-      "startMs": 18818,
-      "section": "arrival",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-05"
-    },
-    {
-      "id": "keyboard-01",
-      "type": "tap",
-      "startMs": 20182,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "arrival-straight-05"
-    },
-    {
-      "id": "keyboard-02",
-      "type": "tap",
-      "startMs": 21545,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-01"
-    },
-    {
-      "id": "keyboard-03",
-      "type": "tap",
-      "startMs": 22909,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-01"
-    },
-    {
-      "id": "keyboard-04",
-      "type": "hold",
-      "startMs": 24273,
-      "section": "keyboard",
-      "endMs": 24818,
-      "patternKind": "hold",
-      "patternId": "keyboard-hold-01"
-    },
-    {
-      "id": "keyboard-05",
-      "type": "tap",
-      "startMs": 25636,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-02"
-    },
-    {
-      "id": "keyboard-06",
-      "type": "tap",
-      "startMs": 27000,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-02"
-    },
-    {
-      "id": "keyboard-07",
-      "type": "tap",
-      "startMs": 28364,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-02"
-    },
-    {
-      "id": "keyboard-08",
-      "type": "tap",
-      "startMs": 29727,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-03"
-    },
-    {
-      "id": "keyboard-09",
-      "type": "tap",
-      "startMs": 31091,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-03"
-    },
-    {
-      "id": "keyboard-10",
-      "type": "tap",
-      "startMs": 32455,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-03"
-    },
-    {
-      "id": "keyboard-11",
-      "type": "hold",
-      "startMs": 33818,
-      "section": "keyboard",
-      "endMs": 34364,
-      "patternKind": "hold",
-      "patternId": "keyboard-hold-02"
-    },
-    {
-      "id": "keyboard-12",
-      "type": "tap",
-      "startMs": 35182,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-04"
-    },
-    {
-      "id": "keyboard-13",
-      "type": "tap",
-      "startMs": 36545,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-04"
-    },
-    {
-      "id": "keyboard-14",
-      "type": "tap",
-      "startMs": 38182,
-      "section": "keyboard",
-      "patternKind": "straight",
-      "patternId": "keyboard-straight-04"
-    },
-    {
-      "id": "mail-01",
-      "type": "tap",
-      "startMs": 39545,
-      "section": "mail",
       "patternKind": "offbeat",
-      "patternId": "mail-offbeat-01"
+      "patternId": "pattern-001"
     },
     {
-      "id": "mail-02",
+      "id": "arrival-002",
       "type": "tap",
-      "startMs": 40909,
-      "section": "mail",
+      "startMs": 1742,
+      "section": "arrival",
       "patternKind": "offbeat",
-      "patternId": "mail-offbeat-01"
+      "patternId": "pattern-001"
     },
     {
-      "id": "mail-03",
+      "id": "arrival-003",
       "type": "tap",
-      "startMs": 42000,
-      "section": "mail",
-      "patternKind": "offbeat",
-      "patternId": "mail-offbeat-01"
+      "startMs": 2710,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-001"
     },
     {
-      "id": "mail-04",
+      "id": "arrival-004",
+      "type": "tap",
+      "startMs": 3484,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-001"
+    },
+    {
+      "id": "arrival-005",
+      "type": "tap",
+      "startMs": 4258,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-002"
+    },
+    {
+      "id": "arrival-006",
       "type": "hold",
-      "startMs": 43364,
-      "section": "mail",
-      "endMs": 43909,
+      "startMs": 5613,
+      "endMs": 5963,
+      "section": "arrival",
       "patternKind": "hold",
-      "patternId": "mail-hold-01"
+      "patternId": "pattern-002"
     },
     {
-      "id": "mail-05",
+      "id": "arrival-007",
       "type": "tap",
-      "startMs": 44455,
-      "section": "mail",
+      "startMs": 6387,
+      "section": "arrival",
       "patternKind": "offbeat",
-      "patternId": "mail-offbeat-02"
+      "patternId": "pattern-002"
     },
     {
-      "id": "mail-06",
+      "id": "arrival-008",
+      "type": "tap",
+      "startMs": 6968,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-002"
+    },
+    {
+      "id": "arrival-009",
+      "type": "tap",
+      "startMs": 8129,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-003"
+    },
+    {
+      "id": "arrival-010",
+      "type": "tap",
+      "startMs": 8903,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-003"
+    },
+    {
+      "id": "arrival-011",
+      "type": "tap",
+      "startMs": 9871,
+      "section": "arrival",
+      "patternKind": "offbeat",
+      "patternId": "pattern-003"
+    },
+    {
+      "id": "arrival-012",
+      "type": "tap",
+      "startMs": 11032,
+      "section": "arrival",
+      "patternKind": "offbeat",
+      "patternId": "pattern-003"
+    },
+    {
+      "id": "arrival-013",
+      "type": "hold",
+      "startMs": 11613,
+      "endMs": 11963,
+      "section": "arrival",
+      "patternKind": "hold",
+      "patternId": "pattern-004"
+    },
+    {
+      "id": "arrival-014",
+      "type": "tap",
+      "startMs": 12387,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-004"
+    },
+    {
+      "id": "arrival-015",
+      "type": "tap",
+      "startMs": 13548,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-004"
+    },
+    {
+      "id": "arrival-016",
+      "type": "tap",
+      "startMs": 14516,
+      "section": "arrival",
+      "patternKind": "offbeat",
+      "patternId": "pattern-004"
+    },
+    {
+      "id": "arrival-017",
+      "type": "tap",
+      "startMs": 15290,
+      "section": "arrival",
+      "patternKind": "offbeat",
+      "patternId": "pattern-005"
+    },
+    {
+      "id": "arrival-018",
+      "type": "tap",
+      "startMs": 16258,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-005"
+    },
+    {
+      "id": "arrival-019",
+      "type": "tap",
+      "startMs": 17032,
+      "section": "arrival",
+      "patternKind": "straight",
+      "patternId": "pattern-005"
+    },
+    {
+      "id": "arrival-020",
+      "type": "hold",
+      "startMs": 17806,
+      "endMs": 18156,
+      "section": "arrival",
+      "patternKind": "hold",
+      "patternId": "pattern-005"
+    },
+    {
+      "id": "keyboard-021",
+      "type": "tap",
+      "startMs": 20581,
+      "section": "keyboard",
+      "patternKind": "transition",
+      "patternId": "pattern-006"
+    },
+    {
+      "id": "keyboard-022",
+      "type": "tap",
+      "startMs": 21355,
+      "section": "keyboard",
+      "patternKind": "offbeat",
+      "patternId": "pattern-006"
+    },
+    {
+      "id": "keyboard-023",
       "type": "burst",
-      "startMs": 45818,
-      "section": "mail",
-      "endMs": 46318,
-      "requiredPresses": 2,
+      "startMs": 21935,
+      "endMs": 22415,
+      "section": "keyboard",
       "patternKind": "burst",
-      "patternId": "mail-burst-01"
+      "patternId": "pattern-006",
+      "requiredPresses": 4
     },
     {
-      "id": "mail-07",
+      "id": "keyboard-024",
       "type": "tap",
-      "startMs": 46909,
-      "section": "mail",
-      "patternKind": "offbeat",
-      "patternId": "mail-offbeat-03"
+      "startMs": 22710,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-006"
     },
     {
-      "id": "mail-08",
+      "id": "keyboard-025",
       "type": "tap",
-      "startMs": 48273,
-      "section": "mail",
-      "patternKind": "offbeat",
-      "patternId": "mail-offbeat-03"
+      "startMs": 23484,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-007"
     },
     {
-      "id": "mail-09",
+      "id": "keyboard-026",
+      "type": "tap",
+      "startMs": 24452,
+      "section": "keyboard",
+      "patternKind": "offbeat",
+      "patternId": "pattern-007"
+    },
+    {
+      "id": "keyboard-027",
+      "type": "tap",
+      "startMs": 25226,
+      "section": "keyboard",
+      "patternKind": "offbeat",
+      "patternId": "pattern-007"
+    },
+    {
+      "id": "keyboard-028",
+      "type": "tap",
+      "startMs": 25806,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-007"
+    },
+    {
+      "id": "keyboard-029",
       "type": "hold",
-      "startMs": 49364,
-      "section": "mail",
-      "endMs": 49909,
+      "startMs": 26581,
+      "endMs": 26931,
+      "section": "keyboard",
       "patternKind": "hold",
-      "patternId": "mail-hold-02"
+      "patternId": "pattern-008"
     },
     {
-      "id": "mail-10",
+      "id": "keyboard-030",
       "type": "tap",
-      "startMs": 50727,
-      "section": "mail",
-      "patternKind": "offbeat",
-      "patternId": "mail-offbeat-04"
+      "startMs": 27355,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-008"
     },
     {
-      "id": "mail-11",
+      "id": "keyboard-031",
       "type": "tap",
-      "startMs": 51818,
-      "section": "mail",
+      "startMs": 28323,
+      "section": "keyboard",
       "patternKind": "offbeat",
-      "patternId": "mail-offbeat-04"
+      "patternId": "pattern-008"
     },
     {
-      "id": "mail-12",
+      "id": "keyboard-032",
       "type": "tap",
-      "startMs": 53182,
-      "section": "mail",
+      "startMs": 29097,
+      "section": "keyboard",
       "patternKind": "offbeat",
-      "patternId": "mail-offbeat-04"
+      "patternId": "pattern-008"
     },
     {
-      "id": "mail-13",
+      "id": "keyboard-033",
       "type": "tap",
-      "startMs": 54273,
-      "section": "mail",
-      "patternKind": "offbeat",
-      "patternId": "mail-offbeat-05"
+      "startMs": 29677,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-009"
     },
     {
-      "id": "mail-14",
-      "type": "hold",
-      "startMs": 55636,
-      "section": "mail",
-      "endMs": 56182,
-      "patternKind": "hold",
-      "patternId": "mail-hold-03"
-    },
-    {
-      "id": "mail-15",
+      "id": "keyboard-034",
       "type": "tap",
-      "startMs": 57273,
-      "section": "mail",
-      "patternKind": "offbeat",
-      "patternId": "mail-offbeat-06"
+      "startMs": 30452,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-009"
     },
     {
-      "id": "meeting-01",
+      "id": "keyboard-035",
       "type": "tap",
-      "startMs": 59182,
-      "section": "meeting",
-      "patternKind": "offbeat",
-      "patternId": "mail-offbeat-06"
+      "startMs": 31226,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-009"
     },
     {
-      "id": "meeting-02",
+      "id": "keyboard-036",
+      "type": "tap",
+      "startMs": 32194,
+      "section": "keyboard",
+      "patternKind": "offbeat",
+      "patternId": "pattern-009"
+    },
+    {
+      "id": "keyboard-037",
       "type": "burst",
-      "startMs": 60273,
-      "section": "meeting",
-      "endMs": 60773,
-      "requiredPresses": 3,
+      "startMs": 32968,
+      "endMs": 33448,
+      "section": "keyboard",
       "patternKind": "burst",
-      "patternId": "meeting-burst-01"
+      "patternId": "pattern-010",
+      "requiredPresses": 3
     },
     {
-      "id": "meeting-03",
-      "type": "hold",
-      "startMs": 61364,
-      "section": "meeting",
-      "endMs": 61909,
-      "patternKind": "hold",
-      "patternId": "meeting-hold-01"
-    },
-    {
-      "id": "meeting-04",
+      "id": "keyboard-038",
       "type": "tap",
-      "startMs": 62455,
+      "startMs": 33548,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-010"
+    },
+    {
+      "id": "keyboard-039",
+      "type": "tap",
+      "startMs": 34323,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-010"
+    },
+    {
+      "id": "keyboard-040",
+      "type": "tap",
+      "startMs": 35097,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-010"
+    },
+    {
+      "id": "keyboard-041",
+      "type": "tap",
+      "startMs": 36065,
+      "section": "keyboard",
+      "patternKind": "offbeat",
+      "patternId": "pattern-011"
+    },
+    {
+      "id": "keyboard-042",
+      "type": "tap",
+      "startMs": 36839,
+      "section": "keyboard",
+      "patternKind": "offbeat",
+      "patternId": "pattern-011"
+    },
+    {
+      "id": "keyboard-043",
+      "type": "tap",
+      "startMs": 37419,
+      "section": "keyboard",
+      "patternKind": "straight",
+      "patternId": "pattern-011"
+    },
+    {
+      "id": "keyboard-044",
+      "type": "hold",
+      "startMs": 38194,
+      "endMs": 38544,
+      "section": "keyboard",
+      "patternKind": "hold",
+      "patternId": "pattern-011"
+    },
+    {
+      "id": "mail-045",
+      "type": "tap",
+      "startMs": 40387,
+      "section": "mail",
+      "patternKind": "transition",
+      "patternId": "pattern-012"
+    },
+    {
+      "id": "mail-046",
+      "type": "tap",
+      "startMs": 41355,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-012"
+    },
+    {
+      "id": "mail-047",
+      "type": "tap",
+      "startMs": 42129,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-012"
+    },
+    {
+      "id": "mail-048",
+      "type": "tap",
+      "startMs": 42323,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-012"
+    },
+    {
+      "id": "mail-049",
+      "type": "tap",
+      "startMs": 43097,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-013"
+    },
+    {
+      "id": "mail-050",
+      "type": "tap",
+      "startMs": 43871,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-013"
+    },
+    {
+      "id": "mail-051",
+      "type": "hold",
+      "startMs": 44452,
+      "endMs": 44802,
+      "section": "mail",
+      "patternKind": "hold",
+      "patternId": "pattern-013"
+    },
+    {
+      "id": "mail-052",
+      "type": "tap",
+      "startMs": 45226,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-013"
+    },
+    {
+      "id": "mail-053",
+      "type": "burst",
+      "startMs": 45806,
+      "endMs": 46114,
+      "section": "mail",
+      "patternKind": "burst",
+      "patternId": "pattern-014",
+      "requiredPresses": 4
+    },
+    {
+      "id": "mail-054",
+      "type": "tap",
+      "startMs": 46194,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-014"
+    },
+    {
+      "id": "mail-055",
+      "type": "tap",
+      "startMs": 46968,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-014"
+    },
+    {
+      "id": "mail-056",
+      "type": "tap",
+      "startMs": 47935,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-014"
+    },
+    {
+      "id": "mail-057",
+      "type": "tap",
+      "startMs": 48323,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-015"
+    },
+    {
+      "id": "mail-058",
+      "type": "tap",
+      "startMs": 48903,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-015"
+    },
+    {
+      "id": "mail-059",
+      "type": "tap",
+      "startMs": 49677,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-015"
+    },
+    {
+      "id": "mail-060",
+      "type": "hold",
+      "startMs": 50452,
+      "endMs": 50802,
+      "section": "mail",
+      "patternKind": "hold",
+      "patternId": "pattern-015"
+    },
+    {
+      "id": "mail-061",
+      "type": "tap",
+      "startMs": 51032,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-016"
+    },
+    {
+      "id": "mail-062",
+      "type": "tap",
+      "startMs": 51806,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-016"
+    },
+    {
+      "id": "mail-063",
+      "type": "tap",
+      "startMs": 52387,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-016"
+    },
+    {
+      "id": "mail-064",
+      "type": "tap",
+      "startMs": 52774,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-016"
+    },
+    {
+      "id": "mail-065",
+      "type": "tap",
+      "startMs": 53548,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-017"
+    },
+    {
+      "id": "mail-066",
+      "type": "hold",
+      "startMs": 54516,
+      "endMs": 54823,
+      "section": "mail",
+      "patternKind": "hold",
+      "patternId": "pattern-017"
+    },
+    {
+      "id": "mail-067",
+      "type": "tap",
+      "startMs": 54903,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-017"
+    },
+    {
+      "id": "mail-068",
+      "type": "tap",
+      "startMs": 55484,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-017"
+    },
+    {
+      "id": "mail-069",
+      "type": "burst",
+      "startMs": 56258,
+      "endMs": 56565,
+      "section": "mail",
+      "patternKind": "burst",
+      "patternId": "pattern-018",
+      "requiredPresses": 5
+    },
+    {
+      "id": "mail-070",
+      "type": "tap",
+      "startMs": 56645,
+      "section": "mail",
+      "patternKind": "straight",
+      "patternId": "pattern-018"
+    },
+    {
+      "id": "mail-071",
+      "type": "tap",
+      "startMs": 57613,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-018"
+    },
+    {
+      "id": "mail-072",
+      "type": "tap",
+      "startMs": 58387,
+      "section": "mail",
+      "patternKind": "offbeat",
+      "patternId": "pattern-018"
+    },
+    {
+      "id": "meeting-073",
+      "type": "tap",
+      "startMs": 60387,
       "section": "meeting",
       "patternKind": "transition",
-      "patternId": "meeting-transition-01"
+      "patternId": "pattern-019"
     },
     {
-      "id": "meeting-05",
+      "id": "meeting-074",
       "type": "tap",
-      "startMs": 63545,
+      "startMs": 60774,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-019"
+    },
+    {
+      "id": "meeting-075",
+      "type": "hold",
+      "startMs": 61548,
+      "endMs": 61898,
+      "section": "meeting",
+      "patternKind": "hold",
+      "patternId": "pattern-019"
+    },
+    {
+      "id": "meeting-076",
+      "type": "tap",
+      "startMs": 62129,
       "section": "meeting",
       "patternKind": "offbeat",
-      "patternId": "meeting-offbeat-01"
+      "patternId": "pattern-019"
     },
     {
-      "id": "meeting-06",
+      "id": "meeting-077",
       "type": "tap",
-      "startMs": 64636,
-      "section": "meeting",
-      "patternKind": "transition",
-      "patternId": "meeting-transition-02"
-    },
-    {
-      "id": "meeting-07",
-      "type": "tap",
-      "startMs": 65727,
+      "startMs": 62903,
       "section": "meeting",
       "patternKind": "offbeat",
-      "patternId": "meeting-offbeat-02"
+      "patternId": "pattern-020"
     },
     {
-      "id": "meeting-08",
+      "id": "meeting-078",
+      "type": "tap",
+      "startMs": 63097,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-020"
+    },
+    {
+      "id": "meeting-079",
+      "type": "tap",
+      "startMs": 63871,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-020"
+    },
+    {
+      "id": "meeting-080",
+      "type": "tap",
+      "startMs": 64258,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-020"
+    },
+    {
+      "id": "meeting-081",
       "type": "hold",
-      "startMs": 66818,
+      "startMs": 65226,
+      "endMs": 65533,
       "section": "meeting",
-      "endMs": 67364,
       "patternKind": "hold",
-      "patternId": "meeting-hold-02"
+      "patternId": "pattern-021"
     },
     {
-      "id": "meeting-09",
+      "id": "meeting-082",
       "type": "tap",
-      "startMs": 67909,
-      "section": "meeting",
-      "patternKind": "offbeat",
-      "patternId": "meeting-offbeat-03"
-    },
-    {
-      "id": "meeting-10",
-      "type": "tap",
-      "startMs": 69000,
-      "section": "meeting",
-      "patternKind": "transition",
-      "patternId": "meeting-transition-03"
-    },
-    {
-      "id": "meeting-11",
-      "type": "tap",
-      "startMs": 70091,
-      "section": "meeting",
-      "patternKind": "offbeat",
-      "patternId": "meeting-offbeat-04"
-    },
-    {
-      "id": "meeting-12",
-      "type": "burst",
-      "startMs": 71182,
-      "section": "meeting",
-      "endMs": 71682,
-      "requiredPresses": 3,
-      "patternKind": "burst",
-      "patternId": "meeting-burst-02"
-    },
-    {
-      "id": "meeting-13",
-      "type": "hold",
-      "startMs": 72273,
-      "section": "meeting",
-      "endMs": 72818,
-      "patternKind": "hold",
-      "patternId": "meeting-hold-03"
-    },
-    {
-      "id": "meeting-14",
-      "type": "tap",
-      "startMs": 73364,
-      "section": "meeting",
-      "patternKind": "transition",
-      "patternId": "meeting-transition-04"
-    },
-    {
-      "id": "meeting-15",
-      "type": "tap",
-      "startMs": 74455,
+      "startMs": 65613,
       "section": "meeting",
       "patternKind": "offbeat",
-      "patternId": "meeting-offbeat-05"
+      "patternId": "pattern-021"
     },
     {
-      "id": "meeting-16",
-      "type": "burst",
-      "startMs": 76091,
+      "id": "meeting-083",
+      "type": "tap",
+      "startMs": 66194,
       "section": "meeting",
-      "endMs": 76591,
-      "requiredPresses": 4,
-      "patternKind": "burst",
-      "patternId": "meeting-burst-03"
+      "patternKind": "straight",
+      "patternId": "pattern-021"
     },
     {
-      "id": "copy-01",
+      "id": "meeting-084",
       "type": "tap",
-      "startMs": 78818,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-01"
+      "startMs": 66581,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-021"
     },
     {
-      "id": "copy-02",
-      "type": "tap",
-      "startMs": 79636,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-01"
-    },
-    {
-      "id": "copy-03",
-      "type": "hold",
-      "startMs": 80455,
-      "section": "copy",
-      "endMs": 81000,
-      "patternKind": "hold",
-      "patternId": "copy-hold-01"
-    },
-    {
-      "id": "copy-04",
-      "type": "tap",
-      "startMs": 81273,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-02"
-    },
-    {
-      "id": "copy-05",
-      "type": "tap",
-      "startMs": 82091,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-02"
-    },
-    {
-      "id": "copy-06",
-      "type": "tap",
-      "startMs": 82909,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-02"
-    },
-    {
-      "id": "copy-07",
-      "type": "tap",
-      "startMs": 83727,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-03"
-    },
-    {
-      "id": "copy-08",
-      "type": "hold",
-      "startMs": 84545,
-      "section": "copy",
-      "endMs": 85091,
-      "patternKind": "hold",
-      "patternId": "copy-hold-02"
-    },
-    {
-      "id": "copy-09",
-      "type": "tap",
-      "startMs": 85364,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-04"
-    },
-    {
-      "id": "copy-10",
-      "type": "tap",
-      "startMs": 86182,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-04"
-    },
-    {
-      "id": "copy-11",
-      "type": "tap",
-      "startMs": 87000,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-04"
-    },
-    {
-      "id": "copy-12",
-      "type": "tap",
-      "startMs": 87818,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-05"
-    },
-    {
-      "id": "copy-13",
-      "type": "hold",
-      "startMs": 88636,
-      "section": "copy",
-      "endMs": 89182,
-      "patternKind": "hold",
-      "patternId": "copy-hold-03"
-    },
-    {
-      "id": "copy-14",
-      "type": "tap",
-      "startMs": 89455,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-06"
-    },
-    {
-      "id": "copy-15",
-      "type": "tap",
-      "startMs": 90273,
-      "section": "copy",
-      "patternKind": "transition",
-      "patternId": "copy-transition-06"
-    },
-    {
-      "id": "copy-16",
+      "id": "meeting-085",
       "type": "burst",
-      "startMs": 91091,
-      "section": "copy",
-      "endMs": 91591,
-      "requiredPresses": 4,
+      "startMs": 67355,
+      "endMs": 67835,
+      "section": "meeting",
       "patternKind": "burst",
-      "patternId": "copy-burst-01"
+      "patternId": "pattern-022",
+      "requiredPresses": 3
     },
     {
-      "id": "copy-17",
+      "id": "meeting-086",
+      "type": "tap",
+      "startMs": 67935,
+      "section": "meeting",
+      "patternKind": "offbeat",
+      "patternId": "pattern-022"
+    },
+    {
+      "id": "meeting-087",
+      "type": "tap",
+      "startMs": 68710,
+      "section": "meeting",
+      "patternKind": "offbeat",
+      "patternId": "pattern-022"
+    },
+    {
+      "id": "meeting-088",
+      "type": "tap",
+      "startMs": 68903,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-022"
+    },
+    {
+      "id": "meeting-089",
+      "type": "tap",
+      "startMs": 69677,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-023"
+    },
+    {
+      "id": "meeting-090",
+      "type": "tap",
+      "startMs": 70065,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-023"
+    },
+    {
+      "id": "meeting-091",
+      "type": "tap",
+      "startMs": 71032,
+      "section": "meeting",
+      "patternKind": "offbeat",
+      "patternId": "pattern-023"
+    },
+    {
+      "id": "meeting-092",
       "type": "hold",
-      "startMs": 92455,
-      "section": "copy",
-      "endMs": 93000,
+      "startMs": 71419,
+      "endMs": 71769,
+      "section": "meeting",
       "patternKind": "hold",
-      "patternId": "copy-hold-04"
+      "patternId": "pattern-023"
     },
     {
-      "id": "copy-18",
+      "id": "meeting-093",
+      "type": "tap",
+      "startMs": 72000,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-024"
+    },
+    {
+      "id": "meeting-094",
+      "type": "tap",
+      "startMs": 72387,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-024"
+    },
+    {
+      "id": "meeting-095",
+      "type": "tap",
+      "startMs": 73161,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-024"
+    },
+    {
+      "id": "meeting-096",
+      "type": "tap",
+      "startMs": 73742,
+      "section": "meeting",
+      "patternKind": "offbeat",
+      "patternId": "pattern-024"
+    },
+    {
+      "id": "meeting-097",
+      "type": "tap",
+      "startMs": 74516,
+      "section": "meeting",
+      "patternKind": "offbeat",
+      "patternId": "pattern-025"
+    },
+    {
+      "id": "meeting-098",
+      "type": "hold",
+      "startMs": 74710,
+      "endMs": 75060,
+      "section": "meeting",
+      "patternKind": "hold",
+      "patternId": "pattern-025"
+    },
+    {
+      "id": "meeting-099",
+      "type": "tap",
+      "startMs": 75484,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-025"
+    },
+    {
+      "id": "meeting-100",
+      "type": "tap",
+      "startMs": 75871,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-025"
+    },
+    {
+      "id": "meeting-101",
       "type": "burst",
-      "startMs": 94636,
+      "startMs": 76839,
+      "endMs": 77146,
+      "section": "meeting",
+      "patternKind": "burst",
+      "patternId": "pattern-026",
+      "requiredPresses": 4
+    },
+    {
+      "id": "meeting-102",
+      "type": "tap",
+      "startMs": 77226,
+      "section": "meeting",
+      "patternKind": "offbeat",
+      "patternId": "pattern-026"
+    },
+    {
+      "id": "meeting-103",
+      "type": "tap",
+      "startMs": 77806,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-026"
+    },
+    {
+      "id": "meeting-104",
+      "type": "tap",
+      "startMs": 78194,
+      "section": "meeting",
+      "patternKind": "straight",
+      "patternId": "pattern-026"
+    },
+    {
+      "id": "copy-105",
+      "type": "hold",
+      "startMs": 80387,
+      "endMs": 80737,
       "section": "copy",
-      "endMs": 95136,
-      "requiredPresses": 5,
-      "patternKind": "burst",
-      "patternId": "copy-burst-02"
-    },
-    {
-      "id": "departure-01",
-      "type": "tap",
-      "startMs": 98455,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-01"
-    },
-    {
-      "id": "departure-02",
-      "type": "tap",
-      "startMs": 99273,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-01"
-    },
-    {
-      "id": "departure-03",
-      "type": "hold",
-      "startMs": 100091,
-      "section": "departure",
-      "endMs": 100636,
       "patternKind": "hold",
-      "patternId": "departure-hold-01"
+      "patternId": "pattern-027"
     },
     {
-      "id": "departure-04",
+      "id": "copy-106",
       "type": "tap",
-      "startMs": 100909,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-02"
+      "startMs": 80968,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-027"
     },
     {
-      "id": "departure-05",
+      "id": "copy-107",
       "type": "tap",
-      "startMs": 101727,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-02"
+      "startMs": 81355,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-027"
     },
     {
-      "id": "departure-06",
+      "id": "copy-108",
+      "type": "tap",
+      "startMs": 81935,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-027"
+    },
+    {
+      "id": "copy-109",
+      "type": "tap",
+      "startMs": 82323,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-028"
+    },
+    {
+      "id": "copy-110",
+      "type": "tap",
+      "startMs": 82710,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-028"
+    },
+    {
+      "id": "copy-111",
       "type": "hold",
-      "startMs": 102545,
-      "section": "departure",
-      "endMs": 103091,
+      "startMs": 83677,
+      "endMs": 83985,
+      "section": "copy",
       "patternKind": "hold",
-      "patternId": "departure-hold-02"
+      "patternId": "pattern-028"
     },
     {
-      "id": "departure-07",
+      "id": "copy-112",
       "type": "tap",
-      "startMs": 103364,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-03"
+      "startMs": 84065,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-028"
     },
     {
-      "id": "departure-08",
+      "id": "copy-113",
       "type": "tap",
-      "startMs": 104182,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-03"
+      "startMs": 84258,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-029"
     },
     {
-      "id": "departure-09",
+      "id": "copy-114",
       "type": "tap",
-      "startMs": 105000,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-03"
+      "startMs": 85032,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-029"
     },
     {
-      "id": "departure-10",
-      "type": "hold",
-      "startMs": 105818,
-      "section": "departure",
-      "endMs": 106364,
-      "patternKind": "hold",
-      "patternId": "departure-hold-03"
-    },
-    {
-      "id": "departure-11",
+      "id": "copy-115",
       "type": "tap",
-      "startMs": 106636,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-04"
+      "startMs": 85419,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-029"
     },
     {
-      "id": "departure-12",
-      "type": "tap",
-      "startMs": 107455,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-04"
-    },
-    {
-      "id": "departure-13",
-      "type": "tap",
-      "startMs": 108273,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-04"
-    },
-    {
-      "id": "departure-14",
-      "type": "hold",
-      "startMs": 109091,
-      "section": "departure",
-      "endMs": 109636,
-      "patternKind": "hold",
-      "patternId": "departure-hold-04"
-    },
-    {
-      "id": "departure-15",
-      "type": "tap",
-      "startMs": 109909,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-05"
-    },
-    {
-      "id": "departure-16",
-      "type": "tap",
-      "startMs": 110727,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-05"
-    },
-    {
-      "id": "departure-17",
-      "type": "tap",
-      "startMs": 111545,
-      "section": "departure",
-      "patternKind": "transition",
-      "patternId": "departure-transition-05"
-    },
-    {
-      "id": "departure-18",
-      "type": "hold",
-      "startMs": 112364,
-      "section": "departure",
-      "endMs": 112909,
-      "patternKind": "hold",
-      "patternId": "departure-hold-05"
-    },
-    {
-      "id": "departure-19",
+      "id": "copy-116",
       "type": "burst",
-      "startMs": 114000,
-      "section": "departure",
-      "endMs": 114500,
-      "requiredPresses": 3,
+      "startMs": 86000,
+      "endMs": 86480,
+      "section": "copy",
       "patternKind": "burst",
-      "patternId": "departure-burst-01"
+      "patternId": "pattern-029",
+      "requiredPresses": 4
     },
     {
-      "id": "departure-20",
-      "type": "burst",
-      "startMs": 116182,
-      "section": "departure",
-      "endMs": 116682,
-      "requiredPresses": 5,
-      "patternKind": "burst",
-      "patternId": "departure-burst-02"
+      "id": "copy-117",
+      "type": "tap",
+      "startMs": 86774,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-030"
     },
     {
-      "id": "departure-21",
+      "id": "copy-118",
+      "type": "tap",
+      "startMs": 86968,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-030"
+    },
+    {
+      "id": "copy-119",
+      "type": "tap",
+      "startMs": 87355,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-030"
+    },
+    {
+      "id": "copy-120",
+      "type": "tap",
+      "startMs": 88129,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-030"
+    },
+    {
+      "id": "copy-121",
+      "type": "tap",
+      "startMs": 88710,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-031"
+    },
+    {
+      "id": "copy-122",
+      "type": "tap",
+      "startMs": 89097,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-031"
+    },
+    {
+      "id": "copy-123",
+      "type": "tap",
+      "startMs": 89677,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-031"
+    },
+    {
+      "id": "copy-124",
       "type": "hold",
-      "startMs": 118364,
-      "section": "departure",
-      "endMs": 118909,
+      "startMs": 90065,
+      "endMs": 90372,
+      "section": "copy",
       "patternKind": "hold",
-      "patternId": "departure-hold-06"
+      "patternId": "pattern-031"
+    },
+    {
+      "id": "copy-125",
+      "type": "tap",
+      "startMs": 90452,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-032"
+    },
+    {
+      "id": "copy-126",
+      "type": "tap",
+      "startMs": 91419,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-032"
+    },
+    {
+      "id": "copy-127",
+      "type": "tap",
+      "startMs": 91806,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-032"
+    },
+    {
+      "id": "copy-128",
+      "type": "tap",
+      "startMs": 92000,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-032"
+    },
+    {
+      "id": "copy-129",
+      "type": "tap",
+      "startMs": 92774,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-033"
+    },
+    {
+      "id": "copy-130",
+      "type": "hold",
+      "startMs": 93161,
+      "endMs": 93511,
+      "section": "copy",
+      "patternKind": "hold",
+      "patternId": "pattern-033"
+    },
+    {
+      "id": "copy-131",
+      "type": "tap",
+      "startMs": 93742,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-033"
+    },
+    {
+      "id": "copy-132",
+      "type": "tap",
+      "startMs": 94516,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-033"
+    },
+    {
+      "id": "copy-133",
+      "type": "burst",
+      "startMs": 94710,
+      "endMs": 95017,
+      "section": "copy",
+      "patternKind": "burst",
+      "patternId": "pattern-034",
+      "requiredPresses": 3
+    },
+    {
+      "id": "copy-134",
+      "type": "tap",
+      "startMs": 95097,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-034"
+    },
+    {
+      "id": "copy-135",
+      "type": "tap",
+      "startMs": 95871,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-034"
+    },
+    {
+      "id": "copy-136",
+      "type": "tap",
+      "startMs": 96452,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-034"
+    },
+    {
+      "id": "copy-137",
+      "type": "tap",
+      "startMs": 96839,
+      "section": "copy",
+      "patternKind": "offbeat",
+      "patternId": "pattern-035"
+    },
+    {
+      "id": "copy-138",
+      "type": "tap",
+      "startMs": 97419,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-035"
+    },
+    {
+      "id": "copy-139",
+      "type": "hold",
+      "startMs": 97806,
+      "endMs": 98114,
+      "section": "copy",
+      "patternKind": "hold",
+      "patternId": "pattern-035"
+    },
+    {
+      "id": "copy-140",
+      "type": "tap",
+      "startMs": 98194,
+      "section": "copy",
+      "patternKind": "straight",
+      "patternId": "pattern-035"
+    },
+    {
+      "id": "departure-141",
+      "type": "tap",
+      "startMs": 100581,
+      "section": "departure",
+      "patternKind": "transition",
+      "patternId": "pattern-036"
+    },
+    {
+      "id": "departure-142",
+      "type": "tap",
+      "startMs": 100968,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-036"
+    },
+    {
+      "id": "departure-143",
+      "type": "tap",
+      "startMs": 101161,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-036"
+    },
+    {
+      "id": "departure-144",
+      "type": "hold",
+      "startMs": 101548,
+      "endMs": 101855,
+      "section": "departure",
+      "patternKind": "hold",
+      "patternId": "pattern-036"
+    },
+    {
+      "id": "departure-145",
+      "type": "tap",
+      "startMs": 101935,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-037"
+    },
+    {
+      "id": "departure-146",
+      "type": "burst",
+      "startMs": 102903,
+      "endMs": 103210,
+      "section": "departure",
+      "patternKind": "burst",
+      "patternId": "pattern-037",
+      "requiredPresses": 4
+    },
+    {
+      "id": "departure-147",
+      "type": "tap",
+      "startMs": 103290,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-037"
+    },
+    {
+      "id": "departure-148",
+      "type": "tap",
+      "startMs": 103484,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-037"
+    },
+    {
+      "id": "departure-149",
+      "type": "tap",
+      "startMs": 103871,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-038"
+    },
+    {
+      "id": "departure-150",
+      "type": "tap",
+      "startMs": 104258,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-038"
+    },
+    {
+      "id": "departure-151",
+      "type": "hold",
+      "startMs": 105226,
+      "endMs": 105533,
+      "section": "departure",
+      "patternKind": "hold",
+      "patternId": "pattern-038"
+    },
+    {
+      "id": "departure-152",
+      "type": "tap",
+      "startMs": 105613,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-038"
+    },
+    {
+      "id": "departure-153",
+      "type": "tap",
+      "startMs": 105806,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-039"
+    },
+    {
+      "id": "departure-154",
+      "type": "tap",
+      "startMs": 106194,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-039"
+    },
+    {
+      "id": "departure-155",
+      "type": "tap",
+      "startMs": 106581,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-039"
+    },
+    {
+      "id": "departure-156",
+      "type": "burst",
+      "startMs": 107548,
+      "endMs": 107855,
+      "section": "departure",
+      "patternKind": "burst",
+      "patternId": "pattern-039",
+      "requiredPresses": 5
+    },
+    {
+      "id": "departure-157",
+      "type": "tap",
+      "startMs": 107935,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-040"
+    },
+    {
+      "id": "departure-158",
+      "type": "tap",
+      "startMs": 108129,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-040"
+    },
+    {
+      "id": "departure-159",
+      "type": "hold",
+      "startMs": 108516,
+      "endMs": 108823,
+      "section": "departure",
+      "patternKind": "hold",
+      "patternId": "pattern-040"
+    },
+    {
+      "id": "departure-160",
+      "type": "tap",
+      "startMs": 108903,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-040"
+    },
+    {
+      "id": "departure-161",
+      "type": "tap",
+      "startMs": 109871,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-041"
+    },
+    {
+      "id": "departure-162",
+      "type": "tap",
+      "startMs": 110258,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-041"
+    },
+    {
+      "id": "departure-163",
+      "type": "hold",
+      "startMs": 110452,
+      "endMs": 110759,
+      "section": "departure",
+      "patternKind": "hold",
+      "patternId": "pattern-041"
+    },
+    {
+      "id": "departure-164",
+      "type": "tap",
+      "startMs": 110839,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-041"
+    },
+    {
+      "id": "departure-165",
+      "type": "tap",
+      "startMs": 111226,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-042"
+    },
+    {
+      "id": "departure-166",
+      "type": "burst",
+      "startMs": 112194,
+      "endMs": 112501,
+      "section": "departure",
+      "patternKind": "burst",
+      "patternId": "pattern-042",
+      "requiredPresses": 3
+    },
+    {
+      "id": "departure-167",
+      "type": "tap",
+      "startMs": 112581,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-042"
+    },
+    {
+      "id": "departure-168",
+      "type": "tap",
+      "startMs": 112774,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-042"
+    },
+    {
+      "id": "departure-169",
+      "type": "hold",
+      "startMs": 113161,
+      "endMs": 113468,
+      "section": "departure",
+      "patternKind": "hold",
+      "patternId": "pattern-043"
+    },
+    {
+      "id": "departure-170",
+      "type": "tap",
+      "startMs": 113548,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-043"
+    },
+    {
+      "id": "departure-171",
+      "type": "tap",
+      "startMs": 114516,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-043"
+    },
+    {
+      "id": "departure-172",
+      "type": "tap",
+      "startMs": 114903,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-043"
+    },
+    {
+      "id": "departure-173",
+      "type": "tap",
+      "startMs": 115097,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-044"
+    },
+    {
+      "id": "departure-174",
+      "type": "burst",
+      "startMs": 115484,
+      "endMs": 115791,
+      "section": "departure",
+      "patternKind": "burst",
+      "patternId": "pattern-044",
+      "requiredPresses": 5
+    },
+    {
+      "id": "departure-175",
+      "type": "tap",
+      "startMs": 115871,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-044"
+    },
+    {
+      "id": "departure-176",
+      "type": "hold",
+      "startMs": 116839,
+      "endMs": 117146,
+      "section": "departure",
+      "patternKind": "hold",
+      "patternId": "pattern-044"
+    },
+    {
+      "id": "departure-177",
+      "type": "tap",
+      "startMs": 117226,
+      "section": "departure",
+      "patternKind": "offbeat",
+      "patternId": "pattern-045"
+    },
+    {
+      "id": "departure-178",
+      "type": "burst",
+      "startMs": 117419,
+      "endMs": 117726,
+      "section": "departure",
+      "patternKind": "burst",
+      "patternId": "pattern-045",
+      "requiredPresses": 3
+    },
+    {
+      "id": "departure-179",
+      "type": "tap",
+      "startMs": 117806,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-045"
+    },
+    {
+      "id": "departure-180",
+      "type": "tap",
+      "startMs": 118194,
+      "section": "departure",
+      "patternKind": "straight",
+      "patternId": "pattern-045"
     }
   ],
   "patterns": [
     {
-      "id": "arrival-straight-01",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 818,
-      "endMs": 1018,
-      "eventIds": [
-        "arrival-01"
-      ]
-    },
-    {
-      "id": "rest-01",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 818,
-      "endMs": 2455,
-      "eventIds": []
-    },
-    {
-      "id": "arrival-hold-01",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 2455,
-      "endMs": 3000,
-      "eventIds": [
-        "arrival-02"
-      ]
-    },
-    {
-      "id": "rest-02",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 3000,
-      "endMs": 4091,
-      "eventIds": []
-    },
-    {
-      "id": "rest-03",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 4091,
-      "endMs": 5727,
-      "eventIds": []
-    },
-    {
-      "id": "arrival-straight-02",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 4091,
-      "endMs": 7364,
-      "eventIds": [
-        "arrival-03",
-        "arrival-04",
-        "arrival-05"
-      ]
-    },
-    {
-      "id": "rest-04",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 5727,
-      "endMs": 7364,
-      "eventIds": []
-    },
-    {
-      "id": "rest-05",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 7364,
-      "endMs": 9000,
-      "eventIds": []
-    },
-    {
-      "id": "arrival-straight-03",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 9000,
-      "endMs": 9200,
-      "eventIds": [
-        "arrival-06"
-      ]
-    },
-    {
-      "id": "rest-06",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 9000,
-      "endMs": 10636,
-      "eventIds": []
-    },
-    {
-      "id": "arrival-hold-02",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 10636,
-      "endMs": 11182,
-      "eventIds": [
-        "arrival-07"
-      ]
-    },
-    {
-      "id": "rest-07",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 11182,
-      "endMs": 12273,
-      "eventIds": []
-    },
-    {
-      "id": "rest-08",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 12273,
-      "endMs": 13909,
-      "eventIds": []
-    },
-    {
-      "id": "arrival-straight-04",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 12273,
-      "endMs": 15545,
-      "eventIds": [
-        "arrival-08",
-        "arrival-09",
-        "arrival-10"
-      ]
-    },
-    {
-      "id": "rest-09",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 13909,
-      "endMs": 15545,
-      "eventIds": []
-    },
-    {
-      "id": "rest-10",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 15545,
-      "endMs": 17182,
-      "eventIds": []
-    },
-    {
-      "id": "rest-11",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 17182,
-      "endMs": 18818,
-      "eventIds": []
-    },
-    {
-      "id": "arrival-straight-05",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 17182,
-      "endMs": 20182,
-      "eventIds": [
-        "arrival-11",
-        "arrival-12",
-        "keyboard-01"
-      ]
-    },
-    {
-      "id": "rest-12",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 18818,
-      "endMs": 20182,
-      "eventIds": []
-    },
-    {
-      "id": "rest-13",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 20182,
-      "endMs": 21545,
-      "eventIds": []
-    },
-    {
-      "id": "keyboard-straight-01",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 21545,
-      "endMs": 22909,
-      "eventIds": [
-        "keyboard-02",
-        "keyboard-03"
-      ]
-    },
-    {
-      "id": "rest-14",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 21545,
-      "endMs": 22909,
-      "eventIds": []
-    },
-    {
-      "id": "rest-15",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 22909,
-      "endMs": 24273,
-      "eventIds": []
-    },
-    {
-      "id": "keyboard-hold-01",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 24273,
-      "endMs": 24818,
-      "eventIds": [
-        "keyboard-04"
-      ]
-    },
-    {
-      "id": "rest-16",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 25636,
-      "endMs": 27000,
-      "eventIds": []
-    },
-    {
-      "id": "keyboard-straight-02",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 25636,
-      "endMs": 28364,
-      "eventIds": [
-        "keyboard-05",
-        "keyboard-06",
-        "keyboard-07"
-      ]
-    },
-    {
-      "id": "rest-17",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 27000,
-      "endMs": 28364,
-      "eventIds": []
-    },
-    {
-      "id": "rest-18",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 28364,
-      "endMs": 29727,
-      "eventIds": []
-    },
-    {
-      "id": "rest-19",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 29727,
-      "endMs": 31091,
-      "eventIds": []
-    },
-    {
-      "id": "keyboard-straight-03",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 29727,
-      "endMs": 32455,
-      "eventIds": [
-        "keyboard-08",
-        "keyboard-09",
-        "keyboard-10"
-      ]
-    },
-    {
-      "id": "rest-20",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 31091,
-      "endMs": 32455,
-      "eventIds": []
-    },
-    {
-      "id": "rest-21",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 32455,
-      "endMs": 33818,
-      "eventIds": []
-    },
-    {
-      "id": "keyboard-hold-02",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 33818,
-      "endMs": 34364,
-      "eventIds": [
-        "keyboard-11"
-      ]
-    },
-    {
-      "id": "rest-22",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 35182,
-      "endMs": 36545,
-      "eventIds": []
-    },
-    {
-      "id": "keyboard-straight-04",
-      "kind": "straight",
-      "label": "정박 루틴",
-      "startMs": 35182,
-      "endMs": 38182,
-      "eventIds": [
-        "keyboard-12",
-        "keyboard-13",
-        "keyboard-14"
-      ]
-    },
-    {
-      "id": "rest-23",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 36545,
-      "endMs": 38182,
-      "eventIds": []
-    },
-    {
-      "id": "rest-24",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 38182,
-      "endMs": 39545,
-      "eventIds": []
-    },
-    {
-      "id": "rest-25",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 39545,
-      "endMs": 40909,
-      "eventIds": []
-    },
-    {
-      "id": "mail-offbeat-01",
+      "id": "pattern-001",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 39545,
-      "endMs": 42000,
+      "label": "ARRIVAL OFFBEAT",
+      "startMs": 968,
+      "endMs": 3484,
       "eventIds": [
-        "mail-01",
-        "mail-02",
-        "mail-03"
+        "arrival-001",
+        "arrival-002",
+        "arrival-003",
+        "arrival-004"
       ]
     },
     {
-      "id": "rest-26",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 40909,
-      "endMs": 42000,
-      "eventIds": []
+      "id": "pattern-002",
+      "kind": "straight",
+      "label": "ARRIVAL STRAIGHT",
+      "startMs": 4258,
+      "endMs": 6968,
+      "eventIds": [
+        "arrival-005",
+        "arrival-006",
+        "arrival-007",
+        "arrival-008"
+      ]
     },
     {
-      "id": "rest-27",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 42000,
-      "endMs": 43364,
-      "eventIds": []
+      "id": "pattern-003",
+      "kind": "straight",
+      "label": "ARRIVAL STRAIGHT",
+      "startMs": 8129,
+      "endMs": 11032,
+      "eventIds": [
+        "arrival-009",
+        "arrival-010",
+        "arrival-011",
+        "arrival-012"
+      ]
     },
     {
-      "id": "mail-hold-01",
+      "id": "pattern-004",
       "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 43364,
-      "endMs": 43909,
+      "label": "ARRIVAL HOLD",
+      "startMs": 11613,
+      "endMs": 14516,
       "eventIds": [
-        "mail-04"
+        "arrival-013",
+        "arrival-014",
+        "arrival-015",
+        "arrival-016"
       ]
     },
     {
-      "id": "mail-offbeat-02",
+      "id": "pattern-005",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 44455,
-      "endMs": 44655,
+      "label": "ARRIVAL OFFBEAT",
+      "startMs": 15290,
+      "endMs": 18156,
       "eventIds": [
-        "mail-05"
+        "arrival-017",
+        "arrival-018",
+        "arrival-019",
+        "arrival-020"
       ]
     },
     {
-      "id": "rest-28",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 44455,
-      "endMs": 45818,
-      "eventIds": []
+      "id": "pattern-006",
+      "kind": "transition",
+      "label": "KEYBOARD TRANSITION",
+      "startMs": 20581,
+      "endMs": 22710,
+      "eventIds": [
+        "keyboard-021",
+        "keyboard-022",
+        "keyboard-023",
+        "keyboard-024"
+      ]
     },
     {
-      "id": "mail-burst-01",
+      "id": "pattern-007",
+      "kind": "straight",
+      "label": "KEYBOARD STRAIGHT",
+      "startMs": 23484,
+      "endMs": 25806,
+      "eventIds": [
+        "keyboard-025",
+        "keyboard-026",
+        "keyboard-027",
+        "keyboard-028"
+      ]
+    },
+    {
+      "id": "pattern-008",
+      "kind": "hold",
+      "label": "KEYBOARD HOLD",
+      "startMs": 26581,
+      "endMs": 29097,
+      "eventIds": [
+        "keyboard-029",
+        "keyboard-030",
+        "keyboard-031",
+        "keyboard-032"
+      ]
+    },
+    {
+      "id": "pattern-009",
+      "kind": "straight",
+      "label": "KEYBOARD STRAIGHT",
+      "startMs": 29677,
+      "endMs": 32194,
+      "eventIds": [
+        "keyboard-033",
+        "keyboard-034",
+        "keyboard-035",
+        "keyboard-036"
+      ]
+    },
+    {
+      "id": "pattern-010",
       "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 45818,
-      "endMs": 46318,
+      "label": "KEYBOARD BURST",
+      "startMs": 32968,
+      "endMs": 35097,
       "eventIds": [
-        "mail-06"
+        "keyboard-037",
+        "keyboard-038",
+        "keyboard-039",
+        "keyboard-040"
       ]
     },
     {
-      "id": "mail-offbeat-03",
+      "id": "pattern-011",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 46909,
-      "endMs": 48273,
+      "label": "KEYBOARD OFFBEAT",
+      "startMs": 36065,
+      "endMs": 38544,
       "eventIds": [
-        "mail-07",
-        "mail-08"
+        "keyboard-041",
+        "keyboard-042",
+        "keyboard-043",
+        "keyboard-044"
       ]
     },
     {
-      "id": "rest-29",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 46909,
-      "endMs": 48273,
-      "eventIds": []
-    },
-    {
-      "id": "rest-30",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 48273,
-      "endMs": 49364,
-      "eventIds": []
-    },
-    {
-      "id": "mail-hold-02",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 49364,
-      "endMs": 49909,
+      "id": "pattern-012",
+      "kind": "transition",
+      "label": "MAIL TRANSITION",
+      "startMs": 40387,
+      "endMs": 42323,
       "eventIds": [
-        "mail-09"
+        "mail-045",
+        "mail-046",
+        "mail-047",
+        "mail-048"
       ]
     },
     {
-      "id": "rest-31",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 50727,
-      "endMs": 51818,
-      "eventIds": []
-    },
-    {
-      "id": "mail-offbeat-04",
-      "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 50727,
-      "endMs": 53182,
+      "id": "pattern-013",
+      "kind": "straight",
+      "label": "MAIL STRAIGHT",
+      "startMs": 43097,
+      "endMs": 45226,
       "eventIds": [
-        "mail-10",
-        "mail-11",
-        "mail-12"
+        "mail-049",
+        "mail-050",
+        "mail-051",
+        "mail-052"
       ]
     },
     {
-      "id": "rest-32",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 51818,
-      "endMs": 53182,
-      "eventIds": []
-    },
-    {
-      "id": "rest-33",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 53182,
-      "endMs": 54273,
-      "eventIds": []
-    },
-    {
-      "id": "mail-offbeat-05",
-      "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 54273,
-      "endMs": 54473,
-      "eventIds": [
-        "mail-13"
-      ]
-    },
-    {
-      "id": "rest-34",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 54273,
-      "endMs": 55636,
-      "eventIds": []
-    },
-    {
-      "id": "mail-hold-03",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 55636,
-      "endMs": 56182,
-      "eventIds": [
-        "mail-14"
-      ]
-    },
-    {
-      "id": "rest-35",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 56182,
-      "endMs": 57273,
-      "eventIds": []
-    },
-    {
-      "id": "mail-offbeat-06",
-      "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 57273,
-      "endMs": 59182,
-      "eventIds": [
-        "mail-15",
-        "meeting-01"
-      ]
-    },
-    {
-      "id": "rest-36",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 57273,
-      "endMs": 59182,
-      "eventIds": []
-    },
-    {
-      "id": "rest-37",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 59182,
-      "endMs": 60273,
-      "eventIds": []
-    },
-    {
-      "id": "meeting-burst-01",
+      "id": "pattern-014",
       "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 60273,
-      "endMs": 60773,
+      "label": "MAIL BURST",
+      "startMs": 45806,
+      "endMs": 47935,
       "eventIds": [
-        "meeting-02"
+        "mail-053",
+        "mail-054",
+        "mail-055",
+        "mail-056"
       ]
     },
     {
-      "id": "meeting-hold-01",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 61364,
-      "endMs": 61909,
-      "eventIds": [
-        "meeting-03"
-      ]
-    },
-    {
-      "id": "meeting-transition-01",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 62455,
-      "endMs": 62655,
-      "eventIds": [
-        "meeting-04"
-      ]
-    },
-    {
-      "id": "rest-38",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 62455,
-      "endMs": 63545,
-      "eventIds": []
-    },
-    {
-      "id": "meeting-offbeat-01",
+      "id": "pattern-015",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 63545,
-      "endMs": 63745,
+      "label": "MAIL OFFBEAT",
+      "startMs": 48323,
+      "endMs": 50802,
       "eventIds": [
-        "meeting-05"
+        "mail-057",
+        "mail-058",
+        "mail-059",
+        "mail-060"
       ]
     },
     {
-      "id": "rest-39",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 63545,
-      "endMs": 64636,
-      "eventIds": []
-    },
-    {
-      "id": "meeting-transition-02",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 64636,
-      "endMs": 64836,
-      "eventIds": [
-        "meeting-06"
-      ]
-    },
-    {
-      "id": "rest-40",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 64636,
-      "endMs": 65727,
-      "eventIds": []
-    },
-    {
-      "id": "meeting-offbeat-02",
+      "id": "pattern-016",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 65727,
-      "endMs": 65927,
+      "label": "MAIL OFFBEAT",
+      "startMs": 51032,
+      "endMs": 52774,
       "eventIds": [
-        "meeting-07"
+        "mail-061",
+        "mail-062",
+        "mail-063",
+        "mail-064"
       ]
     },
     {
-      "id": "rest-41",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 65727,
-      "endMs": 66818,
-      "eventIds": []
-    },
-    {
-      "id": "meeting-hold-02",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 66818,
-      "endMs": 67364,
+      "id": "pattern-017",
+      "kind": "straight",
+      "label": "MAIL STRAIGHT",
+      "startMs": 53548,
+      "endMs": 55484,
       "eventIds": [
-        "meeting-08"
+        "mail-065",
+        "mail-066",
+        "mail-067",
+        "mail-068"
       ]
     },
     {
-      "id": "meeting-offbeat-03",
+      "id": "pattern-018",
+      "kind": "burst",
+      "label": "MAIL BURST",
+      "startMs": 56258,
+      "endMs": 58387,
+      "eventIds": [
+        "mail-069",
+        "mail-070",
+        "mail-071",
+        "mail-072"
+      ]
+    },
+    {
+      "id": "pattern-019",
+      "kind": "transition",
+      "label": "MEETING TRANSITION",
+      "startMs": 60387,
+      "endMs": 62129,
+      "eventIds": [
+        "meeting-073",
+        "meeting-074",
+        "meeting-075",
+        "meeting-076"
+      ]
+    },
+    {
+      "id": "pattern-020",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 67909,
-      "endMs": 68109,
+      "label": "MEETING OFFBEAT",
+      "startMs": 62903,
+      "endMs": 64258,
       "eventIds": [
-        "meeting-09"
+        "meeting-077",
+        "meeting-078",
+        "meeting-079",
+        "meeting-080"
       ]
     },
     {
-      "id": "rest-42",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 67909,
-      "endMs": 69000,
-      "eventIds": []
-    },
-    {
-      "id": "meeting-transition-03",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 69000,
-      "endMs": 69200,
+      "id": "pattern-021",
+      "kind": "hold",
+      "label": "MEETING HOLD",
+      "startMs": 65226,
+      "endMs": 66581,
       "eventIds": [
-        "meeting-10"
+        "meeting-081",
+        "meeting-082",
+        "meeting-083",
+        "meeting-084"
       ]
     },
     {
-      "id": "rest-43",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 69000,
-      "endMs": 70091,
-      "eventIds": []
+      "id": "pattern-022",
+      "kind": "burst",
+      "label": "MEETING BURST",
+      "startMs": 67355,
+      "endMs": 68903,
+      "eventIds": [
+        "meeting-085",
+        "meeting-086",
+        "meeting-087",
+        "meeting-088"
+      ]
     },
     {
-      "id": "meeting-offbeat-04",
+      "id": "pattern-023",
+      "kind": "straight",
+      "label": "MEETING STRAIGHT",
+      "startMs": 69677,
+      "endMs": 71769,
+      "eventIds": [
+        "meeting-089",
+        "meeting-090",
+        "meeting-091",
+        "meeting-092"
+      ]
+    },
+    {
+      "id": "pattern-024",
+      "kind": "straight",
+      "label": "MEETING STRAIGHT",
+      "startMs": 72000,
+      "endMs": 73742,
+      "eventIds": [
+        "meeting-093",
+        "meeting-094",
+        "meeting-095",
+        "meeting-096"
+      ]
+    },
+    {
+      "id": "pattern-025",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 70091,
-      "endMs": 70291,
+      "label": "MEETING OFFBEAT",
+      "startMs": 74516,
+      "endMs": 75871,
       "eventIds": [
-        "meeting-11"
+        "meeting-097",
+        "meeting-098",
+        "meeting-099",
+        "meeting-100"
       ]
     },
     {
-      "id": "rest-44",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 70091,
-      "endMs": 71182,
-      "eventIds": []
-    },
-    {
-      "id": "meeting-burst-02",
+      "id": "pattern-026",
       "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 71182,
-      "endMs": 71682,
+      "label": "MEETING BURST",
+      "startMs": 76839,
+      "endMs": 78194,
       "eventIds": [
-        "meeting-12"
+        "meeting-101",
+        "meeting-102",
+        "meeting-103",
+        "meeting-104"
       ]
     },
     {
-      "id": "meeting-hold-03",
+      "id": "pattern-027",
       "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 72273,
-      "endMs": 72818,
+      "label": "COPY HOLD",
+      "startMs": 80387,
+      "endMs": 81935,
       "eventIds": [
-        "meeting-13"
+        "copy-105",
+        "copy-106",
+        "copy-107",
+        "copy-108"
       ]
     },
     {
-      "id": "meeting-transition-04",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 73364,
-      "endMs": 73564,
+      "id": "pattern-028",
+      "kind": "straight",
+      "label": "COPY STRAIGHT",
+      "startMs": 82323,
+      "endMs": 84065,
       "eventIds": [
-        "meeting-14"
+        "copy-109",
+        "copy-110",
+        "copy-111",
+        "copy-112"
       ]
     },
     {
-      "id": "rest-45",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 73364,
-      "endMs": 74455,
-      "eventIds": []
+      "id": "pattern-029",
+      "kind": "straight",
+      "label": "COPY STRAIGHT",
+      "startMs": 84258,
+      "endMs": 86480,
+      "eventIds": [
+        "copy-113",
+        "copy-114",
+        "copy-115",
+        "copy-116"
+      ]
     },
     {
-      "id": "meeting-offbeat-05",
+      "id": "pattern-030",
       "kind": "offbeat",
-      "label": "엇박 메일",
-      "startMs": 74455,
-      "endMs": 74655,
+      "label": "COPY OFFBEAT",
+      "startMs": 86774,
+      "endMs": 88129,
       "eventIds": [
-        "meeting-15"
+        "copy-117",
+        "copy-118",
+        "copy-119",
+        "copy-120"
       ]
     },
     {
-      "id": "rest-46",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 74455,
-      "endMs": 76091,
-      "eventIds": []
+      "id": "pattern-031",
+      "kind": "offbeat",
+      "label": "COPY OFFBEAT",
+      "startMs": 88710,
+      "endMs": 90372,
+      "eventIds": [
+        "copy-121",
+        "copy-122",
+        "copy-123",
+        "copy-124"
+      ]
     },
     {
-      "id": "meeting-burst-03",
+      "id": "pattern-032",
+      "kind": "straight",
+      "label": "COPY STRAIGHT",
+      "startMs": 90452,
+      "endMs": 92000,
+      "eventIds": [
+        "copy-125",
+        "copy-126",
+        "copy-127",
+        "copy-128"
+      ]
+    },
+    {
+      "id": "pattern-033",
+      "kind": "straight",
+      "label": "COPY STRAIGHT",
+      "startMs": 92774,
+      "endMs": 94516,
+      "eventIds": [
+        "copy-129",
+        "copy-130",
+        "copy-131",
+        "copy-132"
+      ]
+    },
+    {
+      "id": "pattern-034",
       "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 76091,
-      "endMs": 76591,
+      "label": "COPY BURST",
+      "startMs": 94710,
+      "endMs": 96452,
       "eventIds": [
-        "meeting-16"
+        "copy-133",
+        "copy-134",
+        "copy-135",
+        "copy-136"
       ]
     },
     {
-      "id": "rest-47",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 76591,
-      "endMs": 78818,
-      "eventIds": []
+      "id": "pattern-035",
+      "kind": "offbeat",
+      "label": "COPY OFFBEAT",
+      "startMs": 96839,
+      "endMs": 98194,
+      "eventIds": [
+        "copy-137",
+        "copy-138",
+        "copy-139",
+        "copy-140"
+      ]
     },
     {
-      "id": "copy-transition-01",
+      "id": "pattern-036",
       "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 78818,
-      "endMs": 79636,
+      "label": "DEPARTURE TRANSITION",
+      "startMs": 100581,
+      "endMs": 101855,
       "eventIds": [
-        "copy-01",
-        "copy-02"
+        "departure-141",
+        "departure-142",
+        "departure-143",
+        "departure-144"
       ]
     },
     {
-      "id": "copy-hold-01",
+      "id": "pattern-037",
+      "kind": "straight",
+      "label": "DEPARTURE STRAIGHT",
+      "startMs": 101935,
+      "endMs": 103484,
+      "eventIds": [
+        "departure-145",
+        "departure-146",
+        "departure-147",
+        "departure-148"
+      ]
+    },
+    {
+      "id": "pattern-038",
+      "kind": "straight",
+      "label": "DEPARTURE STRAIGHT",
+      "startMs": 103871,
+      "endMs": 105613,
+      "eventIds": [
+        "departure-149",
+        "departure-150",
+        "departure-151",
+        "departure-152"
+      ]
+    },
+    {
+      "id": "pattern-039",
+      "kind": "straight",
+      "label": "DEPARTURE STRAIGHT",
+      "startMs": 105806,
+      "endMs": 107855,
+      "eventIds": [
+        "departure-153",
+        "departure-154",
+        "departure-155",
+        "departure-156"
+      ]
+    },
+    {
+      "id": "pattern-040",
+      "kind": "offbeat",
+      "label": "DEPARTURE OFFBEAT",
+      "startMs": 107935,
+      "endMs": 108903,
+      "eventIds": [
+        "departure-157",
+        "departure-158",
+        "departure-159",
+        "departure-160"
+      ]
+    },
+    {
+      "id": "pattern-041",
+      "kind": "offbeat",
+      "label": "DEPARTURE OFFBEAT",
+      "startMs": 109871,
+      "endMs": 110839,
+      "eventIds": [
+        "departure-161",
+        "departure-162",
+        "departure-163",
+        "departure-164"
+      ]
+    },
+    {
+      "id": "pattern-042",
+      "kind": "straight",
+      "label": "DEPARTURE STRAIGHT",
+      "startMs": 111226,
+      "endMs": 112774,
+      "eventIds": [
+        "departure-165",
+        "departure-166",
+        "departure-167",
+        "departure-168"
+      ]
+    },
+    {
+      "id": "pattern-043",
       "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 80455,
-      "endMs": 81000,
+      "label": "DEPARTURE HOLD",
+      "startMs": 113161,
+      "endMs": 114903,
       "eventIds": [
-        "copy-03"
+        "departure-169",
+        "departure-170",
+        "departure-171",
+        "departure-172"
       ]
     },
     {
-      "id": "copy-transition-02",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 81273,
-      "endMs": 82909,
+      "id": "pattern-044",
+      "kind": "straight",
+      "label": "DEPARTURE STRAIGHT",
+      "startMs": 115097,
+      "endMs": 117146,
       "eventIds": [
-        "copy-04",
-        "copy-05",
-        "copy-06"
+        "departure-173",
+        "departure-174",
+        "departure-175",
+        "departure-176"
       ]
     },
     {
-      "id": "copy-transition-03",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 83727,
-      "endMs": 83927,
+      "id": "pattern-045",
+      "kind": "offbeat",
+      "label": "DEPARTURE OFFBEAT",
+      "startMs": 117226,
+      "endMs": 118194,
       "eventIds": [
-        "copy-07"
-      ]
-    },
-    {
-      "id": "copy-hold-02",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 84545,
-      "endMs": 85091,
-      "eventIds": [
-        "copy-08"
-      ]
-    },
-    {
-      "id": "copy-transition-04",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 85364,
-      "endMs": 87000,
-      "eventIds": [
-        "copy-09",
-        "copy-10",
-        "copy-11"
-      ]
-    },
-    {
-      "id": "copy-transition-05",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 87818,
-      "endMs": 88018,
-      "eventIds": [
-        "copy-12"
-      ]
-    },
-    {
-      "id": "copy-hold-03",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 88636,
-      "endMs": 89182,
-      "eventIds": [
-        "copy-13"
-      ]
-    },
-    {
-      "id": "copy-transition-06",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 89455,
-      "endMs": 90273,
-      "eventIds": [
-        "copy-14",
-        "copy-15"
-      ]
-    },
-    {
-      "id": "copy-burst-01",
-      "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 91091,
-      "endMs": 91591,
-      "eventIds": [
-        "copy-16"
-      ]
-    },
-    {
-      "id": "copy-hold-04",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 92455,
-      "endMs": 93000,
-      "eventIds": [
-        "copy-17"
-      ]
-    },
-    {
-      "id": "rest-48",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 93000,
-      "endMs": 94636,
-      "eventIds": []
-    },
-    {
-      "id": "copy-burst-02",
-      "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 94636,
-      "endMs": 95136,
-      "eventIds": [
-        "copy-18"
-      ]
-    },
-    {
-      "id": "rest-49",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 95136,
-      "endMs": 98455,
-      "eventIds": []
-    },
-    {
-      "id": "departure-transition-01",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 98455,
-      "endMs": 99273,
-      "eventIds": [
-        "departure-01",
-        "departure-02"
-      ]
-    },
-    {
-      "id": "departure-hold-01",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 100091,
-      "endMs": 100636,
-      "eventIds": [
-        "departure-03"
-      ]
-    },
-    {
-      "id": "departure-transition-02",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 100909,
-      "endMs": 101727,
-      "eventIds": [
-        "departure-04",
-        "departure-05"
-      ]
-    },
-    {
-      "id": "departure-hold-02",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 102545,
-      "endMs": 103091,
-      "eventIds": [
-        "departure-06"
-      ]
-    },
-    {
-      "id": "departure-transition-03",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 103364,
-      "endMs": 105000,
-      "eventIds": [
-        "departure-07",
-        "departure-08",
-        "departure-09"
-      ]
-    },
-    {
-      "id": "departure-hold-03",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 105818,
-      "endMs": 106364,
-      "eventIds": [
-        "departure-10"
-      ]
-    },
-    {
-      "id": "departure-transition-04",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 106636,
-      "endMs": 108273,
-      "eventIds": [
-        "departure-11",
-        "departure-12",
-        "departure-13"
-      ]
-    },
-    {
-      "id": "departure-hold-04",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 109091,
-      "endMs": 109636,
-      "eventIds": [
-        "departure-14"
-      ]
-    },
-    {
-      "id": "departure-transition-05",
-      "kind": "transition",
-      "label": "전환 회의",
-      "startMs": 109909,
-      "endMs": 111545,
-      "eventIds": [
-        "departure-15",
-        "departure-16",
-        "departure-17"
-      ]
-    },
-    {
-      "id": "departure-hold-05",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 112364,
-      "endMs": 112909,
-      "eventIds": [
-        "departure-18"
-      ]
-    },
-    {
-      "id": "rest-50",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 112909,
-      "endMs": 114000,
-      "eventIds": []
-    },
-    {
-      "id": "departure-burst-01",
-      "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 114000,
-      "endMs": 114500,
-      "eventIds": [
-        "departure-19"
-      ]
-    },
-    {
-      "id": "rest-51",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 114500,
-      "endMs": 116182,
-      "eventIds": []
-    },
-    {
-      "id": "departure-burst-02",
-      "kind": "burst",
-      "label": "위험 연타",
-      "startMs": 116182,
-      "endMs": 116682,
-      "eventIds": [
-        "departure-20"
-      ]
-    },
-    {
-      "id": "rest-52",
-      "kind": "rest",
-      "label": "쉼표 호흡",
-      "startMs": 116682,
-      "endMs": 118364,
-      "eventIds": []
-    },
-    {
-      "id": "departure-hold-06",
-      "kind": "hold",
-      "label": "길게 누르기",
-      "startMs": 118364,
-      "endMs": 118909,
-      "eventIds": [
-        "departure-21"
+        "departure-177",
+        "departure-178",
+        "departure-179",
+        "departure-180"
       ]
     }
   ]
 }
-

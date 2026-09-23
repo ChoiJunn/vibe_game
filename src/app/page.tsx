@@ -23,7 +23,7 @@ export default function HomePage() {
           <LoginButton />
           <div className="landing-stats" aria-label="게임 정보">
             <span><strong>06</strong><small>업무 장면</small></span>
-            <span><strong>96</strong><small>리듬 노트</small></span>
+            <span><strong>180</strong><small>리듬 노트</small></span>
             <span><strong>5</strong><small>하트</small></span>
           </div>
           <p className="setup-note">조직 계정으로 로그인하면 게임과 순위표를 이용할 수 있습니다.</p>

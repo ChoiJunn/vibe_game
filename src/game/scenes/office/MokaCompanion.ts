@@ -54,7 +54,7 @@ export class MokaCompanion {
     );
     this.sprite.setDisplaySize(size, size);
     if (!this.reactionActive && this.sprite.texture.key !== asset.key) {
-      this.sprite.setTexture(asset.key);
+      this.sprite.setTexture(this.feverActive ? GAME_ASSETS.moka.fever.key : asset.key);
     }
     if (judgement) this.react(judgement);
   }
@@ -62,9 +62,10 @@ export class MokaCompanion {
   setFever(active: boolean): void {
     if (this.feverActive === active) return;
     this.feverActive = active;
-    this.sprite.setTint(active ? 0xffc4f3 : 0xffffff);
+    this.sprite.setTint(0xffffff);
     this.sprite.scene.tweens.killTweensOf(this.sprite);
     if (active) {
+      this.sprite.setTexture(GAME_ASSETS.moka.fever.key);
       this.sprite.scene.tweens.add({ targets: this.sprite, angle: { from: -5, to: 5 }, duration: 260, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
     } else {
       this.sprite.setAngle(0);

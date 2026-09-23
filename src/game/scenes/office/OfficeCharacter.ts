@@ -47,6 +47,7 @@ export class OfficeCharacter {
     const poseKey = getWalkPoseKey(state, songPositionMs);
     if (
       !this.reactionActive &&
+      !this.feverActive &&
       poseKey &&
       this.sprite.texture.key !== poseKey
     ) {
@@ -66,8 +67,9 @@ export class OfficeCharacter {
   setFever(active: boolean): void {
     if (this.feverActive === active) return;
     this.feverActive = active;
-    this.sprite.setTint(active ? 0xf0c7ff : 0xffffff);
+    this.sprite.setTint(0xffffff);
     if (active) {
+      this.sprite.setTexture(GAME_ASSETS.protagonist.fever.key);
       this.sprite.setScale(this.baseScaleX * 1.04, this.baseScaleY * 1.04);
     } else if (!this.reactionActive) {
       this.sprite.setScale(this.baseScaleX, this.baseScaleY);
@@ -93,7 +95,7 @@ export class OfficeCharacter {
       ease: pose.ease,
       onComplete: () => {
         this.reactionActive = false;
-        this.sprite.setTexture(this.lastWalkPoseKey);
+        this.sprite.setTexture(this.feverActive ? GAME_ASSETS.protagonist.fever.key : this.lastWalkPoseKey);
       },
     });
   }

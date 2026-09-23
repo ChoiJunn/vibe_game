@@ -31,6 +31,13 @@ export function createBeatAccent(options: InstrumentOptions): ScheduledAudioNode
   return createTone(options, 'square', 880, 660);
 }
 
+export function createFeverAccent(options: InstrumentOptions): ScheduledAudioNode[] {
+  return [
+    ...createTone({ ...options, durationSec: Math.min(0.16, options.durationSec), volume: options.volume * 0.72 }, 'sawtooth', 1_320, 1_760),
+    ...createTone({ ...options, durationSec: Math.min(0.1, options.durationSec), volume: options.volume * 0.5 }, 'square', 660, 990),
+  ];
+}
+
 export function createMusicNote(options: InstrumentOptions, frequency: number): ScheduledAudioNode[] {
   const oscillator = options.context.createOscillator();
   const gain = createEnvelope(options, 0.0001);

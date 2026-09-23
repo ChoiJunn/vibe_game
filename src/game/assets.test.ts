@@ -23,7 +23,7 @@ function readPng(path: string) {
 
 describe('GAME_ASSETS', () => {
   it('registers every journey section for backgrounds and note motifs', () => {
-    expect(Object.keys(GAME_ASSETS.backgrounds)).toEqual(SECTION_ORDER);
+    expect(Object.keys(GAME_ASSETS.backgrounds).filter((key) => SECTION_ORDER.includes(key as typeof SECTION_ORDER[number]))).toEqual(SECTION_ORDER);
     expect(Object.keys(GAME_ASSETS.notes)).toEqual(SECTION_ORDER);
   });
 
@@ -32,14 +32,20 @@ describe('GAME_ASSETS', () => {
       expect(() => readPng(asset.path), asset.path).not.toThrow();
     }
 
-    for (const asset of Object.values(GAME_ASSETS.backgrounds)) {
+    for (const asset of Object.values(GAME_ASSETS.backgrounds).filter((asset) => asset.key !== GAME_ASSETS.backgrounds.fever.key)) {
       expect(readPng(asset.path)).toMatchObject({ width: 1280, height: 720, colorType: 2 });
     }
+    expect(readPng(GAME_ASSETS.backgrounds.fever.path)).toMatchObject({ width: 1672, height: 941, colorType: 2 });
     for (const asset of Object.values(GAME_ASSETS.protagonist)) {
-      expect(readPng(asset.path)).toMatchObject({ width: 320, height: 320, colorType: 6 });
+      if (asset.key === GAME_ASSETS.protagonist.fever.key) {
+        expect(readPng(asset.path)).toMatchObject({ width: 1024, height: 1536, colorType: 6 });
+      } else {
+        expect(readPng(asset.path)).toMatchObject({ width: 320, height: 320, colorType: 6 });
+      }
     }
-    for (const asset of [...Object.values(GAME_ASSETS.moka), ...Object.values(GAME_ASSETS.notes)]) {
+    for (const asset of [...Object.values(GAME_ASSETS.moka).filter((candidate) => candidate.key !== GAME_ASSETS.moka.fever.key), ...Object.values(GAME_ASSETS.notes)]) {
       expect(readPng(asset.path)).toMatchObject({ width: 128, height: 128, colorType: 6 });
     }
+    expect(readPng(GAME_ASSETS.moka.fever.path)).toMatchObject({ width: 1214, height: 1295, colorType: 6 });
   });
 });

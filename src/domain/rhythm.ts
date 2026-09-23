@@ -44,7 +44,7 @@ export type BeatmapPattern = {
 
 export type Beatmap = {
   id: "office-day-01";
-  bpm: 110;
+  bpm: number;
   timeSignature: [4, 4];
   events: RhythmEvent[];
   patterns: BeatmapPattern[];

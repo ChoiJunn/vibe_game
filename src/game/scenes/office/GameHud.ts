@@ -36,6 +36,9 @@ export function getFeverSecondsRemaining(snapshot: RhythmGameSnapshot): number {
 export class GameHud {
   private readonly panel: Phaser.GameObjects.Graphics;
   private readonly text: Phaser.GameObjects.Text;
+  private readonly feverBanner: Phaser.GameObjects.Graphics;
+  private readonly feverText: Phaser.GameObjects.Text;
+  private readonly feverGauge: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene) {
     this.panel = scene.add.graphics().setDepth(30).setScrollFactor(0);
@@ -49,6 +52,14 @@ export class GameHud {
       })
       .setDepth(31)
       .setScrollFactor(0);
+    this.feverBanner = scene.add.graphics().setDepth(30).setScrollFactor(0);
+    this.feverText = scene.add.text(875, 38, "", {
+      color: "#fff8e9",
+      fontFamily: "Arial, sans-serif",
+      fontSize: "16px",
+      fontStyle: "bold",
+    }).setDepth(31).setScrollFactor(0);
+    this.feverGauge = scene.add.graphics().setDepth(31).setScrollFactor(0);
   }
 
   update(snapshot: RhythmGameSnapshot): void {
@@ -56,6 +67,18 @@ export class GameHud {
     this.drawPanel(typeof snapshot.runState.riskBonusRemaining === "number", fever);
     this.text.setText(getHudLines(snapshot));
     this.text.setColor(fever ? "#fbe7ff" : "#fff8e9");
+    const seconds = getFeverSecondsRemaining(snapshot);
+    const gauge = Math.max(0, Math.min(100, snapshot.runState.feverGauge ?? 0));
+    this.feverBanner.clear();
+    this.feverBanner.fillStyle(fever ? 0x8f35bd : 0x182a31, fever ? 0.96 : 0.86);
+    this.feverBanner.lineStyle(2, fever ? 0xffa8ef : 0xfff1d2, 0.9);
+    this.feverBanner.fillRoundedRect(850, 24, 270, 56, 16);
+    this.feverBanner.strokeRoundedRect(850, 24, 270, 56, 16);
+    this.feverText.setText(fever ? `FEVER  ${seconds}.0s  ×1.5` : `FEVER CHARGE  ${Math.round(gauge)}%`);
+    this.feverText.setColor(fever ? "#fff0ff" : "#fff8e9");
+    this.feverGauge.clear();
+    this.feverGauge.fillStyle(0x493a58, 0.9).fillRoundedRect(866, 66, 238, 5, 3);
+    this.feverGauge.fillStyle(fever ? 0xff9ee8 : 0xffd46f, 1).fillRoundedRect(866, 66, 238 * (fever ? 1 : gauge / 100), 5, 3);
   }
 
   private drawPanel(showRisk: boolean, fever = false): void {

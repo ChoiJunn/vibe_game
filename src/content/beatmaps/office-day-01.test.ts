@@ -14,7 +14,7 @@ describe('office-day-01 beatmap', () => {
     expect(() => validateBeatmap(beatmapJson)).not.toThrow();
   });
 
-  it('contains a two-minute, 96-event chart with a rising section density', () => {
+  it('contains a two-minute, 180-event chart with a rising section density', () => {
     const beatmap = validateBeatmap(beatmapJson);
     const counts = Object.fromEntries(beatmap.sections.map((section) => [
       section.id,
@@ -22,20 +22,20 @@ describe('office-day-01 beatmap', () => {
     ]));
 
     expect(beatmap.sections.map(({ startMs, endMs }) => [startMs, endMs])).toEqual([
-      [0, 19_636], [19_636, 39_273], [39_273, 58_909],
-      [58_909, 78_545], [78_545, 98_182], [98_182, 120_000],
+      [0, 20_000], [20_000, 40_000], [40_000, 60_000],
+      [60_000, 80_000], [80_000, 100_000], [100_000, 120_000],
     ]);
-    expect(beatmap.events).toHaveLength(96);
-    expect(counts).toEqual({ arrival: 12, keyboard: 14, mail: 15, meeting: 16, copy: 18, departure: 21 });
+    expect(beatmap.events).toHaveLength(180);
+    expect(counts).toEqual({ arrival: 20, keyboard: 24, mail: 28, meeting: 32, copy: 36, departure: 40 });
     expect(beatmap.events.map((event) => event.startMs)).toEqual(
       [...beatmap.events.map((event) => event.startMs)].sort((left, right) => left - right),
     );
-    expect(new Set(beatmap.events.map((event) => event.id)).size).toBe(96);
+    expect(new Set(beatmap.events.map((event) => event.id)).size).toBe(180);
     expect(beatmap.patterns.length).toBeGreaterThan(30);
     expect(new Set(beatmap.patterns.map((pattern) => pattern.kind))).toEqual(
-      new Set(['straight', 'offbeat', 'transition', 'hold', 'rest', 'burst']),
+      new Set(['straight', 'offbeat', 'transition', 'hold', 'burst']),
     );
-    expect(beatmap.events.filter((event) => event.type === 'burst')).toHaveLength(8);
+    expect(beatmap.events.filter((event) => event.type === 'burst')).toHaveLength(13);
     expect(beatmap.events.filter((event) => event.type === 'burst').every((event) =>
       event.requiredPresses! >= 2 && event.requiredPresses! <= 5 && event.endMs! - event.startMs >= 300,
     )).toBe(true);
@@ -53,7 +53,7 @@ describe('office-day-01 beatmap', () => {
   });
 
   it('rejects charts outside the supported event count and exact duration', () => {
-    expect(() => validateBeatmap({ ...beatmapJson, events: beatmapJson.events.slice(0, 89) })).toThrow(/90 and 120/);
+    expect(() => validateBeatmap({ ...beatmapJson, events: beatmapJson.events.slice(0, 169) })).toThrow(/170 and 190/);
     const sections = beatmapJson.sections.map((section) => ({ ...section }));
     sections[sections.length - 1].endMs += 1;
     expect(() => validateBeatmap({ ...beatmapJson, sections })).toThrow(/chart boundaries/);
@@ -70,7 +70,7 @@ describe('office-day-01 beatmap', () => {
   });
 
   it('accepts the shorter test fixture only when explicitly enabled for E2E', () => {
-    expect(() => validateBeatmap(e2eQuickBeatmap)).toThrow(/90 and 120/);
+    expect(() => validateBeatmap(e2eQuickBeatmap)).toThrow(/170 and 190/);
     expect(validateBeatmap(e2eQuickBeatmap, { allowShortChart: true }).events).toHaveLength(4);
     expect(() => validateBeatmap({ ...e2eQuickBeatmap, events: [] }, { allowShortChart: true })).toThrow(/at least one event/);
   });

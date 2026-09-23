@@ -1,6 +1,6 @@
 import { SECTION_ORDER, type Beatmap, type PatternKind, type RhythmEvent, type SectionId } from './rhythm';
 
-const SECTION_BOUNDARIES = [0, 19_636, 39_273, 58_909, 78_545, 98_182, 120_000] as const;
+const SECTION_BOUNDARIES = [0, 20_000, 40_000, 60_000, 80_000, 100_000, 120_000] as const;
 
 export class BeatmapValidationError extends Error {
   constructor(message: string) {
@@ -103,14 +103,14 @@ export function validateBeatmap(input: unknown, options: BeatmapValidationOption
   assert(input && typeof input === 'object', 'beatmap must be an object');
   const beatmap = input as Partial<Beatmap>;
   assert(beatmap.id === 'office-day-01', 'beatmap id must be office-day-01');
-  assert(beatmap.bpm === 110, 'beatmap bpm must be 110');
+  assert(beatmap.bpm === 155, 'beatmap bpm must be 155');
   assert(Array.isArray(beatmap.timeSignature) && beatmap.timeSignature[0] === 4 && beatmap.timeSignature[1] === 4, 'time signature must be 4/4');
   assert(Array.isArray(beatmap.sections) && beatmap.sections.length === SECTION_ORDER.length, 'beatmap must contain six sections');
   assert(Array.isArray(beatmap.events), 'beatmap events are required');
   assert(Array.isArray(beatmap.patterns), 'beatmap patterns are required');
-  const minimumEvents = options.allowShortChart ? 1 : 90;
-  assert(beatmap.events.length >= minimumEvents && beatmap.events.length <= 120,
-    options.allowShortChart ? 'test beatmap must contain at least one event and no more than 120' : 'beatmap must contain between 90 and 120 events');
+  const minimumEvents = options.allowShortChart ? 1 : 170;
+  assert(beatmap.events.length >= minimumEvents && beatmap.events.length <= 190,
+    options.allowShortChart ? 'test beatmap must contain at least one event and no more than 190' : 'beatmap must contain between 170 and 190 events');
 
   const sections = beatmap.sections;
   sections.forEach((section, index) => {

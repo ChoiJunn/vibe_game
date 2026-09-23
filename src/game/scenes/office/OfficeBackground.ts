@@ -39,6 +39,7 @@ export function prefersReducedMotion(): boolean {
 export class OfficeBackground {
   private readonly current: Phaser.GameObjects.Image;
   private readonly incoming: Phaser.GameObjects.Image;
+  private readonly feverBackground: Phaser.GameObjects.Image;
   private section: SectionId = "arrival";
   private transitionStartedAtMs?: number;
   private transitionTargetKey = GAME_ASSETS.backgrounds.arrival.key;
@@ -59,8 +60,14 @@ export class OfficeBackground {
       .setDisplaySize(BACKGROUND_WIDTH, BACKGROUND_HEIGHT)
       .setAlpha(0)
       .setDepth(-9);
+    this.feverBackground = scene.add
+      .image(0, 0, GAME_ASSETS.backgrounds.fever.key)
+      .setOrigin(0)
+      .setDisplaySize(BACKGROUND_WIDTH, BACKGROUND_HEIGHT)
+      .setAlpha(0)
+      .setDepth(-8);
     this.feverOverlay = scene.add.graphics().setDepth(-2).setScrollFactor(0).setAlpha(0);
-    this.feverOverlay.fillStyle(0x6e3ec2, 0.28).fillRect(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
+    this.feverOverlay.fillStyle(0x6e3ec2, 0.18).fillRect(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
     this.feverOverlay.lineStyle(5, 0xff8fe7, 0.7);
     this.feverOverlay.strokeRect(28, 28, BACKGROUND_WIDTH - 56, BACKGROUND_HEIGHT - 56);
     this.feverLabel = scene.add.text(BACKGROUND_WIDTH - 56, 34, "FEVER!!", {
@@ -121,11 +128,13 @@ export class OfficeBackground {
     this.feverActive = active;
     const alpha = active ? 1 : 0;
     if (prefersReducedMotion()) {
-      this.feverOverlay.setAlpha(active ? 0.9 : 0);
+      this.feverBackground.setAlpha(active ? 1 : 0);
+      this.feverOverlay.setAlpha(active ? 0.28 : 0);
       this.feverLabel.setAlpha(active ? 1 : 0);
       return;
     }
-    this.feverOverlay.scene.tweens.add({ targets: this.feverOverlay, alpha: active ? 0.9 : 0, duration: 420, ease: "Sine.easeInOut" });
+    this.feverOverlay.scene.tweens.add({ targets: this.feverBackground, alpha: active ? 1 : 0, duration: 520, ease: "Sine.easeInOut" });
+    this.feverOverlay.scene.tweens.add({ targets: this.feverOverlay, alpha: active ? 0.28 : 0, duration: 420, ease: "Sine.easeInOut" });
     this.feverLabel.scene.tweens.add({ targets: this.feverLabel, alpha, duration: 260, ease: "Sine.easeInOut" });
   }
 }

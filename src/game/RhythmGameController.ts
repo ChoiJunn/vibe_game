@@ -146,6 +146,7 @@ export class RhythmGameController {
     this.judgementHistory = [];
     await this.clock.load(this.beatmap, this.audioSettings);
     this.scheduler.load(this.beatmap, this.audioSettings, atSongMs);
+    this.scheduler.setFeverActive?.(false);
     await this.clock.start(atSongMs);
     this.scheduler.start();
     this.inputController?.start();
@@ -409,6 +410,7 @@ export class RhythmGameController {
       finalEventEndMs: event.endMs ?? event.startMs,
       songPositionMs,
     });
+    this.scheduler.setFeverActive?.(this.runState.feverActiveUntilMs > songPositionMs);
     if (event.type === "burst") this.pendingBurstInputs = [];
     this.lastJudgement = result;
     this.judgementHistory.push({ eventId: event.id, patternId: event.patternId, patternKind: event.patternKind, judgement: result.judgement });
