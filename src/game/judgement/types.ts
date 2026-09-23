@@ -22,4 +22,4 @@ export type HoldJudgementResult = {
   combined: JudgementResult;
 };
 
-export type JudgementEvent = Pick<RhythmEvent, 'id' | 'type' | 'startMs' | 'endMs'>;
+export type JudgementEvent = Pick<RhythmEvent, 'id' | 'type' | 'startMs' | 'endMs' | 'requiredPresses'>;

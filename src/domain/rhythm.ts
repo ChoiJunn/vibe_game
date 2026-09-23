@@ -15,6 +15,12 @@ export type RhythmEvent = {
   requiredPresses?: number;
 };
 
+export type BurstRhythmEvent = RhythmEvent & { type: 'burst'; endMs: number; requiredPresses: number };
+
+export function isBurstRhythmEvent(event: RhythmEvent): event is BurstRhythmEvent {
+  return event.type === 'burst' && typeof event.endMs === 'number' && typeof event.requiredPresses === 'number';
+}
+
 export type BeatmapPattern = {
   id: string;
   kind: PatternKind;

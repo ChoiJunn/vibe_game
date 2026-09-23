@@ -139,6 +139,73 @@ describe('RhythmGameController', () => {
     expect(controller.getSnapshot().holdState?.startJudgement?.judgement).toBe('perfect');
   });
 
+  it('tracks and resolves a burst exactly once after its authored window', async () => {
+    const clock = createFakeClock();
+    const burstIndex = beatmap.events.findIndex((event) => event.type === 'burst');
+    const event = beatmap.events[burstIndex];
+    const initialRunState = { ...createInitialRunState({ runId: 'run-burst', userOid: 'user-1', beatmapId: beatmap.id }), nextEventIndex: burstIndex };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: clock as never,
+      scheduler: createFakeScheduler() as never,
+      initialRunState,
+      audioSettings: settings,
+    });
+
+    await controller.start(0, initialRunState);
+    const requiredPresses = event.requiredPresses!;
+    for (let press = 0; press < requiredPresses - 1; press += 1) {
+      const position = event.startMs + Math.round((event.endMs! - event.startMs) * press / Math.max(1, requiredPresses - 1));
+      controller.handleInput({ type: 'keydown', songPositionMs: position });
+      controller.handleInput({ type: 'keyup', songPositionMs: position });
+    }
+    expect(controller.getSnapshot().burstState).toMatchObject({
+      eventId: event.id,
+      requiredPresses,
+      completedPresses: requiredPresses - 1,
+      phase: 'counting',
+      progress: (requiredPresses - 1) / requiredPresses,
+    });
+
+    const finalPosition = event.endMs!;
+    controller.handleInput({ type: 'keydown', songPositionMs: finalPosition });
+    controller.handleInput({ type: 'keyup', songPositionMs: finalPosition });
+    controller.update(event.endMs!);
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: burstIndex + 1, perfectCount: 1 });
+    const judgedSnapshot = controller.getSnapshot();
+    controller.update(event.endMs! + 500);
+    expect(controller.getSnapshot().runState).toEqual(judgedSnapshot.runState);
+  });
+
+  it('preserves an incomplete burst while paused and emits one automatic miss', async () => {
+    const clock = createFakeClock();
+    const burstIndex = beatmap.events.findIndex((event) => event.type === 'burst');
+    const event = beatmap.events[burstIndex];
+    const initialRunState = { ...createInitialRunState({ runId: 'run-burst-miss', userOid: 'user-1', beatmapId: beatmap.id }), nextEventIndex: burstIndex };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: clock as never,
+      scheduler: createFakeScheduler() as never,
+      initialRunState,
+      audioSettings: settings,
+    });
+    const misses: string[] = [];
+    controller.subscribeAutomaticMiss((miss) => misses.push(miss.chartEventId));
+
+    await controller.start(0, initialRunState);
+    controller.handleInput({ type: 'keydown', songPositionMs: event.startMs });
+    controller.handleInput({ type: 'keyup', songPositionMs: event.startMs + 20 });
+    controller.pause();
+    controller.update(event.endMs! + 1000);
+    expect(controller.getSnapshot().runState.nextEventIndex).toBe(burstIndex);
+
+    await controller.resume();
+    controller.update(event.endMs! + 161);
+    controller.update(event.endMs! + 161);
+    expect(misses).toEqual([event.id]);
+    expect(controller.getSnapshot().runState).toMatchObject({ nextEventIndex: burstIndex + 1, missCount: 1 });
+  });
+
   it('notifies persistence before subscribers observe automatic terminal failure', async () => {
     const event = beatmap.events[0];
     const initialRunState = { ...createInitialRunState({ runId: 'run-auto-fail', userOid: 'user-1', beatmapId: beatmap.id }), hearts: 1 };

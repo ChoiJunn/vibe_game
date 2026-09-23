@@ -1,8 +1,8 @@
-import type { Beatmap, RhythmEvent, RunState, SectionId } from '@/domain/rhythm';
+import { isBurstRhythmEvent, type Beatmap, type BurstRhythmEvent, type RhythmEvent, type RunState, type SectionId } from '@/domain/rhythm';
 import { AudioClock } from './audio/AudioClock';
 import { OfficeSoundScheduler } from './audio/OfficeSoundScheduler';
 import { clampAudioSettings, DEFAULT_AUDIO_SETTINGS, type AudioClockState, type AudioSettings } from './audio/types';
-import { judgeHoldEnd, judgeHoldStart, judgeTap, combineHoldJudgements } from './judgement/judgeInput';
+import { judgeBurst, judgeHoldEnd, judgeHoldStart, judgeTap, combineHoldJudgements } from './judgement/judgeInput';
 import { JUDGEMENT_WINDOWS, type InputEvent, type JudgementResult } from './judgement/types';
 import { SpaceInputController } from './input/SpaceInputController';
 import { createInitialRunState, reduceRunState } from './state/reduceRunState';
@@ -17,6 +17,7 @@ export type RhythmGameSnapshot = {
   section: SectionId;
   lastJudgement?: JudgementResult;
   holdState?: HoldState;
+  burstState?: BurstState;
 };
 
 export type HoldState = {
@@ -24,6 +25,14 @@ export type HoldState = {
   phase: 'waiting' | 'holding';
   progress: number;
   startJudgement?: JudgementResult;
+};
+
+export type BurstState = {
+  eventId: string;
+  requiredPresses: number;
+  completedPresses: number;
+  phase: 'waiting' | 'counting';
+  progress: number;
 };
 
 export type AutomaticMissNotification = { chartEventId: string; songPositionMs: number };
@@ -50,6 +59,7 @@ export class RhythmGameController {
   private inputController?: Pick<SpaceInputController, 'start' | 'stop'> & Partial<Pick<SpaceInputController, 'releaseHeld'>>;
   private runState: RunState;
   private pendingHoldStart?: JudgementResult;
+  private pendingBurstInputs: InputEvent[] = [];
   private lastJudgement?: JudgementResult;
   private readonly listeners = new Set<(snapshot: RhythmGameSnapshot) => void>();
   private readonly automaticMissListeners = new Set<(miss: AutomaticMissNotification) => void>();
@@ -80,6 +90,7 @@ export class RhythmGameController {
       beatmapId: this.beatmap.id,
     });
     this.pendingHoldStart = undefined;
+    this.pendingBurstInputs = [];
     this.lastJudgement = undefined;
     await this.clock.load(this.beatmap, this.audioSettings);
     this.scheduler.load(this.beatmap, this.audioSettings, atSongMs);
@@ -131,6 +142,14 @@ export class RhythmGameController {
       return;
     }
 
+    if (isBurstRhythmEvent(event)) {
+      this.pendingBurstInputs.push(input);
+      if (input.type === 'keyup' && this.isBurstComplete(event) && input.songPositionMs + this.audioSettings.inputOffsetMs >= event.endMs!) {
+        this.resolveBurst(event, input.songPositionMs);
+      }
+      return;
+    }
+
     if (event.type !== 'hold') {
       return;
     }
@@ -162,6 +181,26 @@ export class RhythmGameController {
       if (this.clock.getState() !== 'playing') return;
       const event = this.beatmap.events[this.runState.nextEventIndex];
       if (!event) return;
+
+      if (isBurstRhythmEvent(event)) {
+        if (this.isBurstComplete(event) && songPositionMs >= event.endMs!) {
+          this.resolveBurst(event, songPositionMs);
+          continue;
+        }
+
+        const burstDeadlineMs = event.endMs! + JUDGEMENT_WINDOWS.goodMs;
+        if (songPositionMs <= burstDeadlineMs) return;
+
+        const automaticMiss = { chartEventId: event.id, songPositionMs };
+        this.automaticMissListeners.forEach((listener) => listener(automaticMiss));
+        this.pendingBurstInputs = [];
+        this.applyResult({
+          judgement: 'miss',
+          errorMs: songPositionMs - event.endMs!,
+          eventId: event.id,
+        }, event, songPositionMs);
+        continue;
+      }
 
       const targetMs = event.type === 'hold' ? event.endMs! : event.startMs;
       const deadlineMs = targetMs + JUDGEMENT_WINDOWS.goodMs;
@@ -215,6 +254,15 @@ export class RhythmGameController {
           startJudgement: this.pendingHoldStart,
         }
       : undefined;
+    const burstState = currentEvent && isBurstRhythmEvent(currentEvent)
+      ? {
+          eventId: currentEvent.id,
+          requiredPresses: currentEvent.requiredPresses!,
+          completedPresses: this.getCompletedBurstPresses(),
+          phase: this.pendingBurstInputs.length > 0 ? 'counting' as const : 'waiting' as const,
+          progress: Math.min(1, this.getCompletedBurstPresses() / currentEvent.requiredPresses!),
+        }
+      : undefined;
     return {
       clockState: this.clock.getState(),
       songPositionMs: this.clock.getSongPositionMs(),
@@ -225,6 +273,7 @@ export class RhythmGameController {
       section: currentEvent?.section ?? this.beatmap.sections[this.beatmap.sections.length - 1]?.id ?? 'arrival',
       lastJudgement: this.lastJudgement,
       holdState,
+      burstState,
     };
   }
 
@@ -247,6 +296,7 @@ export class RhythmGameController {
       finalEventEndMs: event.endMs ?? event.startMs,
       songPositionMs,
     });
+    if (event.type === 'burst') this.pendingBurstInputs = [];
     this.lastJudgement = result;
     if (this.runState.status === 'completed' || this.runState.status === 'failed') {
       // Freeze the run immediately. Release a recorded held key first so its
@@ -256,6 +306,21 @@ export class RhythmGameController {
       this.scheduler.pause();
     }
     this.emit();
+  }
+
+  private resolveBurst(event: BurstRhythmEvent, songPositionMs: number): void {
+    const result = judgeBurst(event, this.pendingBurstInputs, this.audioSettings.inputOffsetMs);
+    this.applyResult(result, event, songPositionMs);
+  }
+
+  private isBurstComplete(event: BurstRhythmEvent): boolean {
+    const completedPresses = this.getCompletedBurstPresses();
+    return completedPresses >= event.requiredPresses
+      && this.pendingBurstInputs.at(-1)?.type === 'keyup';
+  }
+
+  private getCompletedBurstPresses(): number {
+    return this.pendingBurstInputs.filter((input) => input.type === 'keyup').length;
   }
 
   private applyAudioSettings(settings: AudioSettings): void {

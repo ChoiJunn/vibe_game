@@ -10,13 +10,21 @@ const beatmap = validateBeatmap(beatmapInput);
 function makeFullRun(): ReplayInputEvent[] {
   const events: ReplayInputEvent[] = [];
   for (const note of beatmap.events) {
-    events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: note.startMs });
-    events.push({
-      eventId: `input-${events.length}`,
-      sequence: events.length,
-      type: 'keyup',
-      songPositionMs: note.type === 'hold' ? note.endMs! : note.startMs + 1,
-    });
+    if (note.type === 'burst') {
+      for (let press = 0; press < note.requiredPresses!; press += 1) {
+        const position = note.startMs + Math.round((note.endMs! - note.startMs) * press / Math.max(1, note.requiredPresses! - 1));
+        events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: position });
+        events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keyup', songPositionMs: position });
+      }
+    } else {
+      events.push({ eventId: `input-${events.length}`, sequence: events.length, type: 'keydown', songPositionMs: note.startMs });
+      events.push({
+        eventId: `input-${events.length}`,
+        sequence: events.length,
+        type: 'keyup',
+        songPositionMs: note.type === 'hold' ? note.endMs! : note.startMs + 1,
+      });
+    }
   }
   return events;
 }
