@@ -29,6 +29,9 @@ export const GAME_ASSETS = {
     perfect: { key: 'protagonist-perfect', path: '/game/art/character/protagonist-perfect.png' },
     miss: { key: 'protagonist-miss', path: '/game/art/character/protagonist-miss.png' },
     fever: { key: 'protagonist-fever', path: '/game/art/character/protagonist-fever.png' },
+    feverGood: { key: 'protagonist-fever-good', path: '/game/art/character/protagonist-fever-good.png' },
+    feverPerfect: { key: 'protagonist-fever-perfect', path: '/game/art/character/protagonist-fever-perfect.png' },
+    feverMiss: { key: 'protagonist-fever-miss', path: '/game/art/character/protagonist-fever-miss.png' },
   },
   moka: {
     tumbler: { key: 'moka-tumbler', path: '/game/art/mascot/moka-tumbler.png' },
@@ -37,6 +40,9 @@ export const GAME_ASSETS = {
     perfect: { key: 'moka-perfect', path: '/game/art/mascot/moka-perfect.png' },
     miss: { key: 'moka-miss', path: '/game/art/mascot/moka-miss.png' },
     fever: { key: 'moka-fever', path: '/game/art/mascot/moka-fever.png' },
+    feverGood: { key: 'moka-fever-good', path: '/game/art/mascot/moka-fever-good.png' },
+    feverPerfect: { key: 'moka-fever-perfect', path: '/game/art/mascot/moka-fever-perfect.png' },
+    feverMiss: { key: 'moka-fever-miss', path: '/game/art/mascot/moka-fever-miss.png' },
   },
   notes: {
     arrival: { key: 'note-arrival', path: '/game/art/notes/arrival.png' },

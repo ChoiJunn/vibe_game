@@ -3,6 +3,11 @@ import type { AudioClockState } from "@/game/audio/types";
 import { GAME_ASSETS } from "@/game/assets";
 import type { Judgement } from "@/domain/rhythm";
 
+const BASE_CHARACTER_WIDTH = 190;
+const BASE_CHARACTER_HEIGHT = 190;
+const FEVER_CHARACTER_WIDTH = 150;
+const FEVER_CHARACTER_HEIGHT = 225;
+
 export function getWalkPoseKey(
   state: AudioClockState,
   songPositionMs: number,
@@ -16,11 +21,19 @@ export function getWalkPoseKey(
     : GAME_ASSETS.protagonist.walkB.key;
 }
 
+export function fitImageToFootprint(
+  sprite: Phaser.GameObjects.Image,
+  maxWidth: number,
+  maxHeight: number,
+): void {
+  const source = sprite.texture.getSourceImage() as { width: number; height: number };
+  const scale = Math.min(maxWidth / source.width, maxHeight / source.height);
+  sprite.setScale(scale);
+}
+
 export class OfficeCharacter {
   private readonly sprite: Phaser.GameObjects.Image;
   private readonly baseY: number;
-  private readonly baseScaleX: number;
-  private readonly baseScaleY: number;
   private reactionActive = false;
   private feverActive = false;
   private lastWalkPoseKey: string = GAME_ASSETS.protagonist.walkA.key;
@@ -30,10 +43,8 @@ export class OfficeCharacter {
     this.sprite = scene.add
       .image(x, y, GAME_ASSETS.protagonist.walkA.key)
       .setOrigin(0.5, 1)
-      .setDisplaySize(190, 190)
+      .setDisplaySize(BASE_CHARACTER_WIDTH, BASE_CHARACTER_HEIGHT)
       .setDepth(11);
-    this.baseScaleX = this.sprite.scaleX;
-    this.baseScaleY = this.sprite.scaleY;
   }
 
   update(
@@ -70,32 +81,48 @@ export class OfficeCharacter {
     this.sprite.setTint(0xffffff);
     if (active) {
       this.sprite.setTexture(GAME_ASSETS.protagonist.fever.key);
-      this.sprite.setScale(this.baseScaleX * 1.04, this.baseScaleY * 1.04);
+      fitImageToFootprint(this.sprite, FEVER_CHARACTER_WIDTH, FEVER_CHARACTER_HEIGHT);
     } else if (!this.reactionActive) {
-      this.sprite.setScale(this.baseScaleX, this.baseScaleY);
+      this.sprite.setTexture(this.lastWalkPoseKey);
+      this.sprite.setDisplaySize(BASE_CHARACTER_WIDTH, BASE_CHARACTER_HEIGHT);
     }
   }
 
   react(judgement: Judgement): void {
     const pose = getCharacterReactionPose(judgement);
+    const feverReaction = this.feverActive;
     this.reactionActive = true;
     this.sprite.scene.tweens.killTweensOf(this.sprite);
     this.sprite
-      .setTexture(getCharacterReactionAssetKey(judgement))
-      .setRotation(0)
-      .setScale(this.baseScaleX, this.baseScaleY);
+      .setTexture(getCharacterReactionAssetKey(judgement, feverReaction))
+      .setRotation(0);
+    if (feverReaction) {
+      fitImageToFootprint(this.sprite, FEVER_CHARACTER_WIDTH, FEVER_CHARACTER_HEIGHT);
+    } else {
+      this.sprite.setDisplaySize(BASE_CHARACTER_WIDTH, BASE_CHARACTER_HEIGHT);
+    }
+    const initialScaleX = this.sprite.scaleX;
+    const initialScaleY = this.sprite.scaleY;
     this.sprite.scene.tweens.add({
       targets: this.sprite,
       rotation: pose.rotation,
-      scaleX: this.baseScaleX * pose.scaleX,
-      scaleY: this.baseScaleY * pose.scaleY,
+      scaleX: initialScaleX * pose.scaleX,
+      scaleY: initialScaleY * pose.scaleY,
       y: this.baseY + pose.yOffset,
       duration: pose.duration,
       yoyo: true,
       ease: pose.ease,
       onComplete: () => {
         this.reactionActive = false;
-        this.sprite.setTexture(this.feverActive ? GAME_ASSETS.protagonist.fever.key : this.lastWalkPoseKey);
+        this.sprite.setRotation(0);
+        this.sprite.setTexture(
+          this.feverActive ? GAME_ASSETS.protagonist.fever.key : this.lastWalkPoseKey,
+        );
+        if (this.feverActive) {
+          fitImageToFootprint(this.sprite, FEVER_CHARACTER_WIDTH, FEVER_CHARACTER_HEIGHT);
+        } else {
+          this.sprite.setDisplaySize(BASE_CHARACTER_WIDTH, BASE_CHARACTER_HEIGHT);
+        }
       },
     });
   }
@@ -144,6 +171,10 @@ export function getCharacterReactionPose(judgement: Judgement): {
   }
 }
 
-export function getCharacterReactionAssetKey(judgement: Judgement): string {
-  return GAME_ASSETS.protagonist[judgement].key;
+export function getCharacterReactionAssetKey(
+  judgement: Judgement,
+  feverActive = false,
+): string {
+  if (!feverActive) return GAME_ASSETS.protagonist[judgement].key;
+  return GAME_ASSETS.protagonist[`fever${judgement[0].toUpperCase()}${judgement.slice(1)}` as "feverGood" | "feverPerfect" | "feverMiss"].key;
 }

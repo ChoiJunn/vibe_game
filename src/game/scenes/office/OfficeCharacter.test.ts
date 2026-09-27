@@ -31,7 +31,13 @@ describe('Office journey characters', () => {
     expect(getCharacterReactionPose('miss').yOffset).toBeGreaterThan(0);
     expect(getCharacterReactionAssetKey('perfect')).toBe(GAME_ASSETS.protagonist.perfect.key);
     expect(getCharacterReactionAssetKey('miss')).toBe(GAME_ASSETS.protagonist.miss.key);
+    expect(getCharacterReactionAssetKey('perfect', true)).toBe(GAME_ASSETS.protagonist.feverPerfect.key);
+    expect(getCharacterReactionAssetKey('good', true)).toBe(GAME_ASSETS.protagonist.feverGood.key);
+    expect(getCharacterReactionAssetKey('miss', true)).toBe(GAME_ASSETS.protagonist.feverMiss.key);
     expect(getMokaReactionAssetKey('good')).toBe(GAME_ASSETS.moka.good.key);
     expect(getMokaReactionAssetKey('miss')).toBe(GAME_ASSETS.moka.miss.key);
+    expect(getMokaReactionAssetKey('perfect', true)).toBe(GAME_ASSETS.moka.feverPerfect.key);
+    expect(getMokaReactionAssetKey('good', true)).toBe(GAME_ASSETS.moka.feverGood.key);
+    expect(getMokaReactionAssetKey('miss', true)).toBe(GAME_ASSETS.moka.feverMiss.key);
   });
 });

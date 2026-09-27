@@ -6,6 +6,7 @@ import { GAME_ASSETS } from './assets';
 
 const allAssets = [
   ...Object.values(GAME_ASSETS.backgrounds),
+  ...Object.values(GAME_ASSETS.feverBackgrounds),
   ...Object.values(GAME_ASSETS.protagonist),
   ...Object.values(GAME_ASSETS.moka),
   ...Object.values(GAME_ASSETS.notes),
@@ -36,16 +37,35 @@ describe('GAME_ASSETS', () => {
       expect(readPng(asset.path)).toMatchObject({ width: 1280, height: 720, colorType: 2 });
     }
     expect(readPng(GAME_ASSETS.backgrounds.fever.path)).toMatchObject({ width: 1672, height: 941, colorType: 2 });
+    for (const asset of Object.values(GAME_ASSETS.feverBackgrounds)) {
+      expect(readPng(asset.path)).toMatchObject({ width: 1672, height: 941, colorType: 2 });
+    }
+    const feverProtagonistKeys: readonly string[] = [
+      GAME_ASSETS.protagonist.fever.key,
+      GAME_ASSETS.protagonist.feverGood.key,
+      GAME_ASSETS.protagonist.feverPerfect.key,
+      GAME_ASSETS.protagonist.feverMiss.key,
+    ];
     for (const asset of Object.values(GAME_ASSETS.protagonist)) {
-      if (asset.key === GAME_ASSETS.protagonist.fever.key) {
-        expect(readPng(asset.path)).toMatchObject({ width: 1024, height: 1536, colorType: 6 });
+      if (feverProtagonistKeys.includes(asset.key)) {
+        expect(readPng(asset.path).colorType).toBe(6);
       } else {
         expect(readPng(asset.path)).toMatchObject({ width: 320, height: 320, colorType: 6 });
       }
     }
-    for (const asset of [...Object.values(GAME_ASSETS.moka).filter((candidate) => candidate.key !== GAME_ASSETS.moka.fever.key), ...Object.values(GAME_ASSETS.notes)]) {
+    const normalMokaAssets = [
+      GAME_ASSETS.moka.tumbler,
+      GAME_ASSETS.moka.deskCup,
+      GAME_ASSETS.moka.good,
+      GAME_ASSETS.moka.perfect,
+      GAME_ASSETS.moka.miss,
+    ];
+    for (const asset of [...normalMokaAssets, ...Object.values(GAME_ASSETS.notes)]) {
       expect(readPng(asset.path)).toMatchObject({ width: 128, height: 128, colorType: 6 });
     }
     expect(readPng(GAME_ASSETS.moka.fever.path)).toMatchObject({ width: 1214, height: 1295, colorType: 6 });
+    for (const asset of [GAME_ASSETS.moka.feverGood, GAME_ASSETS.moka.feverPerfect, GAME_ASSETS.moka.feverMiss]) {
+      expect(readPng(asset.path).colorType).toBe(6);
+    }
   });
 });
