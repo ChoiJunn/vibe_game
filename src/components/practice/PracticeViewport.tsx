@@ -19,7 +19,7 @@ export function PracticeViewport({ beatmap, onComplete, onExit }: { beatmap: Bea
     return () => { window.removeEventListener("keydown", onKeyDown); unsubscribe(); controller.exit(); };
   }, [beatmap, onComplete]);
   if (!snapshot) return <p role="status">연습을 준비하고 있어요...</p>;
-  return <section className="practice-viewport" aria-label="패턴 연습">
+  return <section className="practice-viewport" aria-label="패턴 연습" data-source-pattern-id={beatmap.patterns[0]?.id}>
     <div className="practice-viewport__lane" aria-hidden="true"><span className="practice-viewport__cursor" style={{ left: `${Math.min(100, (snapshot.nextEventIndex / beatmap.events.length) * 100)}%` }} />{beatmap.events.map((event) => <i key={event.id} className={`practice-note practice-note--${event.patternKind}`} />)}</div>
     <p><strong>{snapshot.status === "completed" ? "연습 완료!" : snapshot.status === "paused" ? "일시정지" : "SPACE로 박자를 맞춰보세요"}</strong> · {snapshot.nextEventIndex}/{beatmap.events.length} · 정확도 {snapshot.accuracy}%</p>
     <div className="practice-viewport__stats"><span>PERFECT {snapshot.perfectCount}</span><span>GOOD {snapshot.goodCount}</span><span>MISS {snapshot.missCount}</span></div>

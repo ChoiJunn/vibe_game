@@ -75,6 +75,6 @@ Task: T02-build-catalog-and-variation-previews
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] 구현 완료
+- [x] 검증 통과 (5 Chromium E2E tests, typecheck, ESLint, diff check)
+- commit: `feat(practice): add localized grouped pattern catalog`
