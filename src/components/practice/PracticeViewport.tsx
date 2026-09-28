@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PracticeChart } from "@/game/practice/createPracticeBeatmap";
 import { PracticeRunController, type PracticeLoopResult, type PracticeRunSnapshot } from "@/game/practice/PracticeRunController";
+import { RhythmTouchButton, useCoarsePointer } from "@/components/game/RhythmTouchButton";
 
 const APPROACH_WINDOW_MS = 1_500;
 
@@ -14,6 +15,7 @@ export function PracticeViewport({ chart, title, onComplete, onExit }: {
 }) {
   const controllerRef = useRef<PracticeRunController | null>(null);
   const [snapshot, setSnapshot] = useState<PracticeRunSnapshot>();
+  const isCoarsePointer = useCoarsePointer();
 
   useEffect(() => {
     const controller = new PracticeRunController(chart, onComplete);
@@ -104,6 +106,10 @@ export function PracticeViewport({ chart, title, onComplete, onExit }: {
     {snapshot.musicStatus === "loading" && <p className="practice-audio-status" role="status">배경 음악을 불러오고 있어요.</p>}
     {snapshot.audioUnavailable && <p className="practice-audio-status is-unavailable" role="status">배경 음악을 사용할 수 없어도 박자 연습은 계속할 수 있어요.</p>}
     <div className="practice-viewport__actions">
+      {isCoarsePointer && snapshot.status === "playing" && <RhythmTouchButton
+        onPress={(source) => controllerRef.current?.pressInputSource(source)}
+        onRelease={(source) => controllerRef.current?.releaseInputSource(source)}
+      />}
       {snapshot.status === "paused"
         ? <button type="button" className="practice-control practice-control--primary" onClick={() => controllerRef.current?.resume()}>이어하기</button>
         : <button type="button" className="practice-control practice-control--primary" onClick={() => controllerRef.current?.pause()}>일시정지</button>}

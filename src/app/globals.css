@@ -251,6 +251,32 @@ select {
   cursor: pointer;
 }
 
+.rhythm-touch-button {
+  display: inline-flex;
+  min-width: 160px;
+  min-height: 64px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 2px solid rgba(255, 221, 122, 0.8);
+  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  color: #fffdf8;
+  background: rgba(36, 50, 59, 0.94);
+  box-shadow: 0 0.5rem 1.4rem rgba(16, 25, 30, 0.24);
+  font: inherit;
+  font-weight: 800;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.rhythm-touch-button[data-pressed="true"] { transform: translateY(2px) scale(0.98); background: #5d4ba0; }
+.rhythm-touch-button:focus-visible { outline: 3px solid #ffdd7a; outline-offset: 4px; }
+.rhythm-touch-button__key { border-radius: 7px; padding: 0.25rem 0.45rem; color: #26343a; background: #ffdd7a; font-size: 0.72rem; }
+.game-frame > .rhythm-touch-button { position: absolute; z-index: 4; right: 1rem; bottom: 1rem; }
+.practice-viewport__actions > .rhythm-touch-button { flex: 1 1 100%; color: #fffdf8; }
+
 .pause-overlay,
 .result-summary {
   position: absolute;
@@ -1134,5 +1160,6 @@ a:focus-visible {
   .practice-viewport__lane { min-height: 125px; padding-inline: 16px; }
   .practice-viewport__lane-center { right: 16px; left: 16px; }
   .practice-viewport__actions .practice-control { flex: 1; }
+  .practice-viewport__actions > .rhythm-touch-button { flex: 1 1 100%; }
   .practice-summary__grid { grid-template-columns: 1fr; }
 }

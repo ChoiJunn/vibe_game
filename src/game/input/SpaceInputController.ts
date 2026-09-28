@@ -20,7 +20,7 @@ export class SpaceInputController {
   private readonly isViewportFocused: () => boolean;
   private readonly options: Pick<SpaceInputControllerOptions, 'getGameState' | 'getSongPositionMs' | 'onInput' | 'onPauseRequest' | 'onPersistInput' | 'getInputOffsetMs'>;
   private attached = false;
-  private spaceHeld = false;
+  private readonly activeSources = new Set<string>();
   private persistedSpaceDown = false;
   private sequence: number;
   private releaseWaiters = new Set<() => void>();
@@ -45,21 +45,17 @@ export class SpaceInputController {
   }
 
   stop(): void {
-    if (!this.attached) {
-      return;
-    }
-
+    this.releaseHeld();
+    if (!this.attached) return;
     this.inputTarget.removeEventListener('keydown', this.handleKeyDown);
     this.inputTarget.removeEventListener('keyup', this.handleKeyUp);
     this.blurTarget.removeEventListener('blur', this.handleBlur);
     this.attached = false;
-    this.spaceHeld = false;
-    this.persistedSpaceDown = false;
   }
 
   releaseHeld(): void {
-    if (!this.spaceHeld) return;
-    this.spaceHeld = false;
+    if (this.activeSources.size === 0) return;
+    this.activeSources.clear();
     // Keep recorded keydown/keyup pairs complete even if the final judgement
     // ended the run while Space was held; ignore keys pressed while paused.
     if (this.persistedSpaceDown) {
@@ -70,8 +66,26 @@ export class SpaceInputController {
   }
 
   waitForRelease(): Promise<void> {
-    if (!this.spaceHeld) return Promise.resolve();
+    if (this.activeSources.size === 0) return Promise.resolve();
     return new Promise((resolve) => this.releaseWaiters.add(resolve));
+  }
+
+  press(source: string): void {
+    if (this.activeSources.has(source)) return;
+    const wasReleased = this.activeSources.size === 0;
+    this.activeSources.add(source);
+    if (!wasReleased || this.options.getGameState() !== 'playing') return;
+    this.persistedSpaceDown = true;
+    this.forwardInput('keydown');
+  }
+
+  release(source: string): void {
+    if (!this.activeSources.delete(source) || this.activeSources.size > 0) return;
+    if (this.persistedSpaceDown) {
+      this.persistedSpaceDown = false;
+      this.forwardInput('keyup');
+    }
+    this.notifyReleased();
   }
 
   private readonly handleKeyDown = (event: Event): void => {
@@ -86,15 +100,10 @@ export class SpaceInputController {
 
     keyboardEvent.preventDefault();
 
-    if (keyboardEvent.repeat || this.spaceHeld) {
+    if (keyboardEvent.repeat || this.activeSources.has('keyboard')) {
       return;
     }
-
-    this.spaceHeld = true;
-    if (this.options.getGameState() === 'playing') {
-      this.persistedSpaceDown = true;
-      this.forwardInput('keydown');
-    }
+    this.press('keyboard');
   };
 
   private readonly handleKeyUp = (event: Event): void => {
@@ -105,16 +114,7 @@ export class SpaceInputController {
 
     keyboardEvent.preventDefault();
 
-    if (!this.spaceHeld) {
-      return;
-    }
-
-    this.spaceHeld = false;
-    if (this.persistedSpaceDown) {
-      this.persistedSpaceDown = false;
-      this.forwardInput('keyup');
-    }
-    this.notifyReleased();
+    this.release('keyboard');
   };
 
   private readonly handleBlur = (): void => {

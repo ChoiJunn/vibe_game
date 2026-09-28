@@ -111,6 +111,51 @@ describe('SpaceInputController', () => {
     controller.stop();
   });
 
+  it('combines keyboard and touch sources into one held input until every source releases', async () => {
+    const inputTarget = new EventTarget();
+    const persisted: string[] = [];
+    const controller = new SpaceInputController({
+      inputTarget,
+      blurTarget: new EventTarget(),
+      getGameState: () => 'playing',
+      getSongPositionMs: () => 500,
+      onInput: ({ type }) => persisted.push(type),
+      onPersistInput: ({ type }) => persisted.push(`persist:${type}`),
+      onPauseRequest: () => undefined,
+    });
+    controller.start();
+
+    inputTarget.dispatchEvent(createKeyEvent('keydown'));
+    controller.press('touch:7');
+    inputTarget.dispatchEvent(createKeyEvent('keyup'));
+    const released = controller.waitForRelease();
+    expect(persisted).toEqual(['persist:keydown', 'keydown']);
+
+    controller.release('touch:7');
+    await released;
+    expect(persisted).toEqual(['persist:keydown', 'keydown', 'persist:keyup', 'keyup']);
+    controller.release('touch:7');
+    expect(persisted).toHaveLength(4);
+    controller.stop();
+  });
+
+  it('releases a held touch exactly once when stopped', () => {
+    const inputTarget = new EventTarget();
+    const persisted: string[] = [];
+    const controller = new SpaceInputController({
+      inputTarget,
+      getGameState: () => 'playing',
+      getSongPositionMs: () => 500,
+      onInput: ({ type }) => persisted.push(type),
+      onPauseRequest: () => undefined,
+    });
+    controller.start();
+    controller.press('touch:2');
+    controller.stop();
+    controller.stop();
+    expect(persisted).toEqual(['keydown', 'keyup']);
+  });
+
   it('sequences automatic misses with physical inputs without forwarding them as keys', () => {
     const inputTarget = new EventTarget();
     const persisted: Array<{ clientSequence: number; type: string; chartEventId?: string }> = [];

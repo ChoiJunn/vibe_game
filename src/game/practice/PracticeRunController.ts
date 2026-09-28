@@ -46,7 +46,8 @@ type PracticeAudioScheduler = Pick<OfficeSoundScheduler,
 >;
 
 type FrameHandle = number | ReturnType<typeof setTimeout>;
-type PracticeInputController = Pick<SpaceInputController, "start" | "stop" | "releaseHeld">;
+type PracticeInputController = Pick<SpaceInputController, "start" | "stop" | "releaseHeld"> &
+  Partial<Pick<SpaceInputController, "press" | "release">>;
 
 export type PracticeRunControllerOptions = {
   clock?: AudioClockContract;
@@ -219,6 +220,14 @@ export class PracticeRunController {
     if (isBurstComplete(event, this.pendingBurstInputs) && input.songPositionMs + this.settings.inputOffsetMs >= (event.endMs ?? event.startMs)) {
       this.resolveBurst(event, input.songPositionMs);
     }
+  }
+
+  pressInputSource(source: string): void {
+    this.inputController?.press?.(source);
+  }
+
+  releaseInputSource(source: string): void {
+    this.inputController?.release?.(source);
   }
 
   update(songPositionOverride?: number): void {

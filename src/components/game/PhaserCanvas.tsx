@@ -16,6 +16,7 @@ import { AudioClock } from '@/game/audio/AudioClock';
 import { DEFAULT_AUDIO_SETTINGS, type AudioSettings } from '@/game/audio/types';
 import { RhythmGameController, type RhythmGameSnapshot } from '@/game/RhythmGameController';
 import { SpaceInputController } from '@/game/input/SpaceInputController';
+import { RhythmTouchButton, useCoarsePointer } from './RhythmTouchButton';
 import { AutosaveCoordinator, type AutosaveState } from '@/game/persistence/AutosaveCoordinator';
 import { PauseCoordinator, type PauseState } from '@/game/pause/PauseCoordinator';
 import { usePageLifecyclePause } from '@/hooks/usePageLifecyclePause';
@@ -49,6 +50,7 @@ export function PhaserCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
   const startGameRef = useRef<(() => void) | null>(null);
   const controllerRef = useRef<RhythmGameController | null>(null);
+  const inputControllerRef = useRef<SpaceInputController | null>(null);
   const autosaveRef = useRef<AutosaveCoordinator | null>(null);
   const retryTerminalRef = useRef<(() => Promise<void>) | null>(null);
   const exitToNewGameRef = useRef<(() => Promise<void>) | null>(null);
@@ -70,6 +72,7 @@ export function PhaserCanvas() {
   const [submission, setSubmission] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [failedRunRetained, setFailedRunRetained] = useState(false);
   const [loadError, setLoadError] = useState<string>();
+  const isCoarsePointer = useCoarsePointer();
   useEffect(() => {
     tokenProviderRef.current = getIdToken;
   }, [getIdToken]);
@@ -175,6 +178,7 @@ export function PhaserCanvas() {
           onInput: (event) => controller.handleInput(event),
           onPauseRequest: () => controller.pause(),
         });
+        inputControllerRef.current = input;
         controller.attachInputController(input);
         unsubscribeAutomaticMiss = controller.subscribeAutomaticMiss(({ chartEventId, songPositionMs }) => {
           input.recordAutomaticMiss(chartEventId, songPositionMs);
@@ -304,6 +308,7 @@ export function PhaserCanvas() {
       unsubscribeAutosave();
       controllerRef.current?.dispose();
       controllerRef.current = null;
+      inputControllerRef.current = null;
       autosaveRef.current = null;
       game?.destroy(true);
     };
@@ -340,6 +345,12 @@ export function PhaserCanvas() {
     /> : null}
     {runtime && started && !runtime.pauseState.paused && snapshot?.clockState === 'playing' && !hasResult ? (
       <button type={'button'} className={'pause-button'} onClick={() => coordinator?.requestPause('button')}>일시정지</button>
+    ) : null}
+    {isCoarsePointer && runtime && started && !runtime.pauseState.paused && snapshot?.clockState === 'playing' && !hasResult ? (
+      <RhythmTouchButton
+        onPress={(source) => inputControllerRef.current?.press(source)}
+        onRelease={(source) => inputControllerRef.current?.release(source)}
+      />
     ) : null}
     {runtime ? <PauseOverlay
       paused={runtime.pauseState.paused}

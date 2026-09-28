@@ -81,3 +81,66 @@ test("keeps variation previews and actions within a narrow mobile viewport", asy
   }));
   expect(pageWidth, overflowing.join("\n")).toBeLessThanOrEqual(390);
 });
+
+test("supports a held touch input in practice on coarse-pointer devices", async ({ page }) => {
+  await installCoarsePointer(page);
+  await page.reload();
+  await page.locator(".pattern-kind-card--straight").click();
+  await page.locator(".pattern-variation__start").first().click();
+
+  const touchButton = page.locator(".practice-viewport .rhythm-touch-button");
+  await expect(touchButton).toBeVisible({ timeout: 10_000 });
+  await touchButton.hover();
+  await page.mouse.down();
+  await expect(touchButton).toHaveAttribute("aria-pressed", "true");
+  await page.mouse.up();
+  await expect(touchButton).toHaveAttribute("aria-pressed", "false");
+});
+
+test("does not render the touch input on a fine-pointer desktop", async ({ page }) => {
+  await page.locator(".pattern-kind-card--straight").click();
+  await page.locator(".pattern-variation__start").first().click();
+  await expect(page.locator(".practice-count-in")).toHaveCount(0, { timeout: 10_000 });
+  await expect(page.locator(".practice-viewport .rhythm-touch-button")).toHaveCount(0);
+});
+
+test("offers coarse-pointer input in main gameplay and records its down/up pair", async ({ page }) => {
+  const submittedEvents: string[] = [];
+  page.on("request", (request) => {
+    if (!request.url().includes("/api/game/session/events") || request.method() !== "POST") return;
+    const body = request.postDataJSON() as { events?: Array<{ type: string }> };
+    submittedEvents.push(...(body.events ?? []).map((event) => event.type));
+  });
+  await installCoarsePointer(page);
+  await page.addInitScript(() => window.localStorage.setItem("office-rhythm-manager:tutorial-complete", "true"));
+  await page.goto("/game");
+
+  await page.locator(".game-frame button.primary").click();
+  const touchButton = page.locator(".game-frame .rhythm-touch-button");
+  await expect(touchButton).toBeVisible({ timeout: 15_000 });
+  await touchButton.hover();
+  await page.mouse.down();
+  await expect(touchButton).toHaveAttribute("aria-pressed", "true");
+  await page.mouse.up();
+  await expect(touchButton).toHaveAttribute("aria-pressed", "false");
+  await expect.poll(() => submittedEvents).toContain("keydown");
+  await expect.poll(() => submittedEvents).toContain("keyup");
+});
+
+async function installCoarsePointer(page: import("@playwright/test").Page) {
+  await page.addInitScript(() => {
+    const originalMatchMedia = window.matchMedia.bind(window);
+    window.matchMedia = (query: string) => query === "(pointer: coarse)"
+      ? {
+          matches: true,
+          media: query,
+          onchange: null,
+          addListener: () => undefined,
+          removeListener: () => undefined,
+          addEventListener: () => undefined,
+          removeEventListener: () => undefined,
+          dispatchEvent: () => false,
+        } as MediaQueryList
+      : originalMatchMedia(query);
+  });
+}
