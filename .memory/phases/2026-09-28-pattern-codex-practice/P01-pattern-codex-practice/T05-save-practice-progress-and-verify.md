@@ -92,4 +92,4 @@ Task: T05-save-practice-progress-and-verify
 
 - [x] 구현 완료
 - [x] 검증 통과
-- commit: pending
+- commit: 2c70ea7
