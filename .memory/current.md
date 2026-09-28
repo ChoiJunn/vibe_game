@@ -2,23 +2,22 @@
 
 ## Active Plan
 
-[리듬 결과 저장 복구 및 새 게임 전환](./plans/2026-09-28-rhythm-result-save-recovery.md)
+[패턴 도감 및 리듬 연습](./plans/2026-09-28-pattern-codex-practice.md)
 
 ## Active Phase
 
-[P01 검증 저장 및 새 게임 복구](./phases/2026-09-28-rhythm-result-save-recovery/P01-verified-save-and-new-game/phase.md)
+[P01 패턴 도감 및 리듬 연습](./phases/2026-09-28-pattern-codex-practice/P01-pattern-codex-practice/phase.md)
 
 ## Active Task
 
-[2026-09-28 리듬 결과 저장 복구 계획 — 완료](./plans/2026-09-28-rhythm-result-save-recovery.md)
+[T02 종류 카드와 변형 미리보기](./phases/2026-09-28-pattern-codex-practice/P01-pattern-codex-practice/T02-build-catalog-and-variation-previews.md)
 
 ## Status
 
-- T01: done
-- T02: done
-- T03: done
-- Previous active pointer: 2026-09-22 P01-T03 Original Art Asset Pack remains in progress in its original plan; this plan does not change that task's status.
+- P01: in_progress (1/5 complete)
+- Previous plan: 2026-09-28 rhythm result save recovery is complete and unchanged.
+- Earlier pointer: 2026-09-22 P01-T03 Original Art Asset Pack remains in progress in its original plan; this plan does not change that task's status.
 
 ## Next Step (IMPORTANT)
 
-All tasks in the active plan are complete. Next: choose or create the next plan before doing additional planned work.
+Execute only P01-T02: build the kind cards and variation picker with readable Korean names and tap/hold/burst previews.
