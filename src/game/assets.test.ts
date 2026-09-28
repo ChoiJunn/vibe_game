@@ -60,7 +60,16 @@ describe('GAME_ASSETS', () => {
       GAME_ASSETS.moka.perfect,
       GAME_ASSETS.moka.miss,
     ];
-    for (const asset of [...normalMokaAssets, ...Object.values(GAME_ASSETS.notes)]) {
+    const tumblerReactionAssets = [
+      GAME_ASSETS.moka.tumblerGood,
+      GAME_ASSETS.moka.tumblerPerfect,
+      GAME_ASSETS.moka.tumblerMiss,
+      GAME_ASSETS.moka.tumblerFever,
+      GAME_ASSETS.moka.tumblerFeverGood,
+      GAME_ASSETS.moka.tumblerFeverPerfect,
+      GAME_ASSETS.moka.tumblerFeverMiss,
+    ];
+    for (const asset of [...normalMokaAssets, ...tumblerReactionAssets, ...Object.values(GAME_ASSETS.notes)]) {
       expect(readPng(asset.path)).toMatchObject({ width: 128, height: 128, colorType: 6 });
     }
     expect(readPng(GAME_ASSETS.moka.fever.path)).toMatchObject({ width: 1214, height: 1295, colorType: 6 });

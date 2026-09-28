@@ -43,6 +43,13 @@ export const GAME_ASSETS = {
     feverGood: { key: 'moka-fever-good', path: '/game/art/mascot/moka-fever-good.png' },
     feverPerfect: { key: 'moka-fever-perfect', path: '/game/art/mascot/moka-fever-perfect.png' },
     feverMiss: { key: 'moka-fever-miss', path: '/game/art/mascot/moka-fever-miss.png' },
+    tumblerGood: { key: 'moka-tumbler-good', path: '/game/art/mascot/moka-tumbler-good.png' },
+    tumblerPerfect: { key: 'moka-tumbler-perfect', path: '/game/art/mascot/moka-tumbler-perfect.png' },
+    tumblerMiss: { key: 'moka-tumbler-miss', path: '/game/art/mascot/moka-tumbler-miss.png' },
+    tumblerFever: { key: 'moka-tumbler-fever', path: '/game/art/mascot/moka-tumbler-fever.png' },
+    tumblerFeverGood: { key: 'moka-tumbler-fever-good', path: '/game/art/mascot/moka-tumbler-fever-good.png' },
+    tumblerFeverPerfect: { key: 'moka-tumbler-fever-perfect', path: '/game/art/mascot/moka-tumbler-fever-perfect.png' },
+    tumblerFeverMiss: { key: 'moka-tumbler-fever-miss', path: '/game/art/mascot/moka-tumbler-fever-miss.png' },
   },
   notes: {
     arrival: { key: 'note-arrival', path: '/game/art/notes/arrival.png' },
