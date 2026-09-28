@@ -10,6 +10,56 @@ export function getMokaForm(section: SectionId): "tumbler" | "deskCup" {
     : "deskCup";
 }
 
+type MokaForm = "tumbler" | "deskCup";
+
+function getMokaAssetKeyForForm(
+  form: MokaForm,
+  judgement?: Judgement,
+  feverActive = false,
+): string {
+  if (form === "tumbler") {
+    if (!judgement) {
+      return (feverActive ? GAME_ASSETS.moka.tumblerFever : GAME_ASSETS.moka.tumbler).key;
+    }
+    if (feverActive) {
+      switch (judgement) {
+        case "perfect": return GAME_ASSETS.moka.tumblerFeverPerfect.key;
+        case "good": return GAME_ASSETS.moka.tumblerFeverGood.key;
+        case "miss": return GAME_ASSETS.moka.tumblerFeverMiss.key;
+      }
+    }
+    switch (judgement) {
+      case "perfect": return GAME_ASSETS.moka.tumblerPerfect.key;
+      case "good": return GAME_ASSETS.moka.tumblerGood.key;
+      case "miss": return GAME_ASSETS.moka.tumblerMiss.key;
+    }
+  }
+
+  if (!judgement) {
+    return (feverActive ? GAME_ASSETS.moka.fever : GAME_ASSETS.moka.deskCup).key;
+  }
+  if (feverActive) {
+    switch (judgement) {
+      case "perfect": return GAME_ASSETS.moka.feverPerfect.key;
+      case "good": return GAME_ASSETS.moka.feverGood.key;
+      case "miss": return GAME_ASSETS.moka.feverMiss.key;
+    }
+  }
+  switch (judgement) {
+    case "perfect": return GAME_ASSETS.moka.perfect.key;
+    case "good": return GAME_ASSETS.moka.good.key;
+    case "miss": return GAME_ASSETS.moka.miss.key;
+  }
+}
+
+export function getMokaDisplayAssetKey(
+  section: SectionId,
+  judgement?: Judgement,
+  feverActive = false,
+): string {
+  return getMokaAssetKeyForForm(getMokaForm(section), judgement, feverActive);
+}
+
 export function getMokaSize(section: SectionId, combo: number): number {
   return getMokaForm(section) === "tumbler"
     ? 72
@@ -24,7 +74,7 @@ export class MokaCompanion {
   private readonly deskY: number;
   private reactionActive = false;
   private feverActive = false;
-  private currentForm: "tumbler" | "deskCup" = "tumbler";
+  private currentSection: SectionId = "arrival";
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.carryX = x - 64;
@@ -44,10 +94,9 @@ export class MokaCompanion {
     combo: number,
     feverActive = false,
   ): void {
-    this.setFever(feverActive);
     const form = getMokaForm(section);
-    this.currentForm = form;
-    const asset = GAME_ASSETS.moka[form];
+    this.currentSection = section;
+    this.setFever(feverActive);
     const carried = form === "tumbler";
     const size = getMokaSize(section, combo);
     this.sprite.setPosition(
@@ -55,9 +104,9 @@ export class MokaCompanion {
       carried ? this.carryY : this.deskY,
     );
     fitImageToFootprint(this.sprite, size, size);
-    const desiredAsset = this.feverActive ? GAME_ASSETS.moka.fever : asset;
-    if (!this.reactionActive && this.sprite.texture.key !== desiredAsset.key) {
-      this.sprite.setTexture(desiredAsset.key);
+    const desiredAssetKey = getMokaDisplayAssetKey(section, undefined, this.feverActive);
+    if (!this.reactionActive && this.sprite.texture.key !== desiredAssetKey) {
+      this.sprite.setTexture(desiredAssetKey);
     }
     if (judgement) this.react(judgement);
   }
@@ -66,13 +115,13 @@ export class MokaCompanion {
     if (this.feverActive === active) return;
     this.feverActive = active;
     this.sprite.setTint(0xffffff);
+    if (this.reactionActive) return;
     this.sprite.scene.tweens.killTweensOf(this.sprite);
+    this.sprite.setTexture(getMokaDisplayAssetKey(this.currentSection, undefined, active));
     if (active) {
-      this.sprite.setTexture(GAME_ASSETS.moka.fever.key);
       this.sprite.scene.tweens.add({ targets: this.sprite, angle: { from: -5, to: 5 }, duration: 260, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
-    } else if (!this.reactionActive) {
+    } else {
       this.sprite.setAngle(0);
-      this.sprite.setTexture(GAME_ASSETS.moka[this.currentForm].key);
     }
   }
 
@@ -82,7 +131,7 @@ export class MokaCompanion {
     this.reactionActive = true;
     this.sprite.scene.tweens.killTweensOf(this.sprite);
     const feverReaction = this.feverActive;
-    this.sprite.setTexture(getMokaReactionAssetKey(judgement, feverReaction)).setRotation(0);
+    this.sprite.setTexture(getMokaDisplayAssetKey(this.currentSection, judgement, feverReaction)).setRotation(0);
     this.sprite.scene.tweens.add({
       targets: this.sprite,
       rotation,
@@ -91,9 +140,7 @@ export class MokaCompanion {
       ease: "Sine.easeInOut",
       onComplete: () => {
         this.reactionActive = false;
-        this.sprite.setTexture(
-          this.feverActive ? GAME_ASSETS.moka.fever.key : GAME_ASSETS.moka[this.currentForm].key,
-        );
+        this.sprite.setTexture(getMokaDisplayAssetKey(this.currentSection, undefined, this.feverActive));
         if (this.feverActive) {
           this.sprite.scene.tweens.add({ targets: this.sprite, angle: { from: -5, to: 5 }, duration: 260, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
         }
@@ -105,7 +152,7 @@ export class MokaCompanion {
 export function getMokaReactionAssetKey(
   judgement: Judgement,
   feverActive = false,
+  form: MokaForm = "deskCup",
 ): string {
-  if (!feverActive) return GAME_ASSETS.moka[judgement].key;
-  return GAME_ASSETS.moka[`fever${judgement[0].toUpperCase()}${judgement.slice(1)}` as "feverGood" | "feverPerfect" | "feverMiss"].key;
+  return getMokaAssetKeyForForm(form, judgement, feverActive);
 }
