@@ -7,14 +7,16 @@ import { RhythmTouchButton, useCoarsePointer } from "@/components/game/RhythmTou
 
 const APPROACH_WINDOW_MS = 1_500;
 
-export function PracticeViewport({ chart, title, onComplete, onExit }: {
+export function PracticeViewport({ chart, title, onComplete, onExit, storageWarning }: {
   chart: PracticeChart;
   title: string;
   onComplete: (result: PracticeLoopResult) => void;
   onExit: () => void;
+  storageWarning: boolean;
 }) {
   const controllerRef = useRef<PracticeRunController | null>(null);
   const [snapshot, setSnapshot] = useState<PracticeRunSnapshot>();
+  const [sessionNumber, setSessionNumber] = useState(0);
   const isCoarsePointer = useCoarsePointer();
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export function PracticeViewport({ chart, title, onComplete, onExit }: {
       controller.dispose();
       controllerRef.current = null;
     };
-  }, [chart, onComplete]);
+  }, [chart, onComplete, sessionNumber]);
 
   if (!snapshot) return <p role="status">연습을 준비하고 있어요...</p>;
 
@@ -44,11 +46,15 @@ export function PracticeViewport({ chart, title, onComplete, onExit }: {
         <SummaryItem label="MISS" value={`${snapshot.sessionMissCount}회`} />
       </div>
       {snapshot.completedLoops === 0 && <p className="practice-summary__empty">완료한 루프가 없어요. 연습한 구간은 통계에 포함되지 않았습니다.</p>}
-      <button type="button" className="practice-control practice-control--primary" onClick={onExit}>변형 목록으로</button>
+      <div className="practice-viewport__actions">
+        {snapshot.completedLoops > 0 && <button type="button" className="practice-control practice-control--primary" onClick={() => setSessionNumber((value) => value + 1)}>계속 연습</button>}
+        <button type="button" className="practice-control" onClick={onExit}>패턴 목록</button>
+      </div>
     </section>;
   }
 
   return <section className="practice-viewport" aria-label="패턴 연습" data-source-pattern-id={chart.patternId}>
+    {storageWarning && <p className="pattern-codex__storage-warning" role="status">이 브라우저에서는 연습 기록을 저장하지 못했어요. 연습은 계속할 수 있습니다.</p>}
     <header className="practice-viewport__heading">
       <div>
         <p className="eyebrow">PATTERN PRACTICE · {snapshot.completedLoops}회 완주</p>

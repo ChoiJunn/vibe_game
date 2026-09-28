@@ -1062,6 +1062,7 @@ a:focus-visible {
 .pattern-kind-card__description { min-height: 44px; margin-top: 5px; color: #657178; line-height: 1.55; }
 .pattern-kind-card__count { margin-top: 14px; font-weight: 750; }
 .pattern-kind-card__progress { margin-top: 5px; color: #667278; font-size: 13px; }
+.pattern-codex__storage-warning { margin: 0 0 18px; padding: 12px 16px; border: 1px solid #e7a395; border-radius: 14px; color: #783c32; background: #fff4ef; }
 .pattern-kind-card__action { display: flex; justify-content: space-between; width: 100%; margin-top: auto; padding-top: 18px; color: #4f3b93; font-weight: 800; }
 .pattern-variation-list { display: grid; gap: 12px; }
 .pattern-variation { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(180px, 27%) auto; align-items: center; gap: 20px; min-width: 0; padding: 17px 19px; border: 1px solid #e4d8cd; border-radius: 20px; background: rgba(255,255,255,.86); box-shadow: 0 8px 18px rgba(64,45,32,.05); }

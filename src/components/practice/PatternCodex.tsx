@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import beatmapJson from "@/content/beatmaps/office-day-01.json";
 import {
   groupPatternsByKind,
@@ -12,7 +12,7 @@ import type { PatternKind, SectionId } from "@/domain/rhythm";
 import { validateBeatmap } from "@/domain/validateBeatmap";
 import { createPracticeBeatmap } from "@/game/practice/createPracticeBeatmap";
 import { useAuth } from "@/auth/useAuth";
-import { loadPatternCodex, recordPatternPractice, savePatternCodex, type PatternCodex } from "@/client/game/patternCodexStore";
+import { getCodexStorageKey, loadPatternCodex, recordPatternPractice, savePatternCodex, type PatternCodex } from "@/client/game/patternCodexStore";
 import { PracticeViewport } from "./PracticeViewport";
 import { PatternBeatPreview } from "./PatternBeatPreview";
 
@@ -30,8 +30,11 @@ type PatternVariation = PatternSummary & { ordinal: number };
 
 export function PatternCodex() {
   const { user } = useAuth();
+  const userOid = user?.oid;
   const [codex, setCodex] = useState<PatternCodex>(() => ({ schemaVersion: 1, beatmapId: beatmap.id, patterns: {}, badges: [] }));
+  const codexRef = useRef(codex);
   const [codexLoaded, setCodexLoaded] = useState(false);
+  const [storageWarning, setStorageWarning] = useState(false);
   const [filter, setFilter] = useState<PatternKind | "all">("all");
   const [selectedKind, setSelectedKind] = useState<PatternKind | null>(null);
   const [selected, setSelected] = useState<string>();
@@ -41,13 +44,21 @@ export function PatternCodex() {
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {
-      if (active) {
-        setCodex(loadPatternCodex(window.localStorage, user?.oid, beatmap.id));
-        setCodexLoaded(true);
+      if (!active) return;
+      try {
+        const storage = window.localStorage;
+        storage.getItem(getCodexStorageKey(userOid, beatmap.id));
+        const loaded = loadPatternCodex(storage, userOid, beatmap.id);
+        codexRef.current = loaded;
+        setCodex(loaded);
+        setStorageWarning(false);
+      } catch {
+        setStorageWarning(true);
       }
+      setCodexLoaded(true);
     });
     return () => { active = false; };
-  }, [user?.oid]);
+  }, [userOid]);
 
   const visibleGroups = groups.filter((group) => filter === "all" || group.kind === filter);
   const selectedGroup = groups.find(({ kind }) => kind === selectedKind);
@@ -59,17 +70,25 @@ export function PatternCodex() {
     : selectedPattern?.label ?? selected;
   const selectedPracticeChart = useMemo(
     () => selectedPattern ? createPracticeBeatmap(beatmap, selectedPattern.id) : undefined,
-    [selectedPattern?.id],
+    [selectedPattern],
   );
   const onComplete = useCallback((result: { patternId: string; accuracy: number; perfectCount: number; goodCount: number; missCount: number }) => {
-    setCodex((current) => {
-      const next = recordPatternPractice(current, { patternId: result.patternId, terminalStatus: "completed", accuracy: result.accuracy, perfectCount: result.perfectCount, now: new Date().toISOString() });
-      return savePatternCodex(window.localStorage, user?.oid, next);
-    });
-  }, [user?.oid]);
+    const next = recordPatternPractice(codexRef.current, { patternId: result.patternId, terminalStatus: "completed", accuracy: result.accuracy, perfectCount: result.perfectCount, now: new Date().toISOString() });
+    codexRef.current = next;
+    setCodex(next);
+    try {
+      savePatternCodex(window.localStorage, userOid, next);
+      setStorageWarning(false);
+    } catch {
+      setStorageWarning(true);
+    }
+  }, [userOid]);
 
   if (practiceOpen && selectedPracticeChart) {
-    return <PracticeViewport chart={selectedPracticeChart} title={selectedTitle ?? selectedPracticeChart.patternId} onComplete={onComplete} onExit={() => setPracticeOpen(false)} />;
+    return <>
+      {storageWarning && <p className="pattern-codex__storage-warning" role="status">이 브라우저에서는 연습 기록을 저장하지 못했어요. 연습은 계속할 수 있습니다.</p>}
+      <PracticeViewport chart={selectedPracticeChart} title={selectedTitle ?? selectedPracticeChart.patternId} onComplete={onComplete} onExit={() => setPracticeOpen(false)} storageWarning={storageWarning} />
+    </>;
   }
 
   return <section className="pattern-codex">
@@ -82,6 +101,7 @@ export function PatternCodex() {
       <Link href="/game">게임으로 돌아가기</Link>
     </div>
 
+    {storageWarning && <p className="pattern-codex__storage-warning" role="status">이 브라우저에서는 연습 기록을 저장하지 못했어요. 연습은 계속할 수 있습니다.</p>}
     <div className="pattern-codex__filters" aria-label="리듬 종류 필터">
       <button type="button" className={filter === "all" ? "is-active" : ""} aria-pressed={filter === "all"} onClick={() => setFilter("all")}>전체</button>
       {groups.map((group) => <button key={group.kind} type="button" className={filter === group.kind ? "is-active" : ""} aria-pressed={filter === group.kind} onClick={() => setFilter(group.kind)}>{group.label}</button>)}
@@ -105,7 +125,7 @@ export function PatternCodex() {
               <div className="pattern-variation__copy">
                 <h3>{sceneNames[pattern.section]} · {selectedGroup.label} {pattern.ordinal}</h3>
                 <p>{pattern.eventCount}개 노트 <span aria-hidden="true">·</span> {durationSeconds}초</p>
-                {mastery ? <small>최고 정확도 {Math.round(mastery.bestAccuracy)}% · {mastery.attempts}회 연습</small> : <small>아직 연습 기록 없음</small>}
+                {mastery ? <small>{mastery.mastered ? "숙련 완료 · " : ""}최고 정확도 {Math.round(mastery.bestAccuracy)}% · {mastery.successes}회 완주</small> : <small>아직 연습 기록 없음</small>}
               </div>
               <PatternBeatPreview pattern={pattern} sceneName={sceneNames[pattern.section]} ordinal={pattern.ordinal} kindLabel={selectedGroup.label} />
               <button
@@ -135,15 +155,16 @@ export function PatternCodex() {
 }
 
 function PatternKindCard({ group, codex, codexLoaded, onSelect }: { group: PatternGroup; codex: PatternCodex; codexLoaded: boolean; onSelect: () => void }) {
-  const recorded = group.variations.filter(({ id }) => codex.patterns[id]?.attempts);
   const mastered = group.variations.filter(({ id }) => codex.patterns[id]?.mastered).length;
+  const completedLoops = group.variations.reduce((total, { id }) => total + (codex.patterns[id]?.successes ?? 0), 0);
+  const bestAccuracy = group.variations.reduce((best, { id }) => Math.max(best, codex.patterns[id]?.bestAccuracy ?? 0), 0);
 
   return <button type="button" className={`pattern-kind-card pattern-kind-card--${group.kind}`} onClick={onSelect}>
     <span className="pattern-kind-card__eyebrow">리듬 종류</span>
     <span className="pattern-kind-card__title">{group.label}</span>
     <span className="pattern-kind-card__description">{group.description}</span>
     <span className="pattern-kind-card__count">패턴 {group.variations.length}개</span>
-    <span className="pattern-kind-card__progress">{codexLoaded ? <>숙련 {mastered}/{group.variations.length} <span aria-hidden="true">·</span> 연습 {recorded.length}/{group.variations.length}</> : "기록 불러오는 중"}</span>
+    <span className="pattern-kind-card__progress">{codexLoaded ? <>숙련 {mastered}/{group.variations.length} <span aria-hidden="true">·</span> 완주 {completedLoops}회 <span aria-hidden="true">·</span> 최고 {bestAccuracy}%</> : "기록 불러오는 중"}</span>
     <span className="pattern-kind-card__action">변형 살펴보기 <span aria-hidden="true">→</span></span>
   </button>;
 }

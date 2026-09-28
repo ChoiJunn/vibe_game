@@ -1,6 +1,6 @@
 # Task: T05 Save Practice Progress and Verify the Full Flow
 
-## Status: pending
+## Status: complete
 
 ## Goal
 
@@ -90,6 +90,6 @@ Task: T05-save-practice-progress-and-verify
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
+- [x] 구현 완료
+- [x] 검증 통과
 - commit: pending

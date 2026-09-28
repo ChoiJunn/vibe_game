@@ -30,7 +30,7 @@ Make the pattern catalog understandable and make practice behave like a real rhy
 
 | Phase | Status | Summary | Blueprint |
 | :--- | :--- | :--- | :--- |
-| P01 | `in_progress` | 도감 분류와 미리보기를 이해하기 쉽게 만들고, 실제 판정·음악·터치 입력이 있는 무중단 반복 연습을 완성 | [P01](../phases/2026-09-28-pattern-codex-practice/P01-pattern-codex-practice/phase.md) |
+| P01 | `done` | 도감 분류와 미리보기를 이해하기 쉽게 만들고, 실제 판정·음악·터치 입력이 있는 무중단 반복 연습을 완성 | [P01](../phases/2026-09-28-pattern-codex-practice/P01-pattern-codex-practice/phase.md) |
 
 ## Execution Order
 

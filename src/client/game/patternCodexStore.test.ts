@@ -15,6 +15,23 @@ describe("pattern codex storage", () => {
     expect(getCodexStorageKey(undefined, "office-day-01")).not.toBe(getCodexStorageKey("oid-1", "office-day-01"));
   });
 
+  it("keeps completed-loop progress isolated between user identities", () => {
+    const store = storage();
+    const userOne = recordPatternPractice(createEmptyCodex("office-day-01"), { patternId: "source-a", terminalStatus: "completed", accuracy: 80 });
+    const userTwo = recordPatternPractice(createEmptyCodex("office-day-01"), { patternId: "source-b", terminalStatus: "completed", accuracy: 90 });
+    savePatternCodex(store, "oid-1", userOne);
+    savePatternCodex(store, "oid-2", userTwo);
+
+    expect(loadPatternCodex(store, "oid-1", "office-day-01").patterns).toHaveProperty("source-a");
+    expect(loadPatternCodex(store, "oid-1", "office-day-01").patterns).not.toHaveProperty("source-b");
+    expect(loadPatternCodex(store, "oid-2", "office-day-01").patterns).toHaveProperty("source-b");
+  });
+
+  it("lets the caller handle unavailable storage instead of swallowing write failures", () => {
+    const unavailable = { setItem: () => { throw new Error("quota exceeded"); } } as unknown as Storage;
+    expect(() => savePatternCodex(unavailable, "oid-1", createEmptyCodex("office-day-01"))).toThrow("quota exceeded");
+  });
+
   it("resets malformed data without touching another key", () => {
     const store = storage();
     store.setItem(getCodexStorageKey("oid-1", "office-day-01"), "not-json");

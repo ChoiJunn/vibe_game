@@ -60,13 +60,66 @@ test("practices the selected source pattern and returns to its variation list", 
   await expect(practice).toHaveAttribute("data-source-pattern-id", "pattern-002");
   await expect(practice.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
   await expect(page.locator(".practice-count-in")).toContainText("준비");
+  await expect(page.locator(".practice-count-in")).toHaveCount(0, { timeout: 10_000 });
+  await page.keyboard.press("Space");
   await page.getByRole("button", { name: "연습 종료" }).click();
   await expect(page.getByRole("region", { name: "연습 결과 요약" })).toBeVisible();
   await expect(page.getByText("완료한 루프가 없어요. 연습한 구간은 통계에 포함되지 않았습니다.")).toBeVisible();
-  await page.getByRole("button", { name: "변형 목록으로" }).click();
+  await expect(page.locator(".practice-summary__grid")).toContainText("완주 기록 없음");
+  await page.getByRole("button", { name: "패턴 목록" }).click();
+  expect(await page.evaluate(() => window.localStorage.getItem("office-rhythm-codex:v1:e2e-user:office-day-01"))).toBeNull();
 
   await expect(page.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "출근길 · 정박 2" })).toBeVisible();
+});
+
+test("saves two completed loops to the chosen variation and shows session-only summary", async ({ page }) => {
+  let resultRequests = 0;
+  page.on("request", (request) => {
+    if (request.url().includes("/api/game/results")) resultRequests += 1;
+  });
+  await page.locator(".pattern-kind-card--straight").click();
+  await page.locator(".pattern-variation__start").first().click();
+
+  const practice = page.locator(".practice-viewport");
+  const patternId = await practice.getAttribute("data-source-pattern-id");
+  await expect(practice.locator(".practice-viewport__session-stats")).toContainText("완주 2회", { timeout: 15_000 });
+  const persisted = await page.evaluate(() => JSON.parse(window.localStorage.getItem("office-rhythm-codex:v1:e2e-user:office-day-01") ?? "{}"));
+  expect(persisted.patterns[patternId!]).toMatchObject({ attempts: 2, successes: 2 });
+  await expect(practice).toBeVisible();
+
+  await page.getByRole("button", { name: "연습 종료" }).click();
+  const summary = page.getByRole("region", { name: "연습 결과 요약" });
+  await expect(summary.locator(".practice-summary__grid")).toContainText("2회");
+  await expect(summary.getByRole("button", { name: "계속 연습" })).toBeVisible();
+  await summary.getByRole("button", { name: "계속 연습" }).click();
+  await expect(page.locator(".practice-viewport__session-stats")).toContainText("완주 0회");
+  expect(await page.evaluate(() => JSON.parse(window.localStorage.getItem("office-rhythm-codex:v1:e2e-user:office-day-01") ?? "{}").patterns["pattern-002"].successes)).toBe(2);
+  await page.getByRole("button", { name: "연습 종료" }).click();
+  await page.getByRole("button", { name: "패턴 목록" }).click();
+
+  await expect(page.locator(".pattern-variation").first()).toContainText("2회 완주");
+  await page.getByRole("button", { name: "종류 목록" }).click();
+  await expect(page.locator(".pattern-kind-card--straight")).toContainText("완주 2회");
+  await page.reload();
+  await expect(page.locator(".pattern-kind-card--straight")).toContainText("완주 2회");
+  expect(resultRequests).toBe(0);
+});
+
+test("keeps practice and catalog navigation usable when localStorage writes fail", async ({ page }) => {
+  await page.evaluate(() => {
+    Storage.prototype.setItem = () => { throw new DOMException("storage blocked", "QuotaExceededError"); };
+  });
+  await page.locator(".pattern-kind-card--straight").click();
+  await page.locator(".pattern-variation__start").first().click();
+  await expect(page.getByRole("status").filter({ hasText: "준비" })).toBeVisible();
+  await expect(page.locator(".practice-viewport__session-stats")).toContainText("완주 1회", { timeout: 15_000 });
+  await expect(page.getByText("이 브라우저에서는 연습 기록을 저장하지 못했어요. 연습은 계속할 수 있습니다.").first()).toBeVisible();
+  await page.getByRole("button", { name: "연습 종료" }).click();
+  await page.getByRole("button", { name: "계속 연습" }).click();
+  await page.getByRole("button", { name: "연습 종료" }).click();
+  await page.getByRole("button", { name: "패턴 목록" }).click();
+  await expect(page.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
 });
 
 test("keeps variation previews and actions within a narrow mobile viewport", async ({ page }) => {
