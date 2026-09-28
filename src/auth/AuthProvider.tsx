@@ -17,8 +17,8 @@ import type { AuthContextValue, AuthStatus, AuthenticatedUser } from './types';
 const AuthContext = createContext<AuthContextValue | null>(null);
 const AUTH_RETURN_PATH_KEY = 'office-rhythm:auth-return-path';
 
-export function getAuthErrorMessage(): string {
-  if (!entraAuthConfig.isConfigured) {
+export function getAuthErrorMessage(isConfigured = entraAuthConfig.isConfigured): string {
+  if (!isConfigured) {
     return 'Entra ID 환경 설정이 필요합니다. 관리자에게 앱 등록 정보를 확인해 주세요.';
   }
 
