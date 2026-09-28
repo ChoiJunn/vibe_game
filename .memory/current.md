@@ -2,42 +2,23 @@
 
 ## Active Plan
 
-[Office Rhythm Manager Visual Gameplay](../../.memory/plans/2026-09-22-office-rhythm-visual-gameplay.md)
+[리듬 결과 저장 복구 및 새 게임 전환](./plans/2026-09-28-rhythm-result-save-recovery.md)
 
 ## Active Phase
 
-[P01 Illustrated Rhythm Experience](../../.memory/phases/2026-09-22-office-rhythm-visual-gameplay/P01-illustrated-rhythm-experience/phase.md)
+[P01 검증 저장 및 새 게임 복구](./phases/2026-09-28-rhythm-result-save-recovery/P01-verified-save-and-new-game/phase.md)
 
 ## Active Task
 
-[T03 Original Art Asset Pack](../../.memory/phases/2026-09-22-office-rhythm-visual-gameplay/P01-illustrated-rhythm-experience/T03-original-art-asset-pack.md)
+[T02 미저장 결과 24시간 보관](./phases/2026-09-28-rhythm-result-save-recovery/P01-verified-save-and-new-game/T02-retain-unsaved-result-24h.md)
 
 ## Status
 
-- T01 Scaffold Web Game: done
-- T02 Entra Auth Shell: done
-- T03 App Shell and Domain Contracts: done
-- P01 Foundation and Entra Authentication: complete
-- P02 T01 Audio Beatmap Clock: done
-- P02 T02 Judgement Score State: done
-- P02 T03 Phaser Office Scene: done
-- P02 T04 Pause Tutorial Results: done
-- P02 Rhythm Gameplay: complete
-- P03 T01 Cosmos DB Data Access: done
-- P03 T02 Session API: done
-- P03 T03 Result Validation: done
-- P03 T04 Leaderboard: done
-- P03 Persistence and Competition: complete
-- P04 T01 Settings, Accessibility, and E2E: done
-- P04 T02 Azure Deployment: done
-- P04 T03 Release Readiness: complete (user-confirmed 2026-09-22)
-- 2026-09-22 P01 T01 Two-Minute Beatmap: done
-- 2026-09-22 P01 T02 Note Lifecycle and Automatic Miss: done
-- 2026-09-22 P01 T02A Persist and Verify Automatic Misses: done
-- 2026-09-22 P01 T03 Original Art Asset Pack: in_progress
-- Repository: `vibe_game/`
-- Remote: `https://github.com/ChoiJunn/vibe_game.git`
+- T01: done
+- T02: in_progress
+- T03: pending
+- Previous active pointer: 2026-09-22 P01-T03 Original Art Asset Pack remains in progress in its original plan; this plan does not change that task's status.
 
 ## Next Step (IMPORTANT)
 
-Execute only P01-T03: create an original character, mascot, environment, and rhythm-note illustration pack with an asset manifest.
+Execute only P01-T02: retain the latest failed result and its input context in browser storage for 24 hours, without storing authentication tokens or presenting it as leaderboard data.

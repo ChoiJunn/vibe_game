@@ -202,6 +202,15 @@ export class RhythmGameController {
     }
 
     if (isBurstRhythmEvent(event)) {
+      // Tap notes are judged on keydown and advance the chart immediately.
+      // Their matching keyup can therefore arrive while the next chart event
+      // is already a burst; it belongs to the tap, not to this burst.
+      if (
+        input.type === "keyup" &&
+        this.pendingBurstInputs.at(-1)?.type !== "keydown"
+      ) {
+        return;
+      }
       this.pendingBurstInputs.push(input);
       if (
         input.type === "keyup" &&

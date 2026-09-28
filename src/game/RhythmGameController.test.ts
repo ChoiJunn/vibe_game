@@ -177,6 +177,44 @@ describe('RhythmGameController', () => {
     expect(controller.getSnapshot().runState).toEqual(judgedSnapshot.runState);
   });
 
+  it('does not count the previous tap release as the first burst release', async () => {
+    const tapIndex = beatmap.events.findIndex((event, index) =>
+      event.type === 'tap' && beatmap.events[index + 1]?.type === 'burst',
+    );
+    const tap = beatmap.events[tapIndex];
+    const burst = beatmap.events[tapIndex + 1];
+    const initialRunState = {
+      ...createInitialRunState({ runId: 'run-tap-before-burst', userOid: 'user-1', beatmapId: beatmap.id }),
+      nextEventIndex: tapIndex,
+    };
+    const controller = new RhythmGameController({
+      beatmap,
+      clock: createFakeClock() as never,
+      scheduler: createFakeScheduler() as never,
+      initialRunState,
+      audioSettings: settings,
+    });
+
+    await controller.start(0, initialRunState);
+    controller.handleInput({ type: 'keydown', songPositionMs: tap.startMs });
+    controller.handleInput({ type: 'keyup', songPositionMs: tap.startMs + 10 });
+    expect(controller.getSnapshot().burstState?.completedPresses).toBe(0);
+
+    for (let press = 0; press < burst.requiredPresses!; press += 1) {
+      const position = burst.startMs + Math.round(
+        ((burst.endMs! - burst.startMs) * press) / Math.max(1, burst.requiredPresses! - 1),
+      );
+      controller.handleInput({ type: 'keydown', songPositionMs: position });
+      controller.handleInput({ type: 'keyup', songPositionMs: position + 10 });
+    }
+
+    expect(controller.getSnapshot().lastJudgement).toMatchObject({
+      eventId: burst.id,
+      judgement: 'perfect',
+      completedPresses: burst.requiredPresses,
+    });
+  });
+
   it('preserves an incomplete burst while paused and emits one automatic miss', async () => {
     const clock = createFakeClock();
     const burstIndex = beatmap.events.findIndex((event) => event.type === 'burst');
