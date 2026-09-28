@@ -31,7 +31,7 @@ test('a saved zero-heart run retries failed-result submission after refresh inst
   await page.goto('/game');
   await page.getByRole('button', { name: '건너뛰기' }).click();
   await expect(page.getByRole('heading', { name: '오늘의 업무 리듬 결과' })).toBeVisible();
-  await expect(page.locator('.result-submission')).toContainText('다시 플레이를 누르면 저장을 재시도');
+  await expect(page.locator('.result-submission')).toContainText('순위표에는 반영되지 않았습니다');
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toHaveCount(0);
 
   await page.reload();
@@ -50,7 +50,7 @@ test('retrying a failed result from the summary finalizes it before starting a f
   const tutorial = page.getByRole('dialog');
   await expect(tutorial).toBeVisible();
   await tutorial.locator('.tutorial-actions button').first().click();
-  await expect(page.locator('.result-submission')).toContainText('결과 저장에 실패했습니다');
+  await expect(page.locator('.result-submission')).toContainText('결과가 서버에 저장되지 않았어요');
   await page.locator('.result-actions').getByRole('button', { name: '저장 후 다시 플레이' }).click();
 
   await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
@@ -58,6 +58,58 @@ test('retrying a failed result from the summary finalizes it before starting a f
   expect(api.getResult()?.status).toBe('failed');
   expect(api.getSession()?.id).toBe('e2e-run-02');
   expect(api.getSession()?.snapshot.hearts).toBe(5);
+});
+
+test('a 422 result stays off the leaderboard and starts a new run after one abandon ETag retry', async ({ page }) => {
+  const api = await mockGameApi(page, {
+    existing: true,
+    resultFailures: 1,
+    resultFailureStatus: 422,
+    abandonConflicts: 1,
+    snapshot: { cursorMs: 6_000, nextEventIndex: 6, score: 100, hearts: 0, missCount: 5 },
+  });
+
+  await page.goto('/game');
+  const tutorial = page.getByRole('dialog');
+  await expect(tutorial).toBeVisible();
+  await tutorial.locator('.tutorial-actions button').first().click();
+  await expect(page.locator('.result-submission')).toContainText('순위표에는 반영되지 않았습니다');
+  await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some((key) => key.startsWith('office-rhythm:failed-run:v1:')))).toBe(true);
+  expect(api.getResult()).toBeNull();
+
+  await page.locator('.result-actions').getByRole('button', { name: '새 게임' }).click();
+
+  await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
+  await expect(page.locator('.result-summary')).toHaveCount(0);
+  expect(api.getAbandonedRunIds()).toEqual(['e2e-run-01']);
+  expect(api.getSession()?.id).toBe('e2e-run-02');
+  expect(api.getResult()).toBeNull();
+});
+
+test('a failed abandon stays on the result and re-enables the new-game action', async ({ page }) => {
+  const api = await mockGameApi(page, {
+    existing: true,
+    resultFailures: 1,
+    resultFailureStatus: 422,
+    abandonFailures: 1,
+    snapshot: { cursorMs: 6_000, nextEventIndex: 6, score: 100, hearts: 0, missCount: 5 },
+  });
+
+  await page.goto('/game');
+  const tutorial = page.getByRole('dialog');
+  await expect(tutorial).toBeVisible();
+  await tutorial.locator('.tutorial-actions button').first().click();
+  await expect(page.locator('.result-submission')).toContainText('순위표에는 반영되지 않았습니다');
+  const newGameButton = page.locator('.result-actions').getByRole('button', { name: '새 게임' });
+  await newGameButton.click();
+
+  await expect(page.locator('.result-submission[role="alert"]')).toContainText('결과가 서버에 저장되지 않았어요');
+  await expect(page.locator('.result-submission[role="alert"]').last()).toContainText('새 게임을 준비하지 못했습니다');
+  await expect(newGameButton).toBeEnabled();
+  await expect(page.locator('.result-summary')).toBeVisible();
+  expect(api.getSession()?.id).toBe('e2e-run-01');
+  expect(api.getAbandonedRunIds()).toEqual([]);
+  expect(api.getResult()).toBeNull();
 });
 
 test('leaderboard shows each completed attempt as its own row and supports both scopes', async ({ page }) => {

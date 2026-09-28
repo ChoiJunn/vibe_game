@@ -9,6 +9,9 @@ type MockOptions = {
   existing?: boolean;
   snapshot?: Partial<RunState>;
   resultFailures?: number;
+  resultFailureStatus?: number;
+  abandonFailures?: number;
+  abandonConflicts?: number;
 };
 
 const freshSnapshot = (
@@ -67,6 +70,9 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
   let runNumber = 1;
   let result: GameResultDocument | null = null;
   let remainingResultFailures = options.resultFailures ?? 0;
+  let remainingAbandonFailures = options.abandonFailures ?? 0;
+  let remainingAbandonConflicts = options.abandonConflicts ?? 0;
+  const abandonedRunIds: string[] = [];
 
   const envelope = () => ({
     session: session ? { ...session, _etag: undefined } : null,
@@ -118,13 +124,42 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
     return fulfillSession(route);
   });
 
+  await page.route("**/api/game/session/abandon", async (route) => {
+    const body = route.request().postDataJSON() as { runId: string };
+    if (!session || session.id !== body.runId || session.terminalStatus) {
+      return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ error: "Session not found." }) });
+    }
+    if (remainingAbandonFailures > 0) {
+      remainingAbandonFailures -= 1;
+      return route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "Abandon unavailable." }) });
+    }
+    if (remainingAbandonConflicts > 0) {
+      remainingAbandonConflicts -= 1;
+      version += 1;
+      return route.fulfill({ status: 412, contentType: "application/json", body: JSON.stringify({ error: "Stale ETag." }) });
+    }
+    const expectedVersion = route.request().headers()["if-match"];
+    if (expectedVersion !== `v${version}`) {
+      return route.fulfill({ status: 412, contentType: "application/json", body: JSON.stringify({ error: "Stale ETag." }) });
+    }
+    session.terminalStatus = "abandoned";
+    session.snapshot = { ...session.snapshot, status: "abandoned" };
+    abandonedRunIds.push(session.id);
+    version += 1;
+    return fulfillSession(route);
+  });
+
   await page.route("**/api/game/results", async (route) => {
     if (remainingResultFailures > 0) {
       remainingResultFailures -= 1;
+      const status = options.resultFailureStatus ?? 503;
       return route.fulfill({
-        status: 503,
+        status,
         contentType: "application/json",
-        body: JSON.stringify({ error: "Temporary result storage failure." }),
+        body: JSON.stringify({
+          error: status === 422 ? "The submitted rhythm run could not be verified." : "Temporary result storage failure.",
+          code: status === 422 ? "invalid_sequence" : "SESSION_SERVICE_ERROR",
+        }),
       });
     }
     const body = route.request().postDataJSON() as {
@@ -179,5 +214,6 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
   return {
     getSession: () => session,
     getResult: () => result,
+    getAbandonedRunIds: () => [...abandonedRunIds],
   };
 }

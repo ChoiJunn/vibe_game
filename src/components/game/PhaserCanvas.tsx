@@ -181,15 +181,7 @@ export function PhaserCanvas() {
         });
         exitToNewGameRef.current = async () => {
           await terminalSubmissionRef.current?.catch(() => undefined);
-          const active = await api.getActive();
-          if (active?.session.id === envelope.session.id) {
-            try {
-              await api.abandon(active.session.id, active.version, true);
-            } catch (error) {
-              const latest = await api.getActive();
-              if (latest?.session.id === envelope.session.id) throw error;
-            }
-          }
+          await api.closeActiveRun(envelope.session.id);
           window.location.replace('/game');
         };
         const pauseCoordinator = new PauseCoordinator(controller);

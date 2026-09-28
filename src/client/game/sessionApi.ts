@@ -79,6 +79,33 @@ export class SessionApiClient {
     });
   }
 
+  async closeActiveRun(runId: string): Promise<void> {
+    let active = await this.getActive();
+    if (!active) return;
+    if (active.session.id !== runId) throw new Error('A different game session is active.');
+
+    try {
+      await this.abandon(runId, active.version, true);
+      return;
+    } catch (error) {
+      if (!(error instanceof SessionApiError) || error.status !== 412) throw error;
+    }
+
+    active = await this.getActive();
+    if (!active) return;
+    if (active.session.id !== runId) throw new Error('A different game session is active.');
+
+    try {
+      await this.abandon(runId, active.version, true);
+    } catch (error) {
+      if (!(error instanceof SessionApiError) || error.status !== 412) throw error;
+      const latest = await this.getActive();
+      if (!latest) return;
+      if (latest.session.id !== runId) throw new Error('A different game session is active.');
+      throw error;
+    }
+  }
+
   submitResult(
     runId: string,
     terminalStatus: 'completed' | 'failed' | 'abandoned',

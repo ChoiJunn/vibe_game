@@ -24,7 +24,7 @@
 
 | Phase | Status | Summary | Blueprint |
 | :--- | :--- | :--- | :--- |
-| P01 | `pending` | 입력 이벤트 재생 검증을 바로잡고, 미저장 결과의 24시간 복구와 저장 실패 후 새 게임 전환을 완성 | [P01](../phases/2026-09-28-rhythm-result-save-recovery/P01-verified-save-and-new-game/phase.md) |
+| P01 | `done` | 입력 이벤트 재생 검증을 바로잡고, 미저장 결과의 24시간 복구와 저장 실패 후 새 게임 전환을 완성 | [P01](../phases/2026-09-28-rhythm-result-save-recovery/P01-verified-save-and-new-game/phase.md) |
 
 ## Scope and Constraints
 

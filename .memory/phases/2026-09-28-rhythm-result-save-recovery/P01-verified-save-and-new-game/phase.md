@@ -6,8 +6,13 @@
 | :--- | :--- | :--- | :--- |
 | T01 | `done` | 탭 keyup이 다음 버스트에 잘못 합산되어 replay 상태가 갈라지는 결함 수정 | [T01](./T01-repair-verified-input-sequence.md) |
 | T02 | `done` | 저장되지 않은 최신 결과와 입력 이벤트를 사용자별 브라우저에 24시간 임시 보관 | [T02](./T02-retain-unsaved-result-24h.md) |
-| T03 | `in_progress` | 결과 저장 실패 뒤 기존 세션을 안전히 종료하고 새 게임으로 이동하는 UI/API 복구 | [T03](./T03-unblock-safe-new-game.md) |
+| T03 | `done` | 결과 저장 실패 뒤 기존 세션을 안전히 종료하고 새 게임으로 이동하는 UI/API 복구 | [T03](./T03-unblock-safe-new-game.md) |
 
 ## Progress
 
-- done: 2/3 (active: T03)
+- done: 3/3
+
+## Outcome
+
+- Completed all three tasks. Strict server replay remains unchanged; failed results are kept locally for 24 hours and do not enter leaderboards.
+- New-game transition closes only the same active run and retries one stale ETag once. Browser E2E covers success and recoverable failure paths.

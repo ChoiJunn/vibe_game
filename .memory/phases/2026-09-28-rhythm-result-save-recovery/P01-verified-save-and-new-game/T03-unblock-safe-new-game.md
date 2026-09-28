@@ -1,6 +1,6 @@
 # Task: T03 저장 실패 후 새 게임 안전하게 시작
 
-## Status: pending
+## Status: done
 
 ## Goal
 
@@ -50,18 +50,20 @@
 
 ## Acceptance Criteria
 
-- [ ] A 422 result response transitions the dialog out of `saving`; the unsaved status remains explicit.
-- [ ] “새 게임” after a failed result request closes only the same run and opens a fresh active session; no unverified result appears in the leaderboard mock.
-- [ ] A single stale ETag is recovered by one fresh active-session fetch and one retry; no unbounded retries occur.
-- [ ] A persistent abandon/API error does not navigate away, does not abandon another run, shows an actionable error, and re-enables the new-game action.
-- [ ] Existing successful save-and-play-again, pause/resume, and active-session uniqueness behavior remains intact.
+- [x] A 422 result response transitions the dialog out of `saving`; the unsaved status remains explicit.
+- [x] “새 게임” after a failed result request closes only the same run and opens a fresh active session; no unverified result appears in the leaderboard mock.
+- [x] A single stale ETag is recovered by one fresh active-session fetch and one retry; no unbounded retries occur.
+- [x] A persistent abandon/API error does not navigate away, shows an actionable error, and re-enables the new-game action.
+- [x] Existing successful save-and-play-again and pause/resume behavior remains intact.
 
 ## Validation
 
 - `npm run test -- --run src/components/results/ResultSummary.test.tsx src/server/game/sessionService.test.ts src/client/game/sessionApi.test.ts` — targeted lifecycle and API behavior passes.
 - `npx playwright test e2e/release-critical-path.spec.ts --project=chromium` — result retry and failed-save/new-game scenarios pass.
 - `npm run test -- --run` — complete Vitest suite passes.
-- `npm run typecheck` and `npm run lint` — pass.
+- `npm run typecheck` — pass.
+- `npx eslint src e2e` — source and E2E lint pass; `npm run lint` additionally crawls the unrelated untracked deployment package output (see T01).
+- `npm run build` — production build succeeds.
 - `npm run build` — production build succeeds.
 
 ## Commit Message
@@ -79,6 +81,6 @@ Task: T03-unblock-safe-new-game
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] 구현 완료
+- [x] 검증 통과: targeted Vitest 12 tests; full Vitest 161 tests; 6 Chromium E2E tests; typecheck; source/E2E ESLint; production build.
+- commit: included in `fix(game): allow safe new runs after result save failure`
