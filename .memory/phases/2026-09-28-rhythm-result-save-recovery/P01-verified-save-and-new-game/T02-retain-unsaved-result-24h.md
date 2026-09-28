@@ -1,6 +1,6 @@
 # Task: T02 미저장 결과 24시간 임시 보관
 
-## Status: pending
+## Status: done
 
 ## Goal
 
@@ -76,17 +76,17 @@
 
 ## Acceptance Criteria
 
-- [ ] Result failure writes exactly one sanitized record per user with all input events and `expiresAtMs - savedAtMs === 86_400_000`.
-- [ ] A later failed run for the same user replaces the earlier record; other users cannot read it.
-- [ ] Expired/malformed/version-unknown records are deleted on read; successful server submission removes only its matching local record.
-- [ ] No auth token/header is serialized, and localStorage errors never prevent UI error state or a new-game attempt.
-- [ ] A 422 `invalid_sequence` displays “not saved” plus the temporary retention status; it never displays saved confirmation or inserts a leaderboard record.
+- [x] Result failure writes one sanitized record per user with all input events and exactly 24-hour expiry.
+- [x] A later failed run replaces the prior record for that user; per-user keys isolate other users.
+- [x] Expired/malformed/version-unknown records are deleted on read; successful server submission removes only its matching local record.
+- [x] No auth token/header or raw server error is serialized; localStorage errors do not prevent the error state or new-game attempt.
+- [x] The failed-save UI says the result is not on the leaderboard and distinguishes a local 24-hour copy from unavailable storage.
 
 ## Validation
 
 - `npm run test -- --run src/client/game/failedRunStore.test.ts src/components/results/ResultSummary.test.tsx` — storage lifecycle and UI state tests pass.
 - `npm run typecheck` — no TypeScript errors.
-- `npm run lint` — no lint errors.
+- `npx eslint src/client/game/failedRunStore.ts src/client/game/failedRunStore.test.ts src/components/game/PhaserCanvas.tsx src/components/results/ResultSummary.tsx src/components/results/ResultSummary.test.tsx` — changed files lint clean. Full-repository lint also traverses untracked generated deployment output as noted in T01.
 
 ## Commit Message
 
@@ -103,6 +103,6 @@ Task: T02-retain-unsaved-result-24h
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] 구현 완료
+- [x] 검증 통과: 2 files / 6 tests; `npm run typecheck`; targeted ESLint.
+- commit: included in `feat(game): retain one failed result locally for 24 hours`

@@ -8,6 +8,7 @@ export function ResultSummary({
   elapsedMs,
   pendingSubmission = true,
   submissionError = false,
+  unsavedResultRetained = false,
   onPlayAgain,
   playAgainDisabled = false,
   playAgainLabel = "다시 플레이",
@@ -22,6 +23,7 @@ export function ResultSummary({
   elapsedMs: number;
   pendingSubmission?: boolean;
   submissionError?: boolean;
+  unsavedResultRetained?: boolean;
   onPlayAgain?: () => void;
   playAgainDisabled?: boolean;
   playAgainLabel?: string;
@@ -87,7 +89,9 @@ export function ResultSummary({
           role={submissionError ? "alert" : "status"}
         >
           {submissionError
-            ? "결과 저장에 실패했습니다. 연결을 확인하고 다시 플레이를 누르면 저장을 재시도한 뒤 새 게임을 시작합니다."
+            ? unsavedResultRetained
+              ? "결과가 서버에 저장되지 않았어요. 복구용 사본을 이 브라우저에 24시간 보관 중이며 순위표에는 반영되지 않았습니다."
+              : "결과가 서버에 저장되지 않았어요. 브라우저 저장소를 사용할 수 없어 복구용 사본은 보관하지 못했습니다."
             : pendingSubmission
               ? "결과를 안전하게 저장하고 있어요…"
               : "결과가 저장되었습니다."}

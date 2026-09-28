@@ -10,15 +10,15 @@
 
 ## Active Task
 
-[T02 미저장 결과 24시간 보관](./phases/2026-09-28-rhythm-result-save-recovery/P01-verified-save-and-new-game/T02-retain-unsaved-result-24h.md)
+[T03 저장 실패 후 새 게임 안전 시작](./phases/2026-09-28-rhythm-result-save-recovery/P01-verified-save-and-new-game/T03-unblock-safe-new-game.md)
 
 ## Status
 
 - T01: done
-- T02: in_progress
-- T03: pending
+- T02: done
+- T03: in_progress
 - Previous active pointer: 2026-09-22 P01-T03 Original Art Asset Pack remains in progress in its original plan; this plan does not change that task's status.
 
 ## Next Step (IMPORTANT)
 
-Execute only P01-T02: retain the latest failed result and its input context in browser storage for 24 hours, without storing authentication tokens or presenting it as leaderboard data.
+Execute only P01-T03: make new-game transition independent from failed result submission, safely abandon only the same active run, and retry a single ETag conflict with a fresh version.

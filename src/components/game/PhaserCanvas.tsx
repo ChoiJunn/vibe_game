@@ -23,6 +23,8 @@ import type { TerminalRunStatus } from '@/server/cosmos/models';
 import type { RunState } from '@/domain/rhythm';
 import { buildRhythmReport } from '@/game/results/buildRhythmReport';
 import { createEmptyCodex, loadPatternCodex } from '@/client/game/patternCodexStore';
+import { clearFailedRun, writeFailedRun } from '@/client/game/failedRunStore';
+import type { VerifiedInputEvent } from '@/server/cosmos/models';
 
 type GameRuntime = {
   controller: RhythmGameController;
@@ -66,6 +68,7 @@ export function PhaserCanvas() {
   const [exiting, setExiting] = useState(false);
   const [exitError, setExitError] = useState<string>();
   const [submission, setSubmission] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [failedRunRetained, setFailedRunRetained] = useState(false);
   const [loadError, setLoadError] = useState<string>();
   useEffect(() => {
     tokenProviderRef.current = getIdToken;
@@ -108,6 +111,7 @@ export function PhaserCanvas() {
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount || !settingsReady || !userOid) return;
+    const authenticatedUserOid = userOid;
     let disposed = false;
     let game: import('phaser').Game | null = null;
     let startedInEffect = false;
@@ -136,6 +140,8 @@ export function PhaserCanvas() {
         terminalSubmittedRef.current = false;
         terminalSubmissionRef.current = null;
         setSubmission('idle');
+        setFailedRunRetained(false);
+        const inputArchive: VerifiedInputEvent[] = [...envelope.session.inputEvents];
         const controller = new RhythmGameController({
           beatmap,
           clock: new AudioClock(),
@@ -162,7 +168,10 @@ export function PhaserCanvas() {
           getSongPositionMs: () => controller.getSongPositionMs(),
           getInputOffsetMs: () => settingsRef.current.inputOffsetMs,
           initialSequence: envelope.session.inputEvents.length,
-          onPersistInput: (event) => autosave.recordInput(event),
+          onPersistInput: (event) => {
+            inputArchive.push(event);
+            autosave.recordInput(event);
+          },
           onInput: (event) => controller.handleInput(event),
           onPauseRequest: () => controller.pause(),
         });
@@ -238,16 +247,49 @@ export function PhaserCanvas() {
           autosave.stop();
           const saveTerminalResult = async () => {
             setSubmission('saving');
-            // A tap can spend the final heart on keydown. Wait for its physical
-            // keyup before flushing the input log used for server verification.
-            await input.waitForRelease();
-            await autosave.flush({ ...finalSnapshot, status: 'active' });
-            await api.submitResult(envelope.session.id, status, finalSnapshot);
-            setSubmission('saved');
-            controller.stop();
+            try {
+              // A tap can spend the final heart on keydown. Wait for its physical
+              // keyup before flushing the input log used for server verification.
+              await input.waitForRelease();
+              await autosave.flush({ ...finalSnapshot, status: 'active' });
+              await api.submitResult(envelope.session.id, status, finalSnapshot);
+              try {
+                clearFailedRun(window.localStorage, authenticatedUserOid, envelope.session.id);
+              } catch {
+                // Browser storage can be unavailable; a confirmed server save remains successful.
+              }
+              setFailedRunRetained(false);
+              setSubmission('saved');
+              controller.stop();
+            } catch (error) {
+              let retained = false;
+              try {
+                const savedAtMs = Date.now();
+                writeFailedRun(window.localStorage, {
+                  schemaVersion: 1,
+                  userOid: authenticatedUserOid,
+                  runId: envelope.session.id,
+                  savedAtMs,
+                  expiresAtMs: savedAtMs + 24 * 60 * 60 * 1000,
+                  terminalStatus: status,
+                  claimedSnapshot: finalSnapshot,
+                  inputEvents: inputArchive,
+                  failure: {
+                    ...(error instanceof SessionApiError ? { httpStatus: error.status } : {}),
+                    code: error instanceof SessionApiError ? error.code : 'LOCAL_SAVE_FAILED',
+                  },
+                });
+                retained = true;
+              } catch {
+                // A storage/quota failure must never keep the result dialog busy.
+              }
+              setFailedRunRetained(retained);
+              setSubmission('error');
+              throw error;
+            }
           };
           retryTerminalRef.current = saveTerminalResult;
-          terminalSubmissionRef.current = saveTerminalResult().catch(() => setSubmission('error'));
+          terminalSubmissionRef.current = saveTerminalResult().catch(() => undefined);
         }
 
         if (recoveredFailure) submitTerminal('failed', snapshot);
@@ -321,6 +363,7 @@ export function PhaserCanvas() {
       musicUnavailable={snapshot.musicStatus === 'unavailable'}
       pendingSubmission={submission === 'idle' || submission === 'saving'}
       submissionError={submission === 'error'}
+      unsavedResultRetained={failedRunRetained}
       onPlayAgain={() => void handlePlayAgain()}
       playAgainDisabled={submission === 'idle' || submission === 'saving' || restarting}
       playAgainLabel={restarting ? '새 게임 준비 중…' : submission === 'error' ? '저장 후 다시 플레이' : '다시 플레이'}
