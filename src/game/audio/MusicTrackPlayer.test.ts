@@ -27,6 +27,28 @@ describe('MusicTrackPlayer', () => {
     expect(fake.sources[1].stop).toHaveBeenCalledTimes(1);
   });
 
+  it('loops only the selected audio region and resumes at its matching phase', async () => {
+    const fake = createContext();
+    const player = new MusicTrackPlayer(fake.context, fake.context.destination, vi.fn().mockResolvedValue({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) }) as typeof fetch);
+    player.setLoopRegion({ startMs: 5_000, endMs: 7_000 });
+    await player.load('/game/audio/office-groove.wav');
+
+    player.start(2_500);
+    expect(fake.sources[0]).toMatchObject({ loop: true, loopStart: 5, loopEnd: 7 });
+    expect(fake.sources[0].start).toHaveBeenCalledWith(0, 5.5);
+    player.pause(3_250);
+    player.resume(3_250);
+    expect(fake.sources[1].start).toHaveBeenCalledWith(0, 6.25);
+  });
+
+  it('rejects a selected loop region that extends past the decoded soundtrack', async () => {
+    const fake = createContext();
+    const player = new MusicTrackPlayer(fake.context, fake.context.destination, vi.fn().mockResolvedValue({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) }) as typeof fetch);
+    player.setLoopRegion({ startMs: 119_000, endMs: 121_000 });
+
+    await expect(player.load('/game/audio/office-groove.wav')).rejects.toThrow('outside the decoded track');
+  });
+
   it('invokes the browser fetch function with its global context', async () => {
     const fake = createContext();
     const fetcher = vi.fn().mockResolvedValue({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) });
@@ -64,13 +86,13 @@ describe('MusicTrackPlayer', () => {
 
 function createContext() {
   const destination = {} as AudioNode;
-  const sources: Array<{ start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn>; connect: ReturnType<typeof vi.fn> }> = [];
+  const sources: Array<{ start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn>; connect: ReturnType<typeof vi.fn>; loop: boolean; loopStart: number; loopEnd: number }> = [];
   const gains: Array<{ gain: { setValueAtTime: ReturnType<typeof vi.fn>; setTargetAtTime: ReturnType<typeof vi.fn> }; connect: ReturnType<typeof vi.fn> }> = [];
   const decodeAudioData = vi.fn().mockResolvedValue({ duration: 120 });
   const context = {
     currentTime: 0, state: 'running', destination, decodeAudioData,
     createBufferSource: vi.fn(() => {
-      const source = { buffer: null, onended: null, start: vi.fn(), stop: vi.fn(), connect: vi.fn() };
+      const source = { buffer: null, onended: null, start: vi.fn(), stop: vi.fn(), connect: vi.fn(), loop: false, loopStart: 0, loopEnd: 0 };
       sources.push(source);
       return source;
     }),

@@ -58,7 +58,12 @@ test("practices the selected source pattern and returns to its variation list", 
 
   const practice = page.getByRole("region", { name: "패턴 연습" });
   await expect(practice).toHaveAttribute("data-source-pattern-id", "pattern-002");
-  await page.getByRole("button", { name: "패턴 목록" }).click();
+  await expect(practice.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
+  await expect(page.locator(".practice-count-in")).toContainText("준비");
+  await page.getByRole("button", { name: "연습 종료" }).click();
+  await expect(page.getByRole("region", { name: "연습 결과 요약" })).toBeVisible();
+  await expect(page.getByText("완료한 루프가 없어요. 연습한 구간은 통계에 포함되지 않았습니다.")).toBeVisible();
+  await page.getByRole("button", { name: "변형 목록으로" }).click();
 
   await expect(page.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "출근길 · 정박 2" })).toBeVisible();

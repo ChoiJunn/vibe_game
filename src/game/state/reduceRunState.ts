@@ -55,6 +55,7 @@ export function normalizeRunState(state: RunState): RunState {
 export function reduceRunState(
   state: RunState,
   action: RunStateAction,
+  options: { continueAfterZeroHearts?: boolean } = {},
 ): RunState {
   if (state.status !== "active" || action.eventIndex !== state.nextEventIndex) {
     return state;
@@ -67,12 +68,12 @@ export function reduceRunState(
     result.judgement === "perfect" ? normalizedState.consecutivePerfects + 1 : 0;
   const heartReward =
     result.judgement === "perfect" && consecutivePerfects % 10 === 0 ? 1 : 0;
-  const hearts = Math.min(
+  const hearts = Math.max(0, Math.min(
     5,
     normalizedState.hearts + heartReward - (result.judgement === "miss" ? 1 : 0),
-  );
+  ));
   const status =
-    hearts <= 0 ? "failed" : shouldComplete(action) ? "completed" : "active";
+    hearts <= 0 && !options.continueAfterZeroHearts ? "failed" : shouldComplete(action) ? "completed" : "active";
   const riskBonusActive = normalizedState.riskBonusRemaining > 0;
   const successfulBurst = action.event.type === "burst" && result.judgement !== "miss";
   const riskBonusRemaining = successfulBurst

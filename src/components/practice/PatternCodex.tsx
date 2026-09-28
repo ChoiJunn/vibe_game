@@ -53,14 +53,23 @@ export function PatternCodex() {
   const selectedGroup = groups.find(({ kind }) => kind === selectedKind);
   const variations = selectedGroup ? addVariationOrdinals(selectedGroup) : [];
   const selectedPattern = groups.flatMap(({ variations: items }) => items).find((pattern) => pattern.id === selected);
-  const onComplete = useCallback((snapshot: { patternId: string; status: string; accuracy: number; perfectCount: number }) => {
-    if (snapshot.status !== "completed") return;
-    const next = recordPatternPractice(codex, { patternId: snapshot.patternId, terminalStatus: "completed", accuracy: snapshot.accuracy, perfectCount: snapshot.perfectCount, now: new Date().toISOString() });
-    setCodex(savePatternCodex(window.localStorage, user?.oid, next));
-  }, [codex, user?.oid]);
+  const selectedVariation = variations.find((pattern) => pattern.id === selected);
+  const selectedTitle = selectedGroup && selectedVariation
+    ? `${sceneNames[selectedVariation.section]} · ${selectedGroup.label} ${selectedVariation.ordinal}`
+    : selectedPattern?.label ?? selected;
+  const selectedPracticeChart = useMemo(
+    () => selectedPattern ? createPracticeBeatmap(beatmap, selectedPattern.id) : undefined,
+    [selectedPattern?.id],
+  );
+  const onComplete = useCallback((result: { patternId: string; accuracy: number; perfectCount: number; goodCount: number; missCount: number }) => {
+    setCodex((current) => {
+      const next = recordPatternPractice(current, { patternId: result.patternId, terminalStatus: "completed", accuracy: result.accuracy, perfectCount: result.perfectCount, now: new Date().toISOString() });
+      return savePatternCodex(window.localStorage, user?.oid, next);
+    });
+  }, [user?.oid]);
 
-  if (practiceOpen && selectedPattern) {
-    return <PracticeViewport beatmap={createPracticeBeatmap(beatmap, selectedPattern.id)} onComplete={onComplete} onExit={() => setPracticeOpen(false)} />;
+  if (practiceOpen && selectedPracticeChart) {
+    return <PracticeViewport chart={selectedPracticeChart} title={selectedTitle ?? selectedPracticeChart.patternId} onComplete={onComplete} onExit={() => setPracticeOpen(false)} />;
   }
 
   return <section className="pattern-codex">

@@ -1,7 +1,7 @@
 import type { Beatmap, RhythmEvent } from '@/domain/rhythm';
 import { AudioClock } from './AudioClock';
 import { createBeatAccent, createFeverAccent, createSectionSound, type ScheduledAudioNode } from './instruments';
-import { MusicTrackPlayer } from './MusicTrackPlayer';
+import { MusicTrackPlayer, type MusicTrackRegion } from './MusicTrackPlayer';
 import { clampAudioSettings, DEFAULT_AUDIO_SETTINGS, type AudioSettings } from './types';
 
 export type OfficeSoundSchedulerOptions = {
@@ -34,7 +34,7 @@ export class OfficeSoundScheduler {
     this.tickMs = options.tickMs ?? 25;
   }
 
-  load(beatmap: Beatmap, settings: AudioSettings = DEFAULT_AUDIO_SETTINGS, fromSongPositionMs = 0): void {
+  load(beatmap: Beatmap, settings: AudioSettings = DEFAULT_AUDIO_SETTINGS, fromSongPositionMs = 0, musicRegion?: MusicTrackRegion): void {
     this.stop();
     this.beatmap = beatmap;
     this.settings = clampAudioSettings(settings);
@@ -42,6 +42,7 @@ export class OfficeSoundScheduler {
     this.nextMusicStepIndex = Math.ceil(fromSongPositionMs / this.musicStepMs);
     this.musicTrack?.stop();
     this.musicTrack = new MusicTrackPlayer(this.clock.getAudioContext());
+    this.musicTrack.setLoopRegion(musicRegion);
     this.musicTrack.setVolume(this.settings.muted ? 0 : this.settings.musicVolume);
     this.musicStatus = 'loading';
     this.musicLoad = this.musicTrack.load('/game/audio/office-groove.wav')
@@ -122,6 +123,32 @@ export class OfficeSoundScheduler {
 
   getMusicStatus(): MusicStatus {
     return this.musicStatus;
+  }
+
+  playCountInBeat(accent = false): void {
+    if (!this.beatmap || this.settings.muted || this.settings.sfxVolume <= 0) return;
+    try {
+      const context = this.clock.getAudioContext();
+      const [node] = createBeatAccent({
+        context,
+        when: context.currentTime,
+        durationSec: 0.08,
+        volume: this.settings.sfxVolume * (accent ? 1 : 0.7),
+        destination: context.destination,
+      });
+      if (!node) return;
+      this.activeNodes.add(node);
+      node.addEventListener('ended', () => this.activeNodes.delete(node), { once: true });
+    } catch {
+      // Count-in sound is optional; timing practice remains available without Web Audio.
+    }
+  }
+
+  restartLoop(): void {
+    this.scheduledEventIds.clear();
+    this.nextMusicStepIndex = Math.ceil(this.clock.getSongPositionMs() / this.musicStepMs);
+    if (!this.running) this.resume();
+    else this.tick();
   }
 
   setFeverActive(active: boolean): void {

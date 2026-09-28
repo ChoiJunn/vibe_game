@@ -117,6 +117,28 @@ describe("reduceRunState", () => {
     expect(state.combo).toBe(0);
   });
 
+  it("keeps explicit practice state active at zero hearts while clamping hearts", () => {
+    const state = {
+      ...createInitialRunState({ runId: "practice-no-fail", userOid: "practice", beatmapId: "office-day-01", hearts: 1 }),
+    };
+    const next = reduceRunState(state, {
+      result: result("miss"),
+      event: event("practice-event"),
+      eventIndex: 0,
+      songPositionMs: 161,
+    }, { continueAfterZeroHearts: true });
+
+    expect(next).toMatchObject({ status: "active", hearts: 0, missCount: 1 });
+
+    const atZero = reduceRunState(next, {
+      result: result("miss", "practice-event-2"),
+      event: event("practice-event-2"),
+      eventIndex: 1,
+      songPositionMs: 322,
+    }, { continueAfterZeroHearts: true });
+    expect(atZero).toMatchObject({ status: "active", hearts: 0, missCount: 2 });
+  });
+
   it("ignores duplicate or out-of-order event results and completes on the final event", () => {
     const state = createInitialRunState({
       runId: "run-04",
