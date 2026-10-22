@@ -79,4 +79,4 @@ Task: T03-refactor-game-session-entry
 ## Progress
 - [x] 구현 완료
 - [x] 검증 통과
-- commit: `feab095`
+- commit: `c3e17e7`
