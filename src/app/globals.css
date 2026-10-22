@@ -481,6 +481,12 @@ select {
   opacity: 0.42;
 }
 
+.page-shell--home > .game-frame::before,
+.page-shell--home > .game-frame::after {
+  content: none;
+  display: none;
+}
+
 .eyebrow {
   margin: 0 0 1.2rem;
   color: var(--muted-ink);
@@ -659,7 +665,7 @@ a:focus-visible {
 .page-shell--home {
   display: flex;
   min-height: calc(100dvh - 4rem);
-  padding: clamp(0.35rem, 1vw, 0.85rem);
+  padding: 0.4rem clamp(0.35rem, 1vw, 0.85rem);
   background: #202a2f;
 }
 
@@ -791,6 +797,32 @@ a:focus-visible {
   right: clamp(1rem, 3vw, 2.25rem);
   left: auto;
   text-align: right;
+}
+
+.page-shell--home .landing-stage__preview {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: inherit;
+  box-shadow: none;
+}
+
+.page-shell--home .landing-stage__preview .rhythm-preview__character {
+  right: 22%;
+  bottom: clamp(7.5rem, 15vh, 9rem);
+  width: clamp(10rem, 36%, 28rem);
+  animation-duration: 2.2s;
+}
+
+.page-shell--home .landing-stage__preview .rhythm-preview__moka {
+  right: 11%;
+  bottom: 18%;
+  width: clamp(4.5rem, 15%, 11rem);
 }
 
 .rhythm-preview {
@@ -1227,10 +1259,15 @@ a:focus-visible {
 @media (max-width: 560px) {
   .page-shell--home { padding: 0.3rem; }
   .page-shell--home > .game-frame {
-    min-height: calc(100dvh - 4.6rem);
+    height: calc(100dvh - 4.8rem);
+    min-height: calc(100dvh - 4.8rem);
     border-radius: 1rem;
   }
-  .page-shell--home .landing-stage { align-items: flex-start; }
+  .page-shell--home .landing-stage {
+    height: 100%;
+    min-height: 0;
+    align-items: flex-start;
+  }
   .page-shell--home .landing-content {
     width: 100%;
     margin: 0;
@@ -1244,6 +1281,8 @@ a:focus-visible {
     background: linear-gradient(180deg, rgba(18, 29, 34, 0.9), rgba(18, 29, 34, 0.66) 39%, rgba(18, 29, 34, 0.04) 78%), linear-gradient(90deg, rgba(18, 29, 34, 0.34), transparent 85%);
   }
   .landing-stage__preview .rhythm-preview__label { top: auto; right: 1rem; bottom: 7rem; }
+  .page-shell--home .landing-stage__preview .rhythm-preview__character { right: 19%; bottom: 14%; width: 48%; }
+  .page-shell--home .landing-stage__preview .rhythm-preview__moka { right: 7%; bottom: 19%; width: 21%; }
   .landing-stats { gap: 0.35rem; margin-top: 0.85rem; }
   .landing-stats span { min-width: 4.1rem; padding: 0.4rem 0.55rem; }
   .game-page { padding: 0.55rem; gap: 0.45rem; }
