@@ -669,7 +669,7 @@ a:focus-visible {
   display: flex;
   min-height: calc(100dvh - 4rem);
   padding: 0.4rem clamp(0.35rem, 1vw, 0.85rem);
-  background: #202a2f;
+  background: #242427;
 }
 
 .page-shell--home > .game-frame {
@@ -696,7 +696,7 @@ a:focus-visible {
   overflow: hidden;
   isolation: isolate;
   border-radius: inherit;
-  background: #263238;
+  background: #242427;
 }
 
 .landing-stage__preview {
@@ -716,7 +716,7 @@ a:focus-visible {
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: linear-gradient(90deg, rgba(18, 29, 34, 0.86), rgba(18, 29, 34, 0.6) 34%, rgba(18, 29, 34, 0.05) 76%), linear-gradient(0deg, rgba(18, 29, 34, 0.38), transparent 45%);
+  background: linear-gradient(90deg, rgba(18, 18, 20, 0.86), rgba(18, 18, 20, 0.6) 34%, rgba(18, 18, 20, 0.05) 76%), linear-gradient(0deg, rgba(18, 18, 20, 0.38), transparent 45%);
   pointer-events: none;
 }
 
@@ -837,7 +837,7 @@ a:focus-visible {
   overflow: hidden;
   border: 1px solid rgba(255, 253, 248, 0.78);
   border-radius: clamp(1rem, 2.4vw, 2rem);
-  background: #38454a;
+  background: #37373a;
   color: #fffdf8;
   box-shadow: 0 1.5rem 3rem rgba(38, 50, 56, 0.22);
 }
@@ -862,7 +862,7 @@ a:focus-visible {
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: linear-gradient(180deg, rgba(25, 38, 43, 0.16), rgba(25, 38, 43, 0.04) 42%, rgba(25, 38, 43, 0.72));
+  background: linear-gradient(180deg, rgba(18, 18, 20, 0.16), rgba(18, 18, 20, 0.04) 42%, rgba(18, 18, 20, 0.72));
 }
 
 .rhythm-preview__label {
@@ -918,12 +918,6 @@ a:focus-visible {
   filter: blur(1.2rem);
   opacity: 0.55;
   animation: rhythm-preview-glow 2.4s ease-in-out infinite alternate;
-}
-
-.rhythm-preview__light--mint {
-  right: 4%;
-  top: 14%;
-  background: var(--mint);
 }
 
 .rhythm-preview__light--coral {
@@ -1138,18 +1132,7 @@ a:focus-visible {
   margin: 0;
   container-type: size;
   border-radius: 1rem;
-  background: #263238;
-}
-
-.game-stage-shell::before {
-  position: absolute;
-  z-index: -1;
-  inset: -1rem;
-  content: '';
-  background: url('/game/art/background/arrival.png') center / cover no-repeat;
-  filter: blur(1rem) brightness(0.72) saturate(0.82);
-  transform: scale(1.04);
-  pointer-events: none;
+  background: #242427;
 }
 
 .game-stage-shell__topline,
@@ -1317,7 +1300,7 @@ a:focus-visible {
     font-size: clamp(2rem, 8vw, 2.85rem);
   }
   .landing-stage__vignette {
-    background: linear-gradient(180deg, rgba(18, 29, 34, 0.9), rgba(18, 29, 34, 0.66) 39%, rgba(18, 29, 34, 0.04) 78%), linear-gradient(90deg, rgba(18, 29, 34, 0.34), transparent 85%);
+    background: linear-gradient(180deg, rgba(18, 18, 20, 0.9), rgba(18, 18, 20, 0.66) 39%, rgba(18, 18, 20, 0.04) 78%), linear-gradient(90deg, rgba(18, 18, 20, 0.34), transparent 85%);
   }
   .landing-stage__preview .rhythm-preview__label { top: auto; right: 1rem; bottom: 7rem; }
   .page-shell--home .landing-stage__preview .rhythm-preview__character { right: 19%; bottom: 14%; width: 48%; }

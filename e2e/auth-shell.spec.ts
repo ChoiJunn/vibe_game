@@ -28,6 +28,7 @@ test('home intro fills desktop and mobile viewports with visible animated art', 
   const login = page.getByRole('button', { name: 'Entra ID 로그인' });
   const character = page.locator('.rhythm-preview__character');
   const moka = page.locator('.rhythm-preview__moka');
+  const background = page.locator('.rhythm-preview__background');
   const note = page.locator('.rhythm-preview__note--one');
 
   await expect(heading).toBeVisible();
@@ -36,6 +37,8 @@ test('home intro fills desktop and mobile viewports with visible animated art', 
   await expect(character).toBeVisible();
   await expect(moka).toBeVisible();
   await expect(page.locator('.rhythm-preview__lane')).toBeVisible();
+  await expect(page.locator('.rhythm-preview__light--mint')).toHaveCount(0);
+  await expect.poll(() => background.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   await expect.poll(() => character.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   await expect.poll(() => moka.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
 
@@ -85,6 +88,8 @@ test('home intro fills desktop and mobile viewports with visible animated art', 
   await expect(login).toBeVisible();
   await expect(character).toBeVisible();
   await expect(moka).toBeVisible();
+  await expect(page.locator('.rhythm-preview__light--mint')).toHaveCount(0);
+  await expect.poll(() => background.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   const mobileLayout = await page.evaluate(() => {
     const frame = document.querySelector('.page-shell--home > .game-frame')!.getBoundingClientRect();
     const stage = document.querySelector('.game-frame-content.landing-stage')!.getBoundingClientRect();

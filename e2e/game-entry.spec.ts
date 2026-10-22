@@ -8,6 +8,8 @@ test('game preview is visible while active-session discovery is still pending', 
 
   await expect.poll(() => api.getSessionReadCount()).toBe(1);
   await expect(page.locator('.game-play-surface__preview')).toBeVisible();
+  await expect.poll(() => page.locator('.game-stage-shell').evaluate((element) => getComputedStyle(element, '::before').backgroundImage)).toBe('none');
+  await expect(page.locator('.game-stage-shell')).toHaveCSS('background-color', 'rgb(36, 36, 39)');
   expect(api.getSessionCreateCount()).toBe(0);
 
   await page.getByRole('button', { name: '건너뛰기' }).click();

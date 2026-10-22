@@ -20,7 +20,6 @@ export function RhythmStagePreview({ className, compact = false }: RhythmStagePr
         preload
       />
       <div className="rhythm-preview__shade" />
-      <div className="rhythm-preview__light rhythm-preview__light--mint" />
       <div className="rhythm-preview__light rhythm-preview__light--coral" />
 
       <div className="rhythm-preview__label">
