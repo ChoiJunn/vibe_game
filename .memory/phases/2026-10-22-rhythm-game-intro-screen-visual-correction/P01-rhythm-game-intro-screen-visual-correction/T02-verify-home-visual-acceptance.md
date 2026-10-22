@@ -1,6 +1,6 @@
 # Task: T02 Verify Home Visual Acceptance
 
-## Status: pending
+## Status: done
 
 ## Goal
 Add browser-level checks proving the public home visibly renders its key text and art, animates when motion is allowed, removes the corner circles, fits desktop/mobile viewports, and remains static-but-complete under reduced motion.
@@ -41,12 +41,12 @@ Add browser-level checks proving the public home visibly renders its key text an
 - Review the produced desktop and mobile screenshots at full size for text contrast, character crop, motion-lane placement, remaining corner shapes, and unnecessary empty regions before marking acceptance criteria done.
 
 ## Acceptance Criteria
-- [ ] Browser assertions confirm heading/instruction/CTA are visible, legible, and not overlapped at 1920×900 and 390×844.
-- [ ] The protagonist and Moka images load and have visible bounds inside the stage at both viewports.
-- [ ] Character and note motion values change under normal motion preference and are reduced to one static iteration under reduced motion.
-- [ ] Both home-frame corner pseudo-elements are hidden.
-- [ ] Public home causes no session API request and retains the Entra sign-in entry point.
-- [ ] Desktop and mobile screenshots were reviewed and match all visual requirements.
+- [x] Browser assertions confirm heading/instruction/CTA are visible, legible, and not overlapped at 1920×900 and 390×844.
+- [x] The protagonist and Moka images load and have visible bounds inside the stage at both viewports.
+- [x] Character and note motion values change under normal motion preference and are reduced to one static iteration under reduced motion.
+- [x] Both home-frame corner pseudo-elements are hidden.
+- [x] Public home causes no session API request and retains the Entra sign-in entry point.
+- [x] Desktop and mobile screenshots were reviewed and match all visual requirements.
 
 ## Validation
 - `npm run test:e2e -- --project=edge --workers=1 --grep "landing screen|home intro"` — all landing/auth and new visual behavior tests pass.
@@ -66,6 +66,6 @@ Task: T02-verify-home-visual-acceptance
 ```
 
 ## Progress
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] Implementation complete: added desktop/mobile and reduced-motion visual E2E coverage with screenshot artifacts.
+- [x] Validation passed: Edge E2E (4 passed), scoped ESLint, and typecheck.
+- commit: test(home): verify animated intro visuals and responsive fit
