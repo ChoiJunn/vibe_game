@@ -24,7 +24,10 @@
 @media (prefers-reduced-motion: reduce) {
   .calibration-beat,
   .judgement-feedback,
-  .phaser-canvas-shell canvas {
+  .phaser-canvas-shell canvas,
+  .rhythm-preview *,
+  .rhythm-preview *::before,
+  .rhythm-preview *::after {
     animation: none !important;
     transition: none !important;
   }
