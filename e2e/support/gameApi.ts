@@ -12,6 +12,9 @@ type MockOptions = {
   resultFailureStatus?: number;
   abandonFailures?: number;
   abandonConflicts?: number;
+  sessionReadFailures?: number;
+  sessionCreateFailures?: number;
+  sessionReadDelayMs?: number;
 };
 
 const freshSnapshot = (
@@ -72,6 +75,10 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
   let remainingResultFailures = options.resultFailures ?? 0;
   let remainingAbandonFailures = options.abandonFailures ?? 0;
   let remainingAbandonConflicts = options.abandonConflicts ?? 0;
+  let remainingSessionReadFailures = options.sessionReadFailures ?? 0;
+  let remainingSessionCreateFailures = options.sessionCreateFailures ?? 0;
+  let sessionReadCount = 0;
+  let sessionCreateCount = 0;
   const abandonedRunIds: string[] = [];
 
   const envelope = () => ({
@@ -87,6 +94,18 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
 
   await page.route("**/api/game/session", async (route) => {
     if (route.request().method() === "GET") {
+      sessionReadCount += 1;
+      if (options.sessionReadDelayMs) {
+        await new Promise((resolve) => setTimeout(resolve, options.sessionReadDelayMs));
+      }
+      if (remainingSessionReadFailures > 0) {
+        remainingSessionReadFailures -= 1;
+        return route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "Temporary session lookup failure." }),
+        });
+      }
       if (session?.terminalStatus) {
         return route.fulfill({
           contentType: "application/json",
@@ -94,6 +113,15 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
         });
       }
       return fulfillSession(route);
+    }
+    sessionCreateCount += 1;
+    if (remainingSessionCreateFailures > 0) {
+      remainingSessionCreateFailures -= 1;
+      return route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Temporary session creation failure." }),
+      });
     }
     if (!session || session.terminalStatus) {
       runNumber += 1;
@@ -215,5 +243,7 @@ export async function mockGameApi(page: Page, options: MockOptions = {}) {
     getSession: () => session,
     getResult: () => result,
     getAbandonedRunIds: () => [...abandonedRunIds],
+    getSessionReadCount: () => sessionReadCount,
+    getSessionCreateCount: () => sessionCreateCount,
   };
 }

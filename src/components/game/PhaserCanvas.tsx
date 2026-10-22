@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import beatmapJson from '@/content/beatmaps/office-day-01.json';
 import testBeatmapJson from '@/content/beatmaps/e2e-quick-beatmap';
 import { useAuth } from '@/auth/useAuth';
-import { isE2eAuthEnabled } from '@/auth/AuthProvider';
+import { isE2eAuthEnabled, isSilentTokenRecoveryError } from '@/auth/AuthProvider';
 import { settingsStore } from '@/client/settings/settingsStore';
 import { SessionApiClient, SessionApiError, type SessionEnvelope } from '@/client/game/sessionApi';
 import { PauseOverlay } from './PauseOverlay';
@@ -489,6 +489,9 @@ export function PhaserCanvas() {
 }
 
 function formatGameLoadError(error: unknown): string {
+  if (isSilentTokenRecoveryError(error)) {
+    return 'Entra ID 로그인 확인 시간이 초과됐습니다. 로그인 세션을 다시 확인한 뒤 시도해 주세요.';
+  }
   if (error instanceof SessionApiError) {
     if (error.status === 401) return '로그인 세션이 만료되었거나 서버가 로그인 토큰을 거부했습니다. 페이지를 새로고침한 뒤 다시 로그인해 주세요.';
     if (error.status === 403) return '게임 세션을 사용할 권한이 없습니다. Entra ID 앱 권한과 서버 설정을 확인해 주세요.';

@@ -1,11 +1,19 @@
 import { expect, test } from '@playwright/test';
 
 test('landing screen exposes the Entra login entry point', async ({ page }) => {
+  const sessionCreates: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/api/game/session') && request.method() === 'POST') {
+      sessionCreates.push(request.url());
+    }
+  });
   await page.goto('/');
 
   await expect(page.getByRole('heading', { name: /오늘의 업무 리듬을/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Entra ID 로그인' })).toBeVisible();
   await expect(page.getByText('스페이스바로 박자를 맞추고 오늘의 업무를 연주해 보세요.')).toBeVisible();
+  await expect(page.locator('.landing-stage__preview')).toBeVisible();
+  expect(sessionCreates).toHaveLength(0);
 });
 
 test('home intro fills desktop and mobile viewports with visible animated art', async ({ page }, testInfo) => {

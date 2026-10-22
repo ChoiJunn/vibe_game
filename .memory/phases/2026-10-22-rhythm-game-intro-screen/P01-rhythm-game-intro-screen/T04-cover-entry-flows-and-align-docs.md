@@ -1,6 +1,6 @@
 # Task: T04 Cover Entry Flows and Align Local Docs
 
-## Status: in_progress
+## Status: done
 
 ## Goal
 Prove that the new public and authenticated start flows obey the no-write-before-click and recoverable-error decisions, and make local Cosmos authentication instructions agree with the supported configuration without exposing secrets.
@@ -41,12 +41,27 @@ Prove that the new public and authenticated start flows obey the no-write-before
 - Explain that expired Azure CLI/MFA credentials can cause Cosmos-dependent session operations to return 500; direct the developer to refresh/re-authenticate the Azure CLI identity and retry health/session checks. Do not claim that the browser's Entra ID login renews Azure CLI credentials: these are separate auth paths.
 - Preserve the security rule that local secrets remain in ignored `.env.local`; do not read, print, paste, or commit any secret value. Do not change runtime defaults or production identity configuration in this docs task.
 
+### I03. Recover silent Entra token timeouts during session discovery
+- Related Files:
+  - `src/auth/AuthProvider.tsx` :: `getIdToken` — replace repeated `ssoSilent` calls with `acquireTokenSilent`; use an interactive redirect for interaction-required or MSAL iframe-timeout errors while preserving the current route.
+  - `src/auth/AuthProvider.test.tsx` :: silent-token recovery classification — cover interaction-required, `monitor_window_timeout`/`timed_out`, and unrelated errors.
+  - `src/components/game/PhaserCanvas.tsx` :: `formatGameLoadError` — show a concise sign-in recovery message if token refresh still fails; do not expose raw MSAL internals as the only user guidance.
+- Evidence: the user screenshot shows a signed-in `/game` screen whose session discovery error contains the MSAL `timed_out` code. `AuthProvider.getIdToken` currently invokes `ssoSilent` after its cached ID token nears expiry.
+- Keep the existing Entra redirect login and `/game` return path. Do not weaken token validation or change Cosmos auth settings as a workaround for this browser authentication error.
+
+### I04. Exclude generated deployment bundles from lint input
+- Related Files:
+  - `eslint.config.mjs` :: `globalIgnores` — exclude generated `.deploy-package-*` trees so the documented full-repository lint command only inspects project source.
+- Evidence: `npm run lint` currently enters `.deploy-package-97843d1/.next` and reports thousands of generated CommonJS `require()` violations. This directory is generated deployment output, not maintained application source.
+
 ## Acceptance Criteria
-- [ ] E2E coverage proves preview is visible before session API resolution and no create POST occurs before user action.
-- [ ] E2E coverage covers active-session resume, successful start, read retry, and start retry.
-- [ ] Existing gameplay/pause/resume E2E journey passes with the explicit entry action.
-- [ ] Local setup docs match code-supported Cosmos auth modes and distinguish Azure CLI/MFA from browser Entra auth.
-- [ ] No tests or docs require real Cosmos/Entra access, and no secret is exposed.
+- [x] E2E coverage proves preview is visible before session API resolution and no create POST occurs before user action.
+- [x] E2E coverage covers active-session resume, successful start, read retry, and start retry.
+- [x] Existing gameplay/pause/resume E2E journey passes with the explicit entry action.
+- [x] Local setup docs match code-supported Cosmos auth modes and distinguish Azure CLI/MFA from browser Entra auth.
+- [x] No tests or docs require real Cosmos/Entra access, and no secret is exposed.
+- [x] Existing-account token renewal uses the MSAL silent cache flow first and recovers timeout/interaction-required errors through a visible redirect login rather than repeating the same hidden-iframe request.
+- [x] `npm run lint` ignores generated deploy-package output and passes for maintained project files.
 
 ## Validation
 - `npm run test:e2e -- --grep "landing screen|protected route|game entry|player can tune audio|browser back pauses"` — mocked start/auth/gameplay flows pass.
@@ -66,6 +81,6 @@ Task: T04-cover-entry-flows-and-align-docs
 ```
 
 ## Progress
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
+- [x] Implementation complete: added entry/retry E2E coverage, corrected Cosmos and auth docs, recovered MSAL timeout renewals, and excluded generated deploy bundles from lint.
+- [x] Validation passed: Edge E2E (12 passed), AuthProvider unit tests (5 passed), npm run lint, and npm run typecheck.
+- commit: test(game): cover explicit session start and recovery

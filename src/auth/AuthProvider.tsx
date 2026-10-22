@@ -1,6 +1,7 @@
 'use client';
 
-import type { AccountInfo, PublicClientApplication } from '@azure/msal-browser';
+import type { AccountInfo, PublicClientApplication, SilentRequest } from '@azure/msal-browser';
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
 import {
   createContext,
   useCallback,
@@ -118,15 +119,17 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
 
     if (idToken && !isNearExpiry(idToken)) return idToken;
 
-    const result = await client.ssoSilent({
+    const tokenRequest: SilentRequest = {
       scopes: [...entraAuthConfig.scopes],
       account,
       authority: entraAuthConfig.authority,
       redirectUri: entraAuthConfig.redirectUri,
-    });
-    setIdToken(result.idToken);
-    cacheIdToken(result.idToken);
-    return result.idToken;
+    };
+    const returnPath = `${window.location.pathname}${window.location.search}`;
+    const token = await acquireIdTokenWithRecovery(client, tokenRequest, rememberAuthReturnPath, returnPath);
+    setIdToken(token);
+    cacheIdToken(token);
+    return token;
   }, [client, idToken]);
 
   const signIn = useCallback(async () => {
@@ -234,5 +237,33 @@ export function isE2eAuthEnabled(): boolean {
     return window.sessionStorage.getItem('office-rhythm:e2e-auth') === 'enabled';
   } catch {
     return false;
+  }
+}
+
+export function isSilentTokenRecoveryError(error: unknown): boolean {
+  if (error instanceof InteractionRequiredAuthError) return true;
+  if (!error || typeof error !== 'object') return false;
+
+  const errorCode = 'errorCode' in error && typeof error.errorCode === 'string' ? error.errorCode : '';
+  const message = error instanceof Error ? error.message : '';
+  return errorCode === 'monitor_window_timeout'
+    || errorCode === 'timed_out'
+    || /\btimed_out\b/i.test(message);
+}
+
+export async function acquireIdTokenWithRecovery(
+  client: Pick<PublicClientApplication, 'acquireTokenSilent' | 'acquireTokenRedirect'>,
+  request: SilentRequest,
+  rememberReturnPath: (path: string) => void,
+  returnPath: string,
+): Promise<string> {
+  try {
+    return (await client.acquireTokenSilent(request)).idToken;
+  } catch (error) {
+    if (!isSilentTokenRecoveryError(error)) throw error;
+
+    rememberReturnPath(returnPath);
+    await client.acquireTokenRedirect({ ...request, redirectStartPage: returnPath });
+    throw error;
   }
 }
