@@ -6,7 +6,7 @@ import testBeatmapJson from '@/content/beatmaps/e2e-quick-beatmap';
 import { useAuth } from '@/auth/useAuth';
 import { isE2eAuthEnabled } from '@/auth/AuthProvider';
 import { settingsStore } from '@/client/settings/settingsStore';
-import { SessionApiClient, SessionApiError } from '@/client/game/sessionApi';
+import { SessionApiClient, SessionApiError, type SessionEnvelope } from '@/client/game/sessionApi';
 import { PauseOverlay } from './PauseOverlay';
 import { AudioSettingsPanel } from '@/components/settings/AudioSettingsPanel';
 import { AccessibleGameStatus } from './AccessibleGameStatus';
@@ -26,6 +26,7 @@ import { buildRhythmReport } from '@/game/results/buildRhythmReport';
 import { createEmptyCodex, loadPatternCodex } from '@/client/game/patternCodexStore';
 import { clearFailedRun, writeFailedRun } from '@/client/game/failedRunStore';
 import type { VerifiedInputEvent } from '@/server/cosmos/models';
+import { RhythmStagePreview } from './RhythmStagePreview';
 
 type GameRuntime = {
   controller: RhythmGameController;
@@ -33,6 +34,12 @@ type GameRuntime = {
   pauseState: PauseState;
   autosaveState: AutosaveState;
 };
+
+type EntryState =
+  | { status: 'checking' }
+  | { status: 'ready'; activeSession: SessionEnvelope | null }
+  | { status: 'starting'; activeSession: SessionEnvelope | null }
+  | { status: 'error'; message: string; activeSession: SessionEnvelope | null; retry: 'check' | 'start' };
 
 export function hasSavedProgress(snapshot: RunState, inputEventCount: number): boolean {
   return snapshot.status === 'paused'
@@ -49,6 +56,9 @@ export function hasSavedProgress(snapshot: RunState, inputEventCount: number): b
 export function PhaserCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
   const startGameRef = useRef<(() => void) | null>(null);
+  const entryActionRef = useRef<(() => void) | null>(null);
+  const retryEntryRef = useRef<(() => void) | null>(null);
+  const entryStateRef = useRef<EntryState>({ status: 'checking' });
   const controllerRef = useRef<RhythmGameController | null>(null);
   const inputControllerRef = useRef<SpaceInputController | null>(null);
   const autosaveRef = useRef<AutosaveCoordinator | null>(null);
@@ -62,6 +72,7 @@ export function PhaserCanvas() {
   const userOid = user?.oid;
   const tokenProviderRef = useRef(getIdToken);
   const [runtime, setRuntime] = useState<GameRuntime | null>(null);
+  const [entryState, setEntryState] = useState<EntryState>({ status: 'checking' });
   const [coordinator, setCoordinator] = useState<PauseCoordinator | null>(null);
   const [settings, setSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
   const [settingsReady, setSettingsReady] = useState(false);
@@ -125,13 +136,15 @@ export function PhaserCanvas() {
     let unsubscribeAutosave: () => void = () => undefined;
     const isE2e = isE2eAuthEnabled();
     const api = new SessionApiClient(() => tokenProviderRef.current());
+    let activeEnvelope: SessionEnvelope | null = null;
+    let entryBusy = false;
 
-    const bootstrap = async () => {
-      try {
-        const beatmap = validateBeatmap(isE2e ? testBeatmapJson : beatmapJson, { allowShortChart: isE2e });
-        const activeSession = await api.getActive();
-        const envelope = activeSession ?? await api.createOrResume();
-        if (disposed) return;
+    const updateEntryState = (next: EntryState) => {
+      entryStateRef.current = next;
+      setEntryState(next);
+    };
+
+    const initializeSession = async (envelope: SessionEnvelope, beatmap: ReturnType<typeof validateBeatmap>) => {
         const storedSnapshot = envelope.session.snapshot;
         // The result is submitted separately from the autosaved snapshot. If
         // submission failed before a reload, zero hearts identifies the failed
@@ -226,7 +239,7 @@ export function PhaserCanvas() {
         startGameHandler = startGame;
         startGameRef.current = startGame;
         mount.addEventListener('pointerdown', startGameHandler);
-        if (activeSession && !recoveredFailure && hasSavedProgress(snapshot, envelope.session.inputEvents.length)) {
+        if (!recoveredFailure && hasSavedProgress(snapshot, envelope.session.inputEvents.length)) {
           pauseCoordinator.restorePaused('browser-back', snapshot);
         }
         void import('@/game/PhaserGame')
@@ -289,16 +302,73 @@ export function PhaserCanvas() {
         }
 
         if (recoveredFailure) submitTerminal('failed', snapshot);
+    };
+
+    const checkActiveSession = async () => {
+      if (disposed || entryBusy) return;
+      entryBusy = true;
+      updateEntryState({ status: 'checking' });
+      try {
+        const activeSession = await api.getActive();
+        if (disposed) return;
+        activeEnvelope = activeSession;
+        updateEntryState({ status: 'ready', activeSession });
       } catch (error) {
-        if (!disposed) setLoadError(formatGameLoadError(error));
+        if (!disposed) {
+          updateEntryState({
+            status: 'error',
+            message: formatGameLoadError(error),
+            activeSession: null,
+            retry: 'check',
+          });
+        }
+      } finally {
+        entryBusy = false;
       }
     };
 
-    void bootstrap();
+    const startSelectedSession = async () => {
+      if (disposed || entryBusy) return;
+      entryBusy = true;
+      const selectedSession = activeEnvelope;
+      updateEntryState({ status: 'starting', activeSession: selectedSession });
+      setLoadError(undefined);
+      try {
+        const beatmap = validateBeatmap(isE2e ? testBeatmapJson : beatmapJson, { allowShortChart: isE2e });
+        const envelope = selectedSession ?? await api.createOrResume();
+        if (disposed) return;
+        activeEnvelope = envelope;
+        await initializeSession(envelope, beatmap);
+      } catch (error) {
+        if (!disposed) {
+          updateEntryState({
+            status: 'error',
+            message: formatGameLoadError(error),
+            activeSession: activeEnvelope,
+            retry: 'start',
+          });
+        }
+      } finally {
+        entryBusy = false;
+      }
+    };
+
+    entryActionRef.current = () => { void startSelectedSession(); };
+    retryEntryRef.current = () => {
+      if (entryStateRef.current.status === 'error' && entryStateRef.current.retry === 'start') {
+        void startSelectedSession();
+      } else {
+        void checkActiveSession();
+      }
+    };
+    void checkActiveSession();
+
     return () => {
       disposed = true;
       if (startGameHandler) mount.removeEventListener('pointerdown', startGameHandler);
       startGameRef.current = null;
+      entryActionRef.current = null;
+      retryEntryRef.current = null;
       retryTerminalRef.current = null;
       exitToNewGameRef.current = null;
       autosaveRef.current?.stop();
@@ -319,7 +389,15 @@ export function PhaserCanvas() {
   const hasResult = runStatus === 'completed' || runStatus === 'failed' || runStatus === 'abandoned';
 
   return <>
-    <div ref={mountRef} className={'phaser-canvas-shell'} tabIndex={0} aria-label={'Office Rhythm Manager 리듬 게임 화면'}>
+    <div className="game-play-surface">
+      {!started ? <RhythmStagePreview className="game-play-surface__preview" compact /> : null}
+      <div
+        ref={mountRef}
+        className={`phaser-canvas-shell${started ? ' phaser-canvas-shell--active' : ''}`}
+        tabIndex={started ? 0 : -1}
+        aria-hidden={!started}
+        aria-label="Office Rhythm Manager 리듬 게임 화면"
+      />
       {loadError ? (
         <div className="game-load-error" role="alert">
           <strong>게임을 불러오지 못했어요.</strong>
@@ -327,11 +405,34 @@ export function PhaserCanvas() {
           <button type="button" onClick={() => window.location.reload()}>다시 시도</button>
         </div>
       ) : null}
+      {!runtime ? (
+        <div className="game-entry-panel">
+          {entryState.status === 'checking' ? <p role="status">저장된 플레이를 확인하고 있어요…</p> : null}
+          {entryState.status === 'starting' ? <p role="status">게임 세션을 준비하고 있어요…</p> : null}
+          {entryState.status === 'ready' ? (
+            <>
+              <p>{entryState.activeSession ? '저장된 리듬이 있어요. 이어서 연주할까요?' : '오늘의 업무 리듬을 시작해 볼까요?'}</p>
+              <button className="game-entry-button" type="button" onClick={() => entryActionRef.current?.()}>
+                {entryState.activeSession ? '이어하기' : '게임 시작'}
+              </button>
+            </>
+          ) : null}
+          {entryState.status === 'error' ? (
+            <div className="game-entry-error" role="alert">
+              <strong>게임을 불러오지 못했어요.</strong>
+              <span>{entryState.message}</span>
+              <button className="game-entry-button" type="button" onClick={() => retryEntryRef.current?.()}>다시 시도</button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {runtime && !started && !runtime.pauseState.paused && !hasResult ? (
+        <div className="game-entry-panel">
+          <p>준비가 끝났어요. 박자에 맞춰 연주해 보세요.</p>
+          <button className="game-entry-button" type="button" onClick={() => startGameRef.current?.()}>리듬 시작</button>
+        </div>
+      ) : null}
     </div>
-    {!runtime && !loadError ? <p role={'status'}>저장된 게임을 불러오는 중이에요…</p> : null}
-    {runtime && !started && !runtime.pauseState.paused && !hasResult ? (
-      <button className={'primary'} type={'button'} onClick={() => startGameRef.current?.()}>리듬 시작</button>
-    ) : null}
     {runtime?.autosaveState.status === 'error' || runtime?.autosaveState.status === 'conflict' ? (
       <p role={'alert'}>게임 저장에 문제가 있어요. 네트워크 연결을 확인해 주세요.</p>
     ) : null}

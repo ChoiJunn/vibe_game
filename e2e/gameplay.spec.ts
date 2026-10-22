@@ -6,6 +6,7 @@ test('player can tune audio, start a run, pause, and continue without losing the
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/game');
   await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.getByRole('button', { name: '게임 시작' }).click();
   await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
 
   await page.getByText('사운드와 판정 설정').click();
@@ -17,15 +18,16 @@ test('player can tune audio, start a run, pause, and continue without losing the
   await page.getByRole('checkbox', { name: '모든 소리 음소거' }).check();
   await expect(page.getByText('설정은 이 브라우저에만 저장되며 로그인 토큰이나 프로필 정보는 저장하지 않습니다.')).toBeVisible();
 
-  await page.locator('button.primary').click();
+  await page.getByRole('button', { name: '리듬 시작' }).click();
   await page.keyboard.press('Space');
   await page.waitForTimeout(500);
   await page.reload();
+  await expect(page.getByRole('button', { name: '이어하기' })).toBeVisible();
+  await page.getByRole('button', { name: '이어하기' }).click();
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toBeVisible();
+  await page.getByRole('button', { name: '이어하기' }).click();
   await page.getByText('사운드와 판정 설정').click();
   await expect(page.getByRole('checkbox', { name: '모든 소리 음소거' })).toBeChecked();
-  await page.getByRole('button', { name: '이어하기' }).click();
-  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   await page.getByRole('button', { name: '일시정지' }).click();
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toBeVisible();
   await page.getByRole('button', { name: '이어하기' }).click();
@@ -37,6 +39,7 @@ test('browser back pauses the active run instead of navigating away', async ({ p
   await page.goto('/');
   await page.goto('/game');
   await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.getByRole('button', { name: '게임 시작' }).click();
   await page.getByRole('button', { name: '리듬 시작' }).click();
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
 
