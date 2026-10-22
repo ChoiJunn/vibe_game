@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/auth/useAuth';
+import Link from 'next/link';
 
 export function LoginButton() {
   const { status, errorMessage, signIn } = useAuth();
@@ -16,6 +17,14 @@ export function LoginButton() {
     );
   }
 
+  if (status === 'authenticated') {
+    return (
+      <Link className="login-placeholder" href="/game">
+        게임 시작
+      </Link>
+    );
+  }
+
   return (
     <button
       className="login-placeholder"
@@ -23,7 +32,7 @@ export function LoginButton() {
       onClick={() => void signIn()}
       disabled={status === 'loading'}
     >
-      {status === 'loading' ? '로그인 상태 확인 중...' : 'Entra ID로 로그인'}
+      {status === 'loading' ? '로그인 확인 중…' : 'Entra ID 로그인'}
     </button>
   );
 }
