@@ -1,23 +1,19 @@
 # Current Context
 
 ## Active Plan
-
-[패턴 도감 및 리듬 연습](./plans/2026-09-28-pattern-codex-practice.md)
+[Rhythm Game Intro Screen Visual Correction](./plans/2026-10-22-rhythm-game-intro-screen-visual-correction.md)
 
 ## Active Phase
-
-[P01 패턴 도감 및 리듬 연습](./phases/2026-09-28-pattern-codex-practice/P01-pattern-codex-practice/phase.md)
+[P01 Rhythm Game Intro Screen Visual Correction](./phases/2026-10-22-rhythm-game-intro-screen-visual-correction/P01-rhythm-game-intro-screen-visual-correction/phase.md)
 
 ## Active Task
-
-No active task. P01 is complete.
+[T02 Verify Home Visual Acceptance](./phases/2026-10-22-rhythm-game-intro-screen-visual-correction/P01-rhythm-game-intro-screen-visual-correction/T02-verify-home-visual-acceptance.md)
 
 ## Status
-
-- P01: complete (5/5 tasks complete)
-- Previous plan: 2026-09-28 rhythm result save recovery is complete and unchanged.
-- Earlier pointer: 2026-09-22 P01-T03 Original Art Asset Pack remains in progress in its original plan; this plan does not change that task's status.
+- T01 complete in commit `4465591`.
+- T02 complete in commit `a8db338`.
+- T03 complete in commit `c3e17e7`.
+- Visual correction T01 completed in commit `d593d2b`; T02 is active. The earlier intro plan's T04 remains pending.
 
 ## Next Step (IMPORTANT)
-
-The 2026-09-28 Pattern Codex and Rhythm Practice plan is complete. No remaining tasks.
+Read the T02 blueprint and add browser checks for home visuals, motion, reduced-motion behavior, and responsive fit.

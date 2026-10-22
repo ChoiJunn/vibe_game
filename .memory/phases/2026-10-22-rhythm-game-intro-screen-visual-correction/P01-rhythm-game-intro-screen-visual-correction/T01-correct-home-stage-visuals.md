@@ -69,4 +69,4 @@ Task: T01-correct-home-stage-visuals
 ## Progress
 - [x] Implementation complete: fixed preview cascade, viewport fit, mobile stage height, and corner circles.
 - [x] Validation passed: typecheck, scoped ESLint, and visual review at 1920x900 and 390x844.
-- commit: ix(home): make the rhythm stage visible and legible`n
+- commit: fix(home): make the rhythm stage visible and legible
