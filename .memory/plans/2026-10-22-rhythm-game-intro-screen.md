@@ -6,7 +6,7 @@ Turn both the public home page and authenticated `/game` entry into a compact, i
 ## Phases
 | Phase | Status | Summary | Blueprint |
 | :--- | :--- | :--- | :--- |
-| P01 | `in_progress` | Build the shared visual stage, update public and game entry flows, then cover the behavior and align local development guidance. | [P01](../phases/2026-10-22-rhythm-game-intro-screen/P01-rhythm-game-intro-screen/phase.md) |
+| P01 | `complete` | Build the shared visual stage, update public and game entry flows, then cover the behavior and align local development guidance. | [P01](../phases/2026-10-22-rhythm-game-intro-screen/P01-rhythm-game-intro-screen/phase.md) |
 
 ## Confirmed Constraints
 - Public home `/` and authenticated `/game` are both in scope.
