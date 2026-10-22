@@ -6,7 +6,7 @@ Repair the public home screen so its title and start action are immediately read
 ## Phases
 | Phase | Status | Summary | Blueprint |
 | :--- | :--- | :--- | :--- |
-| P01 | `in_progress` | Correct the home visual hierarchy and prove the visible art, motion, reduced-motion behavior, and responsive fit in a browser. | [P01](../phases/2026-10-22-rhythm-game-intro-screen-visual-correction/P01-rhythm-game-intro-screen-visual-correction/phase.md) |
+| P01 | `complete` | Correct the home visual hierarchy and prove the visible art, motion, reduced-motion behavior, and responsive fit in a browser. | [P01](../phases/2026-10-22-rhythm-game-intro-screen-visual-correction/P01-rhythm-game-intro-screen-visual-correction/phase.md) |
 
 ## Confirmed Constraints
 - Only the public home screen `/` is the visual target identified by the supplied screenshot.

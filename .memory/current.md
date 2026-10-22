@@ -1,19 +1,19 @@
 # Current Context
 
 ## Active Plan
-[Rhythm Game Intro Screen Visual Correction](./plans/2026-10-22-rhythm-game-intro-screen-visual-correction.md)
+[Rhythm Game Intro Screen](./plans/2026-10-22-rhythm-game-intro-screen.md)
 
 ## Active Phase
-[P01 Rhythm Game Intro Screen Visual Correction](./phases/2026-10-22-rhythm-game-intro-screen-visual-correction/P01-rhythm-game-intro-screen-visual-correction/phase.md)
+[P01 Rhythm Game Intro Screen](./phases/2026-10-22-rhythm-game-intro-screen/P01-rhythm-game-intro-screen/phase.md)
 
 ## Active Task
-[T02 Verify Home Visual Acceptance](./phases/2026-10-22-rhythm-game-intro-screen-visual-correction/P01-rhythm-game-intro-screen-visual-correction/T02-verify-home-visual-acceptance.md)
+[T04 Cover Entry Flows and Align Local Docs](./phases/2026-10-22-rhythm-game-intro-screen/P01-rhythm-game-intro-screen/T04-cover-entry-flows-and-align-docs.md)
 
 ## Status
 - T01 complete in commit `4465591`.
 - T02 complete in commit `a8db338`.
 - T03 complete in commit `c3e17e7`.
-- Visual correction T01 completed in commit `d593d2b`; T02 is active. The earlier intro plan's T04 remains pending.
+- Visual correction completed in commits `d593d2b` and `7e9be6e`; the original intro plan's T04 is now active.
 
 ## Next Step (IMPORTANT)
-Read the T02 blueprint and add browser checks for home visuals, motion, reduced-motion behavior, and responsive fit.
+Read the T04 blueprint and cover entry/session flows with E2E scenarios, then align local Cosmos setup guidance.

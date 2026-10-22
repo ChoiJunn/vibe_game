@@ -1,6 +1,6 @@
 # Task: T04 Cover Entry Flows and Align Local Docs
 
-## Status: pending
+## Status: in_progress
 
 ## Goal
 Prove that the new public and authenticated start flows obey the no-write-before-click and recoverable-error decisions, and make local Cosmos authentication instructions agree with the supported configuration without exposing secrets.
