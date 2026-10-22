@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
 import beatmapJson from '@/content/beatmaps/office-day-01.json';
 import testBeatmapJson from '@/content/beatmaps/e2e-quick-beatmap';
 import { useAuth } from '@/auth/useAuth';
@@ -41,6 +42,18 @@ type EntryState =
   | { status: 'starting'; activeSession: SessionEnvelope | null }
   | { status: 'error'; message: string; activeSession: SessionEnvelope | null; retry: 'check' | 'start' };
 
+function subscribeToSettingsHost() {
+  return () => undefined;
+}
+
+function getSettingsHostSnapshot(): HTMLElement | null {
+  return typeof document === 'undefined' ? null : document.getElementById('game-audio-settings-host');
+}
+
+function getServerSettingsHostSnapshot(): null {
+  return null;
+}
+
 export function hasSavedProgress(snapshot: RunState, inputEventCount: number): boolean {
   return snapshot.status === 'paused'
     || snapshot.cursorMs > 0
@@ -76,6 +89,11 @@ export function PhaserCanvas() {
   const [coordinator, setCoordinator] = useState<PauseCoordinator | null>(null);
   const [settings, setSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
   const [settingsReady, setSettingsReady] = useState(false);
+  const settingsHost = useSyncExternalStore(
+    subscribeToSettingsHost,
+    getSettingsHostSnapshot,
+    getServerSettingsHostSnapshot,
+  );
   const [started, setStarted] = useState(false);
   const [restarting, setRestarting] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -484,7 +502,10 @@ export function PhaserCanvas() {
         });
       }}
     /> : null}
-    <AudioSettingsPanel value={settings} onChange={changeSettings} />
+    {settingsHost ? createPortal(
+      <AudioSettingsPanel value={settings} onChange={changeSettings} />,
+      settingsHost,
+    ) : null}
   </>;
 }
 
