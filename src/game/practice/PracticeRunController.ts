@@ -20,6 +20,12 @@ export type PracticeLoopResult = Readonly<{
   missCount: number;
 }>;
 
+export type PracticeInputFeedback = Readonly<{
+  sequence: number;
+  type: "keydown" | "keyup";
+  songPositionMs: number;
+}>;
+
 export type PracticeRunSnapshot = {
   status: PracticeRunStatus;
   patternId: string;
@@ -29,6 +35,7 @@ export type PracticeRunSnapshot = {
   missCount: number;
   accuracy: number;
   lastJudgement?: JudgementResult;
+  inputFeedback?: PracticeInputFeedback;
   completedLoops: number;
   sessionPerfectCount: number;
   sessionGoodCount: number;
@@ -89,6 +96,8 @@ export class PracticeRunController {
   private ignoreNextKeyup = false;
   private loopRestarting = false;
   private lastJudgement?: JudgementResult;
+  private inputFeedbackSequence = 0;
+  private inputFeedback?: PracticeInputFeedback;
   private completedLoops = 0;
   private sessionPerfectCount = 0;
   private sessionGoodCount = 0;
@@ -189,6 +198,13 @@ export class PracticeRunController {
 
   handleInput(input: InputEvent): void {
     if (this.status !== "playing" || this.loopRestarting) return;
+    this.inputFeedback = Object.freeze({
+      sequence: ++this.inputFeedbackSequence,
+      type: input.type,
+      songPositionMs: input.songPositionMs,
+    });
+    this.emit();
+
     const event = this.chart.beatmap.events[this.loopRunState.nextEventIndex];
     if (!event) return;
 
@@ -442,6 +458,7 @@ export class PracticeRunController {
       missCount: counts.missCount,
       accuracy: calculateAccuracy(counts),
       lastJudgement: this.lastJudgement,
+      inputFeedback: this.inputFeedback,
       completedLoops: this.completedLoops,
       sessionPerfectCount: this.sessionPerfectCount,
       sessionGoodCount: this.sessionGoodCount,

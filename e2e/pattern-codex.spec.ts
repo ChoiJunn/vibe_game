@@ -61,7 +61,12 @@ test("practices the selected source pattern and returns to its variation list", 
   await expect(practice.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
   await expect(page.locator(".practice-count-in")).toContainText("준비");
   await expect(page.locator(".practice-count-in")).toHaveCount(0, { timeout: 10_000 });
+  const inputFeedback = page.locator(".practice-space-feedback");
+  const initialInputSequence = Number(await inputFeedback.getAttribute("data-input-sequence"));
   await page.keyboard.press("Space");
+  await expect.poll(async () => Number(await inputFeedback.getAttribute("data-input-sequence"))).toBeGreaterThan(initialInputSequence);
+  await expect(inputFeedback).toContainText("입력 감지");
+  await expect(page.locator(".practice-live-feedback")).toBeVisible();
   await page.getByRole("button", { name: "연습 종료" }).click();
   await expect(page.getByRole("region", { name: "연습 결과 요약" })).toBeVisible();
   await expect(page.getByText("완료한 루프가 없어요. 연습한 구간은 통계에 포함되지 않았습니다.")).toBeVisible();

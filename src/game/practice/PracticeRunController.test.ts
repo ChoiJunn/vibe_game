@@ -13,6 +13,43 @@ const chart = makeChart([
 ]);
 
 describe("PracticeRunController", () => {
+  it("publishes each received tap press and suppressed release separately from judgement", async () => {
+    const oneTap = makeChart([{ id: "tap", type: "tap", startMs: 100 }]);
+    const harness = createHarness(oneTap);
+    const controller = new PracticeRunController(oneTap, undefined, harness.options);
+    const snapshots: ReturnType<typeof controller.getSnapshot>[] = [];
+    controller.subscribe((snapshot) => snapshots.push(snapshot));
+    controller.start();
+    controller.handleInput({ type: "keydown", songPositionMs: 1 });
+    expect(controller.getSnapshot().inputFeedback).toBeUndefined();
+    await enterPlaying(controller, harness);
+
+    controller.handleInput({ type: "keydown", songPositionMs: 100 });
+    expect(snapshots).toContainEqual(expect.objectContaining({
+      inputFeedback: { sequence: 1, type: "keydown", songPositionMs: 100 },
+      lastJudgement: undefined,
+    }));
+    expect(controller.getSnapshot()).toMatchObject({
+      inputFeedback: { sequence: 1, type: "keydown", songPositionMs: 100 },
+      lastJudgement: { judgement: "perfect" },
+      perfectCount: 1,
+    });
+
+    controller.handleInput({ type: "keyup", songPositionMs: 105 });
+    expect(controller.getSnapshot()).toMatchObject({
+      inputFeedback: { sequence: 2, type: "keyup", songPositionMs: 105 },
+      lastJudgement: { judgement: "perfect" },
+      perfectCount: 1,
+      nextEventIndex: 1,
+    });
+
+    controller.pause();
+    const pausedFeedback = controller.getSnapshot().inputFeedback;
+    controller.handleInput({ type: "keydown", songPositionMs: 300 });
+    expect(controller.getSnapshot().inputFeedback).toEqual(pausedFeedback);
+    controller.dispose();
+  });
+
   it("uses timestamped tap, hold, and paired burst input, then completes one loop once", async () => {
     const harness = createHarness(chart);
     const completed = vi.fn();
@@ -58,7 +95,13 @@ describe("PracticeRunController", () => {
 
     controller.handleInput({ type: "keydown", songPositionMs: 0 });
     controller.handleInput({ type: "keyup", songPositionMs: 1 });
-    expect(controller.getSnapshot()).toMatchObject({ missCount: 1, perfectCount: 0, nextEventIndex: 1 });
+    expect(controller.getSnapshot()).toMatchObject({
+      inputFeedback: { sequence: 2, type: "keyup", songPositionMs: 1 },
+      missCount: 1,
+      perfectCount: 0,
+      nextEventIndex: 1,
+      lastJudgement: { judgement: "miss" },
+    });
 
     harness.clock.position = oneTap.loopDurationMs;
     controller.update();

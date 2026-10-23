@@ -63,7 +63,7 @@ export function PracticeViewport({ chart, title, onComplete, onExit, storageWarn
       <p className="practice-viewport__loop-count">LOOP {snapshot.completedLoops + 1}</p>
     </header>
 
-    <div className={`practice-viewport__lane${snapshot.lastJudgement ? ` is-${snapshot.lastJudgement.judgement}` : ""}`} aria-label="이동하는 노트와 판정선">
+    <div className={`practice-viewport__lane${snapshot.lastJudgement ? ` is-${snapshot.lastJudgement.judgement}` : ""}${snapshot.inputFeedback?.type === "keydown" ? " is-input-active" : ""}`} aria-label="이동하는 노트와 판정선">
       <span className="practice-viewport__judge-line" aria-hidden="true" />
       <span className="practice-viewport__lane-center" aria-hidden="true" />
       {chart.beatmap.events.map((event) => {
@@ -91,6 +91,17 @@ export function PracticeViewport({ chart, title, onComplete, onExit, storageWarn
         }
         return <i key={event.id} className="practice-moving-note practice-moving-note--tap" style={{ left: `${left}%` }} aria-hidden="true" />;
       })}
+    </div>
+
+    <div
+      className="practice-space-feedback"
+      role="status"
+      aria-live="polite"
+      aria-label={snapshot.inputFeedback ? `SPACE 입력 감지 ${snapshot.inputFeedback.sequence}` : "SPACE를 눌러보세요"}
+      data-input-sequence={snapshot.inputFeedback?.sequence ?? 0}
+    >
+      <kbd key={snapshot.inputFeedback?.sequence ?? 0} className={`practice-space-feedback__key${snapshot.inputFeedback?.type === "keydown" ? " is-pressed" : ""}`}>SPACE</kbd>
+      <span>{snapshot.inputFeedback ? "입력 감지" : "SPACE를 눌러보세요"}</span>
     </div>
 
     {snapshot.status === "countdown" && <p className="practice-count-in" role="status">준비! {snapshot.countInBeat > 0 ? `${snapshot.countInBeat} / 4` : "박자 준비 중"}</p>}
