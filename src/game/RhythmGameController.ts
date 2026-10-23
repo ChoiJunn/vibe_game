@@ -72,6 +72,8 @@ export type AutomaticMissNotification = {
   songPositionMs: number;
 };
 
+export type GameStartCountdownStep = 3 | 2 | 1 | "GO";
+
 export type RhythmGameControllerOptions = {
   beatmap: Beatmap;
   clock?: AudioClock;
@@ -99,6 +101,12 @@ export class RhythmGameController {
   private pendingBurstInputs: InputEvent[] = [];
   private lastJudgement?: JudgementResult;
   private judgementHistory: JudgementHistoryEntry[] = [];
+  private startGeneration = 0;
+  private pendingStartCountdown?: {
+    timeout: ReturnType<typeof setTimeout>;
+    resolve: (active: boolean) => void;
+  };
+  private startCountdownCallback?: (step: GameStartCountdownStep | null) => void;
   private readonly listeners = new Set<
     (snapshot: RhythmGameSnapshot) => void
   >();
@@ -132,7 +140,14 @@ export class RhythmGameController {
     this.inputController = inputController;
   }
 
-  async start(atSongMs = 0, restoredState?: RunState): Promise<void> {
+  async start(
+    atSongMs = 0,
+    restoredState?: RunState,
+    onCountdown?: (step: GameStartCountdownStep | null) => void,
+  ): Promise<void> {
+    this.invalidatePendingStart();
+    const generation = this.startGeneration;
+    this.startCountdownCallback = onCountdown;
     this.runState = restoredState
       ? { ...normalizeRunState(restoredState), status: "active" }
       : createInitialRunState({
@@ -144,13 +159,50 @@ export class RhythmGameController {
     this.pendingBurstInputs = [];
     this.lastJudgement = undefined;
     this.judgementHistory = [];
-    await this.clock.load(this.beatmap, this.audioSettings);
-    this.scheduler.load(this.beatmap, this.audioSettings, atSongMs);
-    this.scheduler.setFeverActive?.(false);
-    await this.clock.start(atSongMs);
-    this.scheduler.start();
-    this.inputController?.start();
-    this.emit();
+    try {
+      await this.clock.load(this.beatmap, this.audioSettings);
+      if (!this.isCurrentStart(generation)) return;
+      this.scheduler.load(this.beatmap, this.audioSettings, atSongMs);
+      this.scheduler.setFeverActive?.(false);
+
+      if (onCountdown) {
+        if (!this.audioSettings.muted && this.audioSettings.sfxVolume > 0) {
+          try {
+            await this.clock.prepareForCountIn();
+          } catch {
+            // A visual count-in is still useful when the browser blocks audio.
+          }
+          if (!this.isCurrentStart(generation)) {
+            this.clock.stop();
+            return;
+          }
+        }
+
+        for (const [step, accent] of [[3, true], [2, false], [1, false]] as const) {
+          onCountdown(step);
+          this.playStartCountInBeat(accent);
+          if (!await this.waitForStartCountdown(1_000, generation)) return;
+        }
+
+        onCountdown("GO");
+        this.playStartCountInBeat(true);
+        if (!await this.waitForStartCountdown(250, generation)) return;
+      }
+
+      if (!this.isCurrentStart(generation)) return;
+      await this.clock.start(atSongMs);
+      if (!this.isCurrentStart(generation)) {
+        this.clock.stop();
+        return;
+      }
+      this.scheduler.start();
+      this.inputController?.start();
+      this.emit();
+    } finally {
+      if (this.isCurrentStart(generation)) {
+        this.clearStartCountdownCallback();
+      }
+    }
   }
 
   pause(): void {
@@ -167,6 +219,7 @@ export class RhythmGameController {
   }
 
   stop(): void {
+    this.invalidatePendingStart();
     this.inputController?.stop();
     this.scheduler.stop();
     this.clock.stop();
@@ -434,6 +487,46 @@ export class RhythmGameController {
       this.scheduler.pause();
     }
     this.emit();
+  }
+
+  private isCurrentStart(generation: number): boolean {
+    return generation === this.startGeneration;
+  }
+
+  private waitForStartCountdown(durationMs: number, generation: number): Promise<boolean> {
+    if (!this.isCurrentStart(generation)) return Promise.resolve(false);
+
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        if (this.pendingStartCountdown?.timeout === timeout) {
+          this.pendingStartCountdown = undefined;
+        }
+        resolve(this.isCurrentStart(generation));
+      }, durationMs);
+      this.pendingStartCountdown = { timeout, resolve };
+    });
+  }
+
+  private invalidatePendingStart(): void {
+    this.startGeneration += 1;
+    const pending = this.pendingStartCountdown;
+    this.pendingStartCountdown = undefined;
+    if (pending) {
+      clearTimeout(pending.timeout);
+      pending.resolve(false);
+    }
+    this.clearStartCountdownCallback();
+  }
+
+  private clearStartCountdownCallback(): void {
+    const callback = this.startCountdownCallback;
+    this.startCountdownCallback = undefined;
+    callback?.(null);
+  }
+
+  private playStartCountInBeat(accent: boolean): void {
+    if (this.audioSettings.muted || this.audioSettings.sfxVolume <= 0) return;
+    this.scheduler.playCountInBeat(accent);
   }
 
   private resolveBurst(event: BurstRhythmEvent, songPositionMs: number): void {

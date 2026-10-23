@@ -13,6 +13,29 @@ const settings: AudioSettings = {
 };
 
 describe('AudioClock', () => {
+  it('prepares audible count-in without starting or advancing the song clock', async () => {
+    const fakeContext = createFakeAudioContext();
+    const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+    await clock.load(beatmap, settings);
+
+    await clock.prepareForCountIn();
+
+    expect(fakeContext.resume).toHaveBeenCalledTimes(1);
+    expect(clock.getState()).toBe('idle');
+    expect(clock.getSongPositionMs()).toBe(0);
+  });
+
+  it('reports a recoverable error when count-in audio preparation is blocked', async () => {
+    const fakeContext = createFakeAudioContext();
+    fakeContext.resume = vi.fn().mockRejectedValue(new Error('gesture required'));
+    const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+    await clock.load(beatmap, settings);
+
+    await expect(clock.prepareForCountIn()).rejects.toBeInstanceOf(AudioClockError);
+    expect(clock.getState()).toBe('idle');
+    expect(clock.getSongPositionMs()).toBe(0);
+  });
+
   it('keeps song position monotonic across pause and resume', async () => {
     const fakeContext = createFakeAudioContext();
     const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });

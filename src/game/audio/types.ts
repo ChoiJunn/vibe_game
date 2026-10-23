@@ -11,6 +11,7 @@ export type AudioSettings = {
 
 export interface AudioClock {
   load(beatmap: Beatmap, settings: AudioSettings): Promise<void>;
+  prepareForCountIn(): Promise<void>;
   start(atSongMs?: number): Promise<void>;
   pause(): void;
   resume(): Promise<void>;

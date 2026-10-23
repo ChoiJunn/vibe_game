@@ -1,5 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { mockGameApi } from './support/gameApi';
+
+async function expectStartCountdown(page: Page) {
+  const countdown = page.locator('.game-start-countdown');
+  await expect(countdown).toHaveText('3');
+  await expect(countdown).toHaveText('2', { timeout: 2_000 });
+  await expect(countdown).toHaveText('1', { timeout: 2_000 });
+  await expect(countdown).toHaveText('GO', { timeout: 2_000 });
+  await expect(countdown).toHaveCount(0, { timeout: 2_000 });
+}
 
 test('game preview is visible while active-session discovery is still pending', async ({ page }) => {
   const api = await mockGameApi(page, { sessionReadDelayMs: 900 });
@@ -44,6 +53,7 @@ test('home game-start CTA starts gameplay directly without showing the tutorial'
   expect(api.getSessionCreateCount()).toBe(0);
 
   await gameLink.click();
+  await expectStartCountdown(page);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionReadCount()).toBe(1);
@@ -55,6 +65,7 @@ test('home start intent starts gameplay immediately without a tutorial dialog', 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/game?start=1');
 
+  await expectStartCountdown(page);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionCreateCount()).toBe(1);
@@ -96,6 +107,7 @@ test('saved-session choices are centered and resume without creating another ses
   await expectDialogCentered();
 
   await resumeButton.click();
+  await expectStartCountdown(page);
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionCreateCount()).toBe(0);
 });
@@ -147,6 +159,7 @@ test('new game closes the saved run before creating and starting another run', a
   await page.goto('/game');
   await page.getByRole('button', { name: '새 게임' }).click();
 
+  await expectStartCountdown(page);
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getAbandonedRunIds()).toContain('e2e-run-01');
   expect(api.getSessionCreateCount()).toBe(1);

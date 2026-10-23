@@ -15,7 +15,7 @@ import { ResultSummary } from '@/components/results/ResultSummary';
 import { validateBeatmap } from '@/domain/validateBeatmap';
 import { AudioClock } from '@/game/audio/AudioClock';
 import { DEFAULT_AUDIO_SETTINGS, type AudioSettings } from '@/game/audio/types';
-import { RhythmGameController, type RhythmGameSnapshot } from '@/game/RhythmGameController';
+import { RhythmGameController, type GameStartCountdownStep, type RhythmGameSnapshot } from '@/game/RhythmGameController';
 import { SpaceInputController } from '@/game/input/SpaceInputController';
 import { RhythmTouchButton, useCoarsePointer } from './RhythmTouchButton';
 import { AutosaveCoordinator, type AutosaveState } from '@/game/persistence/AutosaveCoordinator';
@@ -88,6 +88,7 @@ export function PhaserCanvas() {
   const userOid = user?.oid;
   const tokenProviderRef = useRef(getIdToken);
   const [runtime, setRuntime] = useState<GameRuntime | null>(null);
+  const [countdown, setCountdown] = useState<GameStartCountdownStep | null>(null);
   const [entryState, setEntryState] = useState<EntryState>({ status: 'checking' });
   const [coordinator, setCoordinator] = useState<PauseCoordinator | null>(null);
   const [settings, setSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
@@ -266,9 +267,10 @@ export function PhaserCanvas() {
           if (startedInEffect) return;
           startedInEffect = true;
           setStarted(true);
-          void controller.start(snapshot.cursorMs, snapshot).catch((error: unknown) => {
+          void controller.start(snapshot.cursorMs, snapshot, setCountdown).catch((error: unknown) => {
             startedInEffect = false;
             setStarted(false);
+            setCountdown(null);
             setLoadError(error instanceof Error ? error.message : '게임을 시작하지 못했습니다.');
           });
         };
@@ -464,6 +466,11 @@ export function PhaserCanvas() {
           <strong>게임을 불러오지 못했어요.</strong>
           <span>{loadError}</span>
           <button type="button" onClick={() => window.location.reload()}>다시 시도</button>
+        </div>
+      ) : null}
+      {countdown !== null ? (
+        <div key={countdown} className="game-start-countdown" role="status" aria-live="assertive">
+          {countdown}
         </div>
       ) : null}
       {!runtime && !(entryState.status === 'ready' && entryState.activeSession) ? (

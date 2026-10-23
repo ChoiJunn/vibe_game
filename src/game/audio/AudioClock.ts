@@ -40,6 +40,14 @@ export class AudioClock implements AudioClockContract {
     this.ensureAudioContext();
   }
 
+  async prepareForCountIn(): Promise<void> {
+    try {
+      await this.ensureAudioContext().resume();
+    } catch {
+      throw new AudioClockError('오디오 카운트인을 준비할 수 없습니다.');
+    }
+  }
+
   async start(atSongMs = 0): Promise<void> {
     this.requireBeatmap();
     const position = this.clampSongPosition(atSongMs);

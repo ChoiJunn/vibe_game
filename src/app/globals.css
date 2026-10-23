@@ -1289,6 +1289,31 @@ a:focus-visible {
 .game-session-choice-dialog p { color: rgba(255, 253, 248, 0.82); font-size: 0.9rem; line-height: 1.45; }
 .game-session-choice-dialog .game-entry-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 0.2rem; }
 
+.game-start-countdown {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: rgba(12, 18, 21, 0.18);
+  color: #fffdf8;
+  font-size: clamp(5rem, 22vw, 12rem);
+  font-weight: 950;
+  line-height: 1;
+  text-shadow: 0 0.35rem 2rem rgba(12, 18, 21, 0.75), 0 0 1rem rgba(255, 209, 102, 0.35);
+  animation: game-countdown-pop 220ms ease-out both;
+}
+
+@keyframes game-countdown-pop {
+  from { opacity: 0.45; transform: scale(0.82); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-start-countdown { animation: none; }
+}
+
 .game-entry-button {
   min-height: 2.75rem;
   padding: 0.68rem 1.1rem;

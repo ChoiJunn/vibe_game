@@ -1,11 +1,21 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { mockGameApi } from './support/gameApi';
+
+async function expectStartCountdown(page: Page) {
+  const countdown = page.locator('.game-start-countdown');
+  await expect(countdown).toHaveText('3');
+  await expect(countdown).toHaveText('2', { timeout: 2_000 });
+  await expect(countdown).toHaveText('1', { timeout: 2_000 });
+  await expect(countdown).toHaveText('GO', { timeout: 2_000 });
+  await expect(countdown).toHaveCount(0, { timeout: 2_000 });
+}
 
 test('player can tune audio, start a run, pause, and continue without losing the run', async ({ page }) => {
   await mockGameApi(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/game');
   await page.locator('.game-entry-panel .game-entry-button').click();
+  await expectStartCountdown(page);
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
 
   await page.getByText('사운드와 판정 설정').click();
@@ -22,12 +32,14 @@ test('player can tune audio, start a run, pause, and continue without losing the
   await page.reload();
   await expect(page.getByRole('button', { name: '이어하기' })).toBeVisible();
   await page.getByRole('button', { name: '이어하기' }).click();
+  await expectStartCountdown(page);
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   await page.getByText('사운드와 판정 설정').click();
   await expect(page.getByRole('checkbox', { name: '모든 소리 음소거' })).toBeChecked();
   await page.getByRole('button', { name: '일시정지' }).click();
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toBeVisible();
   await page.getByRole('button', { name: '이어하기' }).click();
+  await expect(page.locator('.game-start-countdown')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
 });
 

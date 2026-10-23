@@ -26,6 +26,126 @@ describe('RhythmGameController', () => {
     expect(controller.getSnapshot().runState.nextEventIndex).toBe(1);
   });
 
+  it('shows 3-2-1-GO at fixed intervals and starts clock and input only after GO', async () => {
+    vi.useFakeTimers();
+    try {
+      const clock = createFakeClock();
+      clock.state = 'idle';
+      clock.start.mockImplementation(async () => { clock.state = 'playing'; });
+      const scheduler = createFakeScheduler();
+      const inputController = { start: vi.fn(), stop: vi.fn() };
+      const controller = new RhythmGameController({
+        beatmap,
+        clock: clock as never,
+        scheduler: scheduler as never,
+        inputController,
+        audioSettings: { ...settings, muted: false },
+      });
+      const steps: Array<number | 'GO' | null> = [];
+      const started = controller.start(0, undefined, (step) => steps.push(step));
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(steps).toEqual([3]);
+      expect(clock.prepareForCountIn).toHaveBeenCalledTimes(1);
+      expect(clock.start).not.toHaveBeenCalled();
+      expect(scheduler.start).not.toHaveBeenCalled();
+      expect(inputController.start).not.toHaveBeenCalled();
+      controller.handleInput({ type: 'keydown', songPositionMs: beatmap.events[0].startMs });
+      expect(controller.getSnapshot().runState.nextEventIndex).toBe(0);
+
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(steps).toEqual([3, 2]);
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(steps).toEqual([3, 2, 1]);
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(steps).toEqual([3, 2, 1, 'GO']);
+      expect(clock.start).not.toHaveBeenCalled();
+      expect(scheduler.playCountInBeat.mock.calls).toEqual([[true], [false], [false], [true]]);
+
+      await vi.advanceTimersByTimeAsync(250);
+      await started;
+      expect(steps).toEqual([3, 2, 1, 'GO', null]);
+      expect(clock.start).toHaveBeenCalledWith(0);
+      expect(scheduler.start).toHaveBeenCalledTimes(1);
+      expect(inputController.start).toHaveBeenCalledTimes(1);
+      controller.handleInput({ type: 'keydown', songPositionMs: beatmap.events[0].startMs });
+      expect(controller.getSnapshot().runState.nextEventIndex).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it.each([
+    ['muted', { ...settings, muted: true }],
+    ['zero SFX volume', { ...settings, muted: false, sfxVolume: 0 }],
+  ] as const)('does not prepare audio or play count-in beats when %s', async (_description, audioSettings) => {
+    vi.useFakeTimers();
+    try {
+      const clock = createFakeClock();
+      const scheduler = createFakeScheduler();
+      const controller = new RhythmGameController({ beatmap, clock: clock as never, scheduler: scheduler as never, audioSettings });
+      const started = controller.start(0, undefined, () => undefined);
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(clock.prepareForCountIn).not.toHaveBeenCalled();
+      expect(scheduler.playCountInBeat).not.toHaveBeenCalled();
+      controller.stop();
+      await started;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('continues the visual count-in when audio preparation fails', async () => {
+    vi.useFakeTimers();
+    try {
+      const clock = createFakeClock();
+      clock.prepareForCountIn.mockRejectedValue(new Error('audio blocked'));
+      const scheduler = createFakeScheduler();
+      const controller = new RhythmGameController({
+        beatmap,
+        clock: clock as never,
+        scheduler: scheduler as never,
+        audioSettings: { ...settings, muted: false },
+      });
+      const steps: Array<number | 'GO' | null> = [];
+      const started = controller.start(0, undefined, (step) => steps.push(step));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(steps).toEqual([3]);
+      await vi.advanceTimersByTimeAsync(3_250);
+      await started;
+      expect(steps).toEqual([3, 2, 1, 'GO', null]);
+      expect(clock.start).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('cancels a pending count-in when the controller is disposed', async () => {
+    vi.useFakeTimers();
+    try {
+      const clock = createFakeClock();
+      const scheduler = createFakeScheduler();
+      const inputController = { start: vi.fn(), stop: vi.fn() };
+      const controller = new RhythmGameController({ beatmap, clock: clock as never, scheduler: scheduler as never, inputController, audioSettings: { ...settings, muted: false } });
+      const steps: Array<number | 'GO' | null> = [];
+      const started = controller.start(0, undefined, (step) => steps.push(step));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(steps).toEqual([3]);
+
+      controller.dispose();
+      await vi.advanceTimersByTimeAsync(10_000);
+      await started;
+
+      expect(steps).toEqual([3, null]);
+      expect(clock.start).not.toHaveBeenCalled();
+      expect(scheduler.start).not.toHaveBeenCalled();
+      expect(inputController.start).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('does not mutate gameplay state while clock is paused', async () => {
     const clock = createFakeClock();
     clock.state = 'paused';
@@ -330,6 +450,7 @@ describe('RhythmGameController', () => {
 function createFakeClock(): {
   state: AudioClockState;
   load: ReturnType<typeof vi.fn>;
+  prepareForCountIn: ReturnType<typeof vi.fn>;
   start: ReturnType<typeof vi.fn>;
   pause: ReturnType<typeof vi.fn>;
   resume: ReturnType<typeof vi.fn>;
@@ -342,6 +463,7 @@ function createFakeClock(): {
     get state() { return state; },
     set state(nextState: AudioClockState) { state = nextState; },
     load: vi.fn().mockResolvedValue(undefined),
+    prepareForCountIn: vi.fn().mockResolvedValue(undefined),
     start: vi.fn().mockResolvedValue(undefined),
     pause: vi.fn(() => { state = 'paused'; }),
     resume: vi.fn(async () => { state = 'playing'; }),
@@ -353,6 +475,7 @@ function createFakeClock(): {
 
 function createFakeScheduler(): {
   load: ReturnType<typeof vi.fn>;
+  playCountInBeat: ReturnType<typeof vi.fn>;
   start: ReturnType<typeof vi.fn>;
   pause: ReturnType<typeof vi.fn>;
   resume: ReturnType<typeof vi.fn>;
@@ -360,6 +483,7 @@ function createFakeScheduler(): {
 } {
   return {
     load: vi.fn(),
+    playCountInBeat: vi.fn(),
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
