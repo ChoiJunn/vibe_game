@@ -29,7 +29,8 @@ test('game preview is visible while active-session discovery is still pending', 
   expect(api.getSessionCreateCount()).toBe(0);
 
   await page.getByRole('button', { name: '건너뛰기' }).click();
-  await expect(page.getByRole('button', { name: '게임 시작' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
+  expect(api.getSessionCreateCount()).toBe(1);
 });
 
 test('public home reaches the game without creating a session before the player chooses start', async ({ page }) => {
@@ -39,18 +40,30 @@ test('public home reaches the game without creating a session before the player 
 
   const gameLink = page.getByRole('link', { name: '게임 시작' });
   await expect(gameLink).toBeVisible();
-  await expect(gameLink).toHaveAttribute('href', '/game');
+  await expect(gameLink).toHaveAttribute('href', '/game?start=1');
   expect(api.getSessionCreateCount()).toBe(0);
 
   await gameLink.click();
   await page.getByRole('button', { name: '건너뛰기' }).click();
-  const startButton = page.getByRole('button', { name: '게임 시작' });
-  await expect(startButton).toBeVisible();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionReadCount()).toBe(1);
-  expect(api.getSessionCreateCount()).toBe(0);
+  expect(api.getSessionCreateCount()).toBe(1);
+});
 
-  await startButton.click();
-  await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
+test('finishing the tutorial starts gameplay from its final button without a second start action', async ({ page }) => {
+  const api = await mockGameApi(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/game?start=1');
+
+  for (let step = 0; step < 4; step += 1) {
+    await page.getByRole('button', { name: '다음', exact: true }).click();
+    expect(api.getSessionCreateCount()).toBe(0);
+  }
+  const finalTutorialStart = page.getByRole('dialog').getByRole('button', { name: '게임 시작' });
+  await expect(finalTutorialStart).toBeVisible();
+  await finalTutorialStart.click();
+
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionCreateCount()).toBe(1);
 });
 
@@ -62,11 +75,12 @@ test('player can resume a discovered paused session without creating another ses
 
   const resumeButton = page.getByRole('button', { name: '이어하기' });
   await expect(resumeButton).toBeVisible();
+  await expect(page.getByRole('button', { name: '새 게임' })).toBeVisible();
   expect(api.getSessionReadCount()).toBe(1);
   expect(api.getSessionCreateCount()).toBe(0);
 
   await resumeButton.click();
-  await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionCreateCount()).toBe(0);
 });
 
@@ -80,9 +94,9 @@ test('session discovery can be retried without reloading the page', async ({ pag
   expect(api.getSessionReadCount()).toBe(1);
   await page.getByRole('button', { name: '다시 시도' }).click();
 
-  await expect(page.getByRole('button', { name: '게임 시작' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionReadCount()).toBe(2);
-  expect(api.getSessionCreateCount()).toBe(0);
+  expect(api.getSessionCreateCount()).toBe(1);
 });
 
 test('session creation can be retried after an explicit start action', async ({ page }) => {
@@ -91,11 +105,37 @@ test('session creation can be retried after an explicit start action', async ({ 
   await page.goto('/game');
   await page.getByRole('button', { name: '건너뛰기' }).click();
 
-  await page.getByRole('button', { name: '게임 시작' }).click();
   await expect(page.locator('.game-entry-error')).toContainText('게임을 불러오지 못했어요');
   expect(api.getSessionCreateCount()).toBe(1);
 
   await page.getByRole('button', { name: '다시 시도' }).click();
-  await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   expect(api.getSessionCreateCount()).toBe(2);
+});
+
+test('tutorial opt-out starts immediately and suppresses the tutorial on the next entry', async ({ page }) => {
+  const api = await mockGameApi(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/game');
+
+  await page.getByRole('button', { name: '다음부터 튜토리얼 하지 않기' }).click();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('office-rhythm-manager:tutorial-disabled'))).toBe('true');
+  expect(api.getSessionCreateCount()).toBe(1);
+
+  await page.goto('/game');
+  await expect(page.getByRole('dialog', { name: 'QUICK TUTORIAL' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '이어하기' })).toBeVisible();
+});
+
+test('new game closes the saved run before creating and starting another run', async ({ page }) => {
+  const api = await mockGameApi(page, { existing: true, snapshot: { cursorMs: 1_200, score: 240 } });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/game');
+  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.getByRole('button', { name: '새 게임' }).click();
+
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
+  expect(api.getAbandonedRunIds()).toContain('e2e-run-01');
+  expect(api.getSessionCreateCount()).toBe(1);
 });

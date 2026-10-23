@@ -19,7 +19,7 @@ export function LoginButton() {
 
   if (status === 'authenticated') {
     return (
-      <Link className="login-placeholder" href="/game">
+      <Link className="login-placeholder" href="/game?start=1">
         게임 시작
       </Link>
     );

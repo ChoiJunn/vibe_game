@@ -383,6 +383,12 @@ select {
   margin-top: 1.25rem;
 }
 
+.game-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .pause-actions button,
 .result-actions button,
 .tutorial-actions button {

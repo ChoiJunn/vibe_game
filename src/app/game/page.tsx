@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { GameViewport } from '@/components/game/GameViewport';
 import { PhaserCanvas } from '@/components/game/PhaserCanvas';
-import { TutorialOverlay } from '@/components/tutorial/TutorialOverlay';
 
 export default function GamePage() {
   return (
@@ -20,8 +19,6 @@ export default function GamePage() {
             <Link className="game-link-pill" href="/leaderboard">순위표 <span aria-hidden="true">↗</span></Link>
           </div>
         </header>
-
-        <TutorialOverlay />
 
         <section className="game-stage-shell" aria-label="Office Morning 게임 스테이지">
           <GameViewport className="game-frame--stage">
