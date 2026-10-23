@@ -85,10 +85,10 @@ export function PatternCodex() {
   }, [userOid]);
 
   if (practiceOpen && selectedPracticeChart) {
-    return <>
+    return <div className="pattern-codex">
       {storageWarning && <p className="pattern-codex__storage-warning" role="status">이 브라우저에서는 연습 기록을 저장하지 못했어요. 연습은 계속할 수 있습니다.</p>}
       <PracticeViewport chart={selectedPracticeChart} title={selectedTitle ?? selectedPracticeChart.patternId} onComplete={onComplete} onExit={() => setPracticeOpen(false)} storageWarning={storageWarning} />
-    </>;
+    </div>;
   }
 
   return <section className="pattern-codex">

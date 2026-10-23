@@ -127,12 +127,55 @@ test("keeps variation previews and actions within a narrow mobile viewport", asy
   await page.locator(".pattern-kind-card--burst").click();
 
   await expect(page.locator(".pattern-variation").first().locator(".pattern-beat-preview")).toBeVisible();
+  await page.locator(".pattern-variation__start").first().click();
+  const practice = page.locator(".practice-viewport");
+  await expect(practice).toBeVisible();
+  const practiceBounds = await practice.evaluate((panel) => {
+    const rect = panel.getBoundingClientRect();
+    return { left: rect.left, right: rect.right };
+  });
+  expect(practiceBounds.left).toBeGreaterThanOrEqual(-1);
+  expect(practiceBounds.right).toBeLessThanOrEqual(391);
+  const childrenWithinPanel = await practice.evaluate((panel) => {
+    const rect = panel.getBoundingClientRect();
+    return [...panel.querySelectorAll(".practice-viewport__heading, .practice-viewport__loop-count, .practice-viewport__lane, .practice-viewport__actions")]
+      .every((element) => {
+        const child = element.getBoundingClientRect();
+        return child.left >= rect.left - 1 && child.right <= rect.right + 1;
+      });
+  });
+  expect(childrenWithinPanel).toBe(true);
   const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
   const overflowing = await page.locator("body *").evaluateAll((elements) => elements.flatMap((element) => {
     const rect = element.getBoundingClientRect();
     return rect.right > window.innerWidth + 1 ? [`${element.tagName}.${(element as HTMLElement).className}: ${rect.right}`] : [];
   }));
   expect(pageWidth, overflowing.join("\n")).toBeLessThanOrEqual(390);
+});
+
+test("centers desktop practice and keeps its heading, lane, and controls inside the panel", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.locator(".pattern-kind-card--straight").click();
+  await page.locator(".pattern-variation__start").first().click();
+
+  const practice = page.locator(".practice-viewport");
+  await expect(practice).toBeVisible();
+  const layout = await practice.evaluate((panel) => {
+    const rect = panel.getBoundingClientRect();
+    const inner = [".practice-viewport__heading", ".practice-viewport__loop-count", ".practice-viewport__lane", ".practice-viewport__actions"]
+      .map((selector) => panel.querySelector(selector)!.getBoundingClientRect());
+    return {
+      left: rect.left,
+      right: rect.right,
+      width: rect.width,
+      centered: Math.abs((rect.left + rect.right) / 2 - window.innerWidth / 2) <= 1,
+      childrenFit: inner.every((child) => child.left >= rect.left - 1 && child.right <= rect.right + 1),
+    };
+  });
+  expect(layout.width).toBeLessThanOrEqual(1180);
+  expect(layout.centered).toBe(true);
+  expect(layout.childrenFit).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440);
 });
 
 test("supports a held touch input in practice on coarse-pointer devices", async ({ page }) => {
@@ -165,10 +208,9 @@ test("offers coarse-pointer input in main gameplay and records its down/up pair"
     submittedEvents.push(...(body.events ?? []).map((event) => event.type));
   });
   await installCoarsePointer(page);
-  await page.addInitScript(() => window.localStorage.setItem("office-rhythm-manager:tutorial-complete", "true"));
-  await page.goto("/game");
+  await page.addInitScript(() => window.localStorage.setItem("office-rhythm-manager:tutorial-disabled", "true"));
+  await page.goto("/game?start=1");
 
-  await page.locator(".game-frame button.primary").click();
   const touchButton = page.locator(".game-frame .rhythm-touch-button");
   await expect(touchButton).toBeVisible({ timeout: 15_000 });
   await touchButton.hover();
