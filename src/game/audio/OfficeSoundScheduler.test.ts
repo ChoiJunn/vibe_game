@@ -97,6 +97,61 @@ describe('OfficeSoundScheduler', () => {
     scheduler.stop();
   });
 
+  it('keeps the metronome off by default and schedules enabled clicks on the audio clock', async () => {
+    const metronomeBeatmap = { ...beatmap, bpm: 120, events: [], patterns: [], sections: [{ id: 'arrival' as const, startMs: 0, endMs: 10_000 }] };
+    const fakeContext = createFakeAudioContext();
+    const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+    await clock.load(metronomeBeatmap, settings);
+    await clock.start();
+    const scheduler = new OfficeSoundScheduler(clock, { lookaheadMs: 0, tickMs: 5 });
+
+    scheduler.load(metronomeBeatmap, settings);
+    scheduler.start();
+    expect(fakeContext.createOscillator).not.toHaveBeenCalled();
+    scheduler.stop();
+
+    vi.useFakeTimers();
+    scheduler.load(metronomeBeatmap, settings);
+    scheduler.setMetronomeEnabled(true);
+    scheduler.start();
+    expect(fakeContext.createOscillator).toHaveBeenCalledTimes(1);
+    for (let beat = 1; beat <= 4; beat += 1) {
+      fakeContext.currentTime = beat * 0.5;
+      expect(clock.getSongPositionMs()).toBe(beat * 500);
+      await vi.advanceTimersByTimeAsync(5);
+      expect(fakeContext.createOscillator).toHaveBeenCalledTimes(beat + 1);
+    }
+
+    const clickNodes = fakeContext.createOscillator.mock.results;
+    expect(clickNodes.slice(0, 5).map(({ value }) => value.start.mock.calls[0]?.[0])).toEqual([0, 0.5, 1, 1.5, 2]);
+    const clickVolumes = fakeContext.createGain.mock.results
+      .map(({ value }) => value.gain.linearRampToValueAtTime.mock.calls[0]?.[0])
+      .filter((volume): volume is number => typeof volume === 'number');
+    [0.8, 0.56, 0.56, 0.56, 0.8].forEach((volume, index) => {
+      expect(clickVolumes[index]).toBeCloseTo(volume, 5);
+    });
+    scheduler.stop();
+    vi.useRealTimers();
+  });
+
+  it('does not emit metronome clicks while muted or when SFX volume is zero', async () => {
+    const metronomeBeatmap = { ...beatmap, bpm: 120, events: [], patterns: [], sections: [{ id: 'arrival' as const, startMs: 0, endMs: 10_000 }] };
+    for (const savedSettings of [{ ...settings, muted: true }, { ...settings, sfxVolume: 0 }]) {
+      const fakeContext = createFakeAudioContext();
+      const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });
+      await clock.load(metronomeBeatmap, savedSettings);
+      await clock.start();
+      const scheduler = new OfficeSoundScheduler(clock, { lookaheadMs: 0, tickMs: 5 });
+      scheduler.load(metronomeBeatmap, savedSettings);
+      scheduler.setMetronomeEnabled(true);
+      scheduler.start();
+
+      expect(fakeContext.createOscillator).not.toHaveBeenCalled();
+      expect(fakeContext.createGain.mock.results.flatMap(({ value }) => value.gain.linearRampToValueAtTime.mock.calls)).toHaveLength(0);
+      scheduler.stop();
+    }
+  });
+
   it('does not create audio nodes when muted', async () => {
     const fakeContext = createFakeAudioContext();
     const clock = new AudioClock({ contextFactory: () => fakeContext as unknown as AudioContext });

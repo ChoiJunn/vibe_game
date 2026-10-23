@@ -44,12 +44,14 @@ export type PracticeRunSnapshot = {
   songPositionMs: number;
   sourceAudioPositionMs: number;
   countInBeat: number;
+  beatIndex: number;
+  beatProgress: number;
   musicStatus: MusicStatus;
   audioUnavailable: boolean;
 };
 
 type PracticeAudioScheduler = Pick<OfficeSoundScheduler,
-  "load" | "start" | "pause" | "resume" | "stop" | "getMusicStatus" | "playCountInBeat" | "restartLoop"
+  "load" | "start" | "pause" | "resume" | "stop" | "getMusicStatus" | "playCountInBeat" | "restartLoop" | "setMetronomeEnabled"
 >;
 
 type FrameHandle = number | ReturnType<typeof setTimeout>;
@@ -304,6 +306,7 @@ export class PracticeRunController {
       if (this.cancelled) return;
       const region: MusicTrackRegion = { startMs: this.chart.sourceAudioStartMs, endMs: this.chart.sourceAudioEndMs };
       this.scheduler.load(this.chart.beatmap, this.settings, 0, region);
+      this.scheduler.setMetronomeEnabled(true);
       await this.clock.start(0);
       if (this.cancelled) {
         this.scheduler.stop();
@@ -449,6 +452,9 @@ export class PracticeRunController {
   private createSnapshot(): PracticeRunSnapshot {
     const counts = this.loopRunState;
     const songPositionMs = this.status === "countdown" ? 0 : this.getSongPositionMs();
+    const beatDurationMs = 60_000 / this.chart.beatmap.bpm;
+    const beatPosition = Math.max(0, songPositionMs) / beatDurationMs;
+    const beatWhole = Math.floor(beatPosition);
     return {
       status: this.status,
       patternId: this.chart.patternId,
@@ -467,6 +473,8 @@ export class PracticeRunController {
       songPositionMs,
       sourceAudioPositionMs: this.chart.sourceAudioStartMs + (songPositionMs % this.chart.loopDurationMs),
       countInBeat: this.countInBeat,
+      beatIndex: beatWhole % 4 + 1,
+      beatProgress: beatPosition - beatWhole,
       musicStatus: this.scheduler.getMusicStatus(),
       audioUnavailable: this.audioUnavailable || this.scheduler.getMusicStatus() === "unavailable",
     };

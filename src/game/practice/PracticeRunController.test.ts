@@ -155,6 +155,7 @@ describe("PracticeRunController", () => {
       { startMs: chart.sourceAudioStartMs, endMs: chart.sourceAudioEndMs },
     );
     expect(harness.scheduler.playCountInBeat).toHaveBeenCalledTimes(1);
+    expect(harness.scheduler.setMetronomeEnabled).toHaveBeenCalledWith(true);
 
     for (const beat of [500, 1_000, 1_500, 2_000]) {
       harness.setNow(beat);
@@ -162,6 +163,7 @@ describe("PracticeRunController", () => {
     }
     await vi.waitFor(() => expect(controller.getSnapshot().status).toBe("playing"));
     expect(harness.scheduler.playCountInBeat).toHaveBeenCalledTimes(4);
+    expect(controller.getSnapshot()).toMatchObject({ beatIndex: 1, beatProgress: 0 });
 
     harness.clock.position = chart.loopDurationMs;
     controller.update();
@@ -170,6 +172,65 @@ describe("PracticeRunController", () => {
     expect(harness.scheduler.restartLoop).toHaveBeenCalled();
     expect(harness.scheduler.playCountInBeat).toHaveBeenCalledTimes(4);
     controller.dispose();
+  });
+
+  it("derives the 1-4 beat guide from the audio clock and freezes it while paused", async () => {
+    const longChart = makeChart([{ id: "late-tap", type: "tap", startMs: 5_000 }]);
+    const harness = createHarness(longChart);
+    const controller = new PracticeRunController(longChart, undefined, harness.options);
+    await enterPlaying(controller, harness);
+
+    for (const [position, beatIndex] of [[0, 1], [500, 2], [1_000, 3], [1_500, 4], [2_000, 1]] as const) {
+      harness.clock.position = position;
+      controller.update();
+      expect(controller.getSnapshot()).toMatchObject({ beatIndex, beatProgress: 0 });
+    }
+
+    harness.clock.position = 2_250;
+    controller.update();
+    expect(controller.getSnapshot()).toMatchObject({ beatIndex: 1, beatProgress: 0.5 });
+    controller.pause();
+    const pausedBeat = controller.getSnapshot();
+    harness.clock.position = 3_000;
+    controller.update();
+    expect(controller.getSnapshot()).toMatchObject({ beatIndex: pausedBeat.beatIndex, beatProgress: pausedBeat.beatProgress });
+
+    controller.resume();
+    await vi.waitFor(() => expect(harness.scheduler.resume).toHaveBeenCalledTimes(1));
+    harness.clock.position = 2_500;
+    controller.update();
+    expect(controller.getSnapshot()).toMatchObject({ beatIndex: 2, beatProgress: 0 });
+    controller.dispose();
+  });
+
+  it("returns the displayed beat to one after a practice loop restarts", async () => {
+    const oneTap = makeChart([{ id: "tap", type: "tap", startMs: 100 }]);
+    const harness = createHarness(oneTap);
+    const controller = new PracticeRunController(oneTap, undefined, harness.options);
+    await enterPlaying(controller, harness);
+
+    harness.clock.position = oneTap.loopDurationMs;
+    controller.update();
+    await vi.waitFor(() => expect(harness.scheduler.restartLoop).toHaveBeenCalledTimes(2));
+    expect(controller.getSnapshot()).toMatchObject({ status: "playing", beatIndex: 1, beatProgress: 0 });
+    controller.dispose();
+  });
+
+  it("forwards saved mute and SFX settings to the practice scheduler", async () => {
+    for (const audioSettings of [settings, { ...settings, muted: true, sfxVolume: 0 }]) {
+      const harness = createHarness(chart, audioSettings);
+      const controller = new PracticeRunController(chart, undefined, harness.options);
+      controller.start();
+      await vi.waitFor(() => expect(harness.scheduler.load).toHaveBeenCalled());
+      expect(harness.scheduler.load).toHaveBeenCalledWith(
+        chart.beatmap,
+        audioSettings,
+        0,
+        { startMs: chart.sourceAudioStartMs, endMs: chart.sourceAudioEndMs },
+      );
+      expect(harness.scheduler.setMetronomeEnabled).toHaveBeenCalledWith(true);
+      controller.dispose();
+    }
   });
 
   it("keeps timing practice usable when browser audio initialization fails", async () => {
@@ -181,7 +242,7 @@ describe("PracticeRunController", () => {
     harness.setNow(2_000);
     controller.update();
     await vi.waitFor(() => expect(controller.getSnapshot().status).toBe("playing"));
-    expect(controller.getSnapshot().audioUnavailable).toBe(true);
+    expect(controller.getSnapshot()).toMatchObject({ audioUnavailable: true, beatIndex: 1, beatProgress: 0 });
     expect(harness.scheduler.start).toHaveBeenCalledTimes(1);
     controller.dispose();
   });
@@ -239,7 +300,7 @@ function makeChart(inputs: Array<{
   return { beatmap, patternId: "source-pattern", sourceAudioStartMs: 2_000, sourceAudioEndMs: 2_000 + loopDurationMs, loopDurationMs };
 }
 
-function createHarness(practiceChart: PracticeChart) {
+function createHarness(practiceChart: PracticeChart, audioSettings = settings) {
   let now = 0;
   const clock = {
     position: 0,
@@ -263,12 +324,13 @@ function createHarness(practiceChart: PracticeChart) {
     getMusicStatus: vi.fn(() => "ready" as const),
     playCountInBeat: vi.fn(),
     restartLoop: vi.fn(),
+    setMetronomeEnabled: vi.fn(),
   };
   const inputController = { start: vi.fn(), stop: vi.fn(), releaseHeld: vi.fn() };
   const options: PracticeRunControllerOptions = {
     clock: clock as never,
     scheduler: scheduler as never,
-    audioSettings: settings,
+    audioSettings,
     inputController,
     now: () => now,
     requestFrame: () => 1,

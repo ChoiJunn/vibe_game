@@ -60,13 +60,19 @@ test("practices the selected source pattern and returns to its variation list", 
   await expect(practice).toHaveAttribute("data-source-pattern-id", "pattern-002");
   await expect(practice.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
   await expect(page.locator(".practice-count-in")).toContainText("준비");
+  const beatGuide = page.locator(".practice-beat-indicator");
+  await expect(beatGuide).toBeVisible();
+  await expect(beatGuide.locator(".practice-beat-indicator__beat")).toHaveCount(4);
   await expect(page.locator(".practice-count-in")).toHaveCount(0, { timeout: 10_000 });
+  await expect(beatGuide.locator('[aria-current="step"]')).toHaveCount(1);
+  await expect(beatGuide.locator(".is-downbeat")).toHaveAttribute("aria-label", /마디 첫 박/);
   const inputFeedback = page.locator(".practice-space-feedback");
   const initialInputSequence = Number(await inputFeedback.getAttribute("data-input-sequence"));
   await page.keyboard.press("Space");
   await expect.poll(async () => Number(await inputFeedback.getAttribute("data-input-sequence"))).toBeGreaterThan(initialInputSequence);
   await expect(inputFeedback).toContainText("입력 감지");
   await expect(page.locator(".practice-live-feedback")).toBeVisible();
+  await expect(beatGuide.locator('[aria-current="step"]')).toHaveCount(1);
   await page.getByRole("button", { name: "연습 종료" }).click();
   await expect(page.getByRole("region", { name: "연습 결과 요약" })).toBeVisible();
   await expect(page.getByText("완료한 루프가 없어요. 연습한 구간은 통계에 포함되지 않았습니다.")).toBeVisible();
@@ -76,6 +82,21 @@ test("practices the selected source pattern and returns to its variation list", 
 
   await expect(page.getByRole("heading", { name: "출근길 · 정박 1" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "출근길 · 정박 2" })).toBeVisible();
+});
+
+test("keeps the visual beat guide available when saved audio settings are muted", async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem("office-rhythm:settings:v1", JSON.stringify({
+    version: 1,
+    settings: { musicVolume: 0.7, sfxVolume: 0, muted: true, inputOffsetMs: 0 },
+  })));
+  await page.reload();
+  await page.locator(".pattern-kind-card--straight").click();
+  await page.locator(".pattern-variation__start").first().click();
+
+  const beatGuide = page.locator(".practice-beat-indicator");
+  await expect(page.locator(".practice-count-in")).toHaveCount(0, { timeout: 10_000 });
+  await expect(beatGuide.locator(".practice-beat-indicator__beat")).toHaveCount(4);
+  await expect(beatGuide.locator('[aria-current="step"]')).toHaveCount(1);
 });
 
 test("saves two completed loops to the chosen variation and shows session-only summary", async ({ page }) => {

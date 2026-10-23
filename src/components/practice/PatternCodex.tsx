@@ -12,6 +12,8 @@ import type { PatternKind, SectionId } from "@/domain/rhythm";
 import { validateBeatmap } from "@/domain/validateBeatmap";
 import { createPracticeBeatmap } from "@/game/practice/createPracticeBeatmap";
 import { useAuth } from "@/auth/useAuth";
+import { settingsStore } from "@/client/settings/settingsStore";
+import { DEFAULT_AUDIO_SETTINGS, type AudioSettings } from "@/game/audio/types";
 import { getCodexStorageKey, loadPatternCodex, recordPatternPractice, savePatternCodex, type PatternCodex } from "@/client/game/patternCodexStore";
 import { PracticeViewport } from "./PracticeViewport";
 import { PatternBeatPreview } from "./PatternBeatPreview";
@@ -39,6 +41,7 @@ export function PatternCodex() {
   const [selectedKind, setSelectedKind] = useState<PatternKind | null>(null);
   const [selected, setSelected] = useState<string>();
   const [practiceOpen, setPracticeOpen] = useState(false);
+  const [practiceAudioSettings, setPracticeAudioSettings] = useState<AudioSettings>(() => ({ ...DEFAULT_AUDIO_SETTINGS }));
   const groups = useMemo(() => groupPatternsByKind(beatmap), []);
 
   useEffect(() => {
@@ -87,7 +90,7 @@ export function PatternCodex() {
   if (practiceOpen && selectedPracticeChart) {
     return <div className="pattern-codex">
       {storageWarning && <p className="pattern-codex__storage-warning" role="status">이 브라우저에서는 연습 기록을 저장하지 못했어요. 연습은 계속할 수 있습니다.</p>}
-      <PracticeViewport chart={selectedPracticeChart} title={selectedTitle ?? selectedPracticeChart.patternId} onComplete={onComplete} onExit={() => setPracticeOpen(false)} storageWarning={storageWarning} />
+      <PracticeViewport chart={selectedPracticeChart} title={selectedTitle ?? selectedPracticeChart.patternId} audioSettings={practiceAudioSettings} onComplete={onComplete} onExit={() => setPracticeOpen(false)} storageWarning={storageWarning} />
     </div>;
   }
 
@@ -132,7 +135,17 @@ export function PatternCodex() {
                 type="button"
                 className="pattern-variation__start"
                 aria-label={`${sceneNames[pattern.section]} · ${selectedGroup.label} ${pattern.ordinal}, ${pattern.eventCount}개 노트, 연습 시작`}
-                onClick={() => { setSelected(pattern.id); setPracticeOpen(true); }}
+                onClick={() => {
+                  let savedAudioSettings = { ...DEFAULT_AUDIO_SETTINGS };
+                  try {
+                    savedAudioSettings = settingsStore.load();
+                  } catch {
+                    // Keep practice available when browser settings cannot be read.
+                  }
+                  setPracticeAudioSettings(savedAudioSettings);
+                  setSelected(pattern.id);
+                  setPracticeOpen(true);
+                }}
               >연습 시작</button>
             </article>;
           })}

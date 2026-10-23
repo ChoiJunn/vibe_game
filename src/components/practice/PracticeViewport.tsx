@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import type { PracticeChart } from "@/game/practice/createPracticeBeatmap";
 import { PracticeRunController, type PracticeLoopResult, type PracticeRunSnapshot } from "@/game/practice/PracticeRunController";
 import { RhythmTouchButton, useCoarsePointer } from "@/components/game/RhythmTouchButton";
+import type { AudioSettings } from "@/game/audio/types";
 
 const APPROACH_WINDOW_MS = 1_500;
 
-export function PracticeViewport({ chart, title, onComplete, onExit, storageWarning }: {
+export function PracticeViewport({ chart, title, audioSettings, onComplete, onExit, storageWarning }: {
   chart: PracticeChart;
   title: string;
+  audioSettings: AudioSettings;
   onComplete: (result: PracticeLoopResult) => void;
   onExit: () => void;
   storageWarning: boolean;
@@ -20,7 +22,7 @@ export function PracticeViewport({ chart, title, onComplete, onExit, storageWarn
   const isCoarsePointer = useCoarsePointer();
 
   useEffect(() => {
-    const controller = new PracticeRunController(chart, onComplete);
+    const controller = new PracticeRunController(chart, onComplete, { audioSettings });
     controllerRef.current = controller;
     const unsubscribe = controller.subscribe(setSnapshot);
     controller.start();
@@ -29,7 +31,7 @@ export function PracticeViewport({ chart, title, onComplete, onExit, storageWarn
       controller.dispose();
       controllerRef.current = null;
     };
-  }, [chart, onComplete, sessionNumber]);
+  }, [audioSettings, chart, onComplete, sessionNumber]);
 
   if (!snapshot) return <p role="status">연습을 준비하고 있어요...</p>;
 
@@ -90,6 +92,23 @@ export function PracticeViewport({ chart, title, onComplete, onExit, storageWarn
           </span>;
         }
         return <i key={event.id} className="practice-moving-note practice-moving-note--tap" style={{ left: `${left}%` }} aria-hidden="true" />;
+      })}
+    </div>
+
+    <div className="practice-beat-indicator" role="group" aria-label={`현재 박자 ${snapshot.status === "countdown" && snapshot.countInBeat > 0 ? snapshot.countInBeat : snapshot.beatIndex}`}>
+      {[1, 2, 3, 4].map((beat) => {
+        const inCountIn = snapshot.status === "countdown" && snapshot.countInBeat > 0;
+        const active = inCountIn ? snapshot.countInBeat === beat : snapshot.beatIndex === beat;
+        const progress = !inCountIn && snapshot.beatIndex === beat ? snapshot.beatProgress : 0;
+        return <span
+          key={beat}
+          className={`practice-beat-indicator__beat${beat === 1 ? " is-downbeat" : ""}${active ? " is-active" : ""}`}
+          aria-current={active ? "step" : undefined}
+          aria-label={`박자 ${beat}${beat === 1 ? ", 마디 첫 박" : ""}`}
+        >
+          <i className="practice-beat-indicator__progress" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
+          <span>{beat}</span>
+        </span>;
       })}
     </div>
 

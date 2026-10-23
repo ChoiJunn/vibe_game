@@ -27,6 +27,8 @@ export class OfficeSoundScheduler {
   private musicLoad: Promise<void> | null = null;
   private musicStatus: MusicStatus = 'idle';
   private feverActive = false;
+  private metronomeEnabled = false;
+  private nextMetronomeBeatIndex = 0;
 
   constructor(clock: AudioClock, options: OfficeSoundSchedulerOptions = {}) {
     this.clock = clock;
@@ -40,6 +42,8 @@ export class OfficeSoundScheduler {
     this.settings = clampAudioSettings(settings);
     this.musicStepMs = 60_000 / beatmap.bpm / 2;
     this.nextMusicStepIndex = Math.ceil(fromSongPositionMs / this.musicStepMs);
+    this.nextMetronomeBeatIndex = 0;
+    this.metronomeEnabled = false;
     this.musicTrack?.stop();
     this.musicTrack = new MusicTrackPlayer(this.clock.getAudioContext());
     this.musicTrack.setLoopRegion(musicRegion);
@@ -102,6 +106,8 @@ export class OfficeSoundScheduler {
     this.feverActive = false;
     this.scheduledEventIds.clear();
     this.nextMusicStepIndex = 0;
+    this.nextMetronomeBeatIndex = 0;
+    this.metronomeEnabled = false;
     this.activeNodes.forEach((node) => {
       try {
         node.stop();
@@ -123,6 +129,14 @@ export class OfficeSoundScheduler {
 
   getMusicStatus(): MusicStatus {
     return this.musicStatus;
+  }
+
+  setMetronomeEnabled(enabled: boolean): void {
+    this.metronomeEnabled = enabled;
+    if (!enabled || !this.beatmap) return;
+
+    const beatDurationMs = 60_000 / this.beatmap.bpm;
+    this.nextMetronomeBeatIndex = Math.ceil(this.clock.getSongPositionMs() / beatDurationMs);
   }
 
   playCountInBeat(accent = false): void {
@@ -147,6 +161,7 @@ export class OfficeSoundScheduler {
   restartLoop(): void {
     this.scheduledEventIds.clear();
     this.nextMusicStepIndex = Math.ceil(this.clock.getSongPositionMs() / this.musicStepMs);
+    this.nextMetronomeBeatIndex = 0;
     if (!this.running) this.resume();
     else this.tick();
   }
@@ -171,6 +186,32 @@ export class OfficeSoundScheduler {
     const horizonMs = songPositionMs + this.lookaheadMs;
 
     while (this.nextMusicStepIndex * this.musicStepMs <= horizonMs) this.nextMusicStepIndex += 1;
+
+    if (this.metronomeEnabled) {
+      const beatDurationMs = 60_000 / beatmap.bpm;
+      while (this.nextMetronomeBeatIndex * beatDurationMs <= horizonMs) {
+        const beatIndex = this.nextMetronomeBeatIndex;
+        const beatPositionMs = beatIndex * beatDurationMs;
+        this.nextMetronomeBeatIndex += 1;
+        if (beatPositionMs + 0.01 < songPositionMs || this.settings.muted || this.settings.sfxVolume <= 0) continue;
+
+        const when = context.currentTime + Math.max(0, (beatPositionMs - songPositionMs) / 1000);
+        try {
+          const [node] = createBeatAccent({
+            context,
+            when,
+            durationSec: 0.08,
+            volume: this.settings.sfxVolume * (beatIndex % 4 === 0 ? 1 : 0.7),
+            destination: context.destination,
+          });
+          if (!node) continue;
+          this.activeNodes.add(node);
+          node.addEventListener('ended', () => this.activeNodes.delete(node), { once: true });
+        } catch {
+          // Audio clicks are optional; visual practice timing continues without Web Audio.
+        }
+      }
+    }
 
     beatmap.events
       .filter((event) => !this.scheduledEventIds.has(event.id) && event.startMs <= horizonMs)
