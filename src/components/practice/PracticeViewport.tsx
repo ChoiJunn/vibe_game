@@ -70,28 +70,36 @@ export function PracticeViewport({ chart, title, audioSettings, onComplete, onEx
       <span className="practice-viewport__lane-center" aria-hidden="true" />
       {chart.beatmap.events.map((event) => {
         const deltaMs = event.startMs - snapshot.songPositionMs;
-        if (deltaMs < -180 || deltaMs > APPROACH_WINDOW_MS) return null;
-        const left = 24 + (deltaMs / APPROACH_WINDOW_MS) * 70;
+        const isJudgedEvent = snapshot.lastJudgement?.eventId === event.id;
+        if ((deltaMs < -180 || deltaMs > APPROACH_WINDOW_MS) && !isJudgedEvent) return null;
+        const isOutOfWindowJudgement = isJudgedEvent && deltaMs < -180;
+        const judgementClass = isJudgedEvent
+          ? ` is-judged is-${snapshot.lastJudgement?.judgement}${isOutOfWindowJudgement ? " is-out-of-window-judgement" : ""}`
+          : "";
+        const judgementSequence = snapshot.sessionPerfectCount + snapshot.sessionGoodCount + snapshot.sessionMissCount;
+        const noteKey = isJudgedEvent ? `${event.id}-${judgementSequence}` : event.id;
+        const left = isOutOfWindowJudgement ? 24 : 24 + (deltaMs / APPROACH_WINDOW_MS) * 70;
         if (event.type === "hold") {
           const duration = Math.max(0, (event.endMs ?? event.startMs) - event.startMs);
           return <span
-            key={event.id}
-            className="practice-moving-note practice-moving-note--hold"
+            key={noteKey}
+            className={`practice-moving-note practice-moving-note--hold${judgementClass}`}
             style={{ left: `${left}%`, width: `${Math.max(1, (duration / APPROACH_WINDOW_MS) * 70)}%` }}
             aria-hidden="true"
-          ><i /><i /></span>;
+          ><i className={judgementClass.trim()} /><i className={judgementClass.trim()} /></span>;
         }
         if (event.type === "burst") {
           const duration = Math.max(0, (event.endMs ?? event.startMs) - event.startMs);
           const count = Math.max(1, event.requiredPresses ?? 1);
-          return <span className="practice-moving-note practice-moving-note--burst" key={event.id} aria-hidden="true">
+          return <span className="practice-moving-note practice-moving-note--burst" key={noteKey} aria-hidden="true">
             {Array.from({ length: count }, (_, index) => <i
-              key={`${event.id}-${index}`}
+              key={`${noteKey}-${index}`}
+              className={judgementClass.trim()}
               style={{ left: `${left + ((duration / APPROACH_WINDOW_MS) * 70 * (count === 1 ? 0.5 : index / (count - 1)))}%` }}
             />)}
           </span>;
         }
-        return <i key={event.id} className="practice-moving-note practice-moving-note--tap" style={{ left: `${left}%` }} aria-hidden="true" />;
+        return <i key={noteKey} className={`practice-moving-note practice-moving-note--tap${judgementClass}`} style={{ left: `${left}%` }} aria-hidden="true" />;
       })}
     </div>
 

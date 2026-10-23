@@ -1,19 +1,18 @@
 ﻿# Current Context
 
 ## Active Plan
-[Game Start Polish](./plans/2026-10-23-game-start-polish.md)
+[Pattern Practice Judgement Feedback](./plans/2026-10-23-pattern-practice-judgement-feedback.md)
 
 ## Active Phase
-[P01 Game Start Experience](./phases/2026-10-23-game-start-polish/P01-game-start-experience/phase.md)
+[P01 Note Judgement Feedback](./phases/2026-10-23-pattern-practice-judgement-feedback/P01-note-judgement-feedback/phase.md)
 
 ## Active Task
 None — all tasks in this plan are complete.
 
 ## Status
-- Direct gameplay start without a saved session and tutorial removal are complete in the preceding plan.
-- T01 completed: saved-session choices are centered in an accessible dialog.
-- T02 completed: new and continued runs use a visual/audio 3-2-1-GO count-in.
-- Decisions are recorded in [direct gameplay start](./decisions/2026-10-23-direct-gameplay-start.md).
+- Decision confirmed in [Pattern Practice Judgement Feedback](./decisions/2026-10-23-pattern-practice-judgement-feedback.md).
+- T01 completed: tap, hold, and burst visuals receive matching grade feedback; out-of-window judgements stay visible for the flash.
+- Typecheck, lint, practice controller tests, and the Chromium tap-feedback scenario passed.
 
 ## Next Step (IMPORTANT)
-All tasks in the active plan are complete. Choose or create the next plan before starting another implementation task.
+This plan is complete. The browser scenario asserts tap feedback; hold/burst edge cases and reduced-motion appearance remain visual checks without dedicated browser assertions.

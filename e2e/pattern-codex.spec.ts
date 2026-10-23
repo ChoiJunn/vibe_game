@@ -71,6 +71,11 @@ test("practices the selected source pattern and returns to its variation list", 
   await page.keyboard.press("Space");
   await expect.poll(async () => Number(await inputFeedback.getAttribute("data-input-sequence"))).toBeGreaterThan(initialInputSequence);
   await expect(inputFeedback).toContainText("입력 감지");
+  const judgedTap = page.locator(".practice-moving-note--tap.is-judged");
+  await expect(judgedTap).toHaveCount(1, { timeout: 5_000 });
+  await expect(judgedTap).toHaveClass(/is-(perfect|good|miss)/);
+  await expect(judgedTap).toHaveCSS("animation-name", "practice-note-feedback-tap");
+  await expect(judgedTap).toHaveCSS("animation-duration", "0.35s");
   await expect(page.locator(".practice-live-feedback")).toBeVisible();
   await expect(beatGuide.locator('[aria-current="step"]')).toHaveCount(1);
   await page.getByRole("button", { name: "연습 종료" }).click();

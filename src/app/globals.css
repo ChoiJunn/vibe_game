@@ -1489,6 +1489,43 @@ a:focus-visible {
 .practice-moving-note--hold i:first-child { left: 0; }
 .practice-moving-note--hold i:last-child { left: 100%; }
 .practice-moving-note--burst i { position: absolute; top: 50%; width: 18px; height: 25px; transform: translate(-50%, -50%) rotate(35deg); border: 3px solid #ffdd7a; border-radius: 5px; background: #ff795d; box-shadow: 0 0 0 1px #c64e37; }
+.practice-moving-note.is-perfect,
+.practice-moving-note--hold > i.is-perfect,
+.practice-moving-note--burst > i.is-perfect { --practice-note-judgement-color: #a8dfc6; }
+.practice-moving-note.is-good,
+.practice-moving-note--hold > i.is-good,
+.practice-moving-note--burst > i.is-good { --practice-note-judgement-color: #ffdd7a; }
+.practice-moving-note.is-miss,
+.practice-moving-note--hold > i.is-miss,
+.practice-moving-note--burst > i.is-miss { --practice-note-judgement-color: #ff8b7b; }
+.practice-moving-note.is-out-of-window-judgement,
+.practice-moving-note--hold > i.is-out-of-window-judgement,
+.practice-moving-note--burst > i.is-out-of-window-judgement { --practice-note-end-opacity: 0; }
+.practice-moving-note--tap.is-judged { animation: practice-note-feedback-tap 350ms ease-out both; }
+.practice-moving-note--hold.is-judged { animation: practice-note-feedback-hold 350ms ease-out both; }
+.practice-moving-note--hold > i.is-judged { animation: practice-note-feedback-endpoint 350ms ease-out both; }
+.practice-moving-note--burst > i.is-judged { animation: practice-note-feedback-burst 350ms ease-out both; }
+@keyframes practice-note-feedback-tap {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); background: #ffb947; box-shadow: 0 0 0 2px #be7a22, 0 0 16px rgba(255,185,71,.5); opacity: var(--practice-note-end-opacity, 1); }
+  28% { transform: translate(-50%, -50%) scale(var(--practice-note-feedback-scale, 1.5)); background: var(--practice-note-judgement-color); box-shadow: 0 0 0 5px color-mix(in srgb, var(--practice-note-judgement-color), transparent 50%), 0 0 24px var(--practice-note-judgement-color); }
+}
+@keyframes practice-note-feedback-hold {
+  0%, 100% { transform: translateY(-50%) scaleY(1); background: #9b85f0; box-shadow: 0 0 0 1px #6855b8; opacity: var(--practice-note-end-opacity, 1); }
+  28% { transform: translateY(-50%) scaleY(var(--practice-note-feedback-scale, 1.5)); background: var(--practice-note-judgement-color); box-shadow: 0 0 0 4px color-mix(in srgb, var(--practice-note-judgement-color), transparent 50%), 0 0 22px var(--practice-note-judgement-color); }
+}
+@keyframes practice-note-feedback-endpoint {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); background: #8e78e2; box-shadow: none; opacity: var(--practice-note-end-opacity, 1); }
+  28% { transform: translate(-50%, -50%) scale(var(--practice-note-feedback-scale, 1.5)); background: var(--practice-note-judgement-color); box-shadow: 0 0 18px var(--practice-note-judgement-color); }
+}
+@keyframes practice-note-feedback-burst {
+  0%, 100% { transform: translate(-50%, -50%) rotate(35deg) scale(1); background: #ff795d; box-shadow: 0 0 0 1px #c64e37; opacity: var(--practice-note-end-opacity, 1); }
+  28% { transform: translate(-50%, -50%) rotate(35deg) scale(var(--practice-note-feedback-scale, 1.5)); background: var(--practice-note-judgement-color); box-shadow: 0 0 20px var(--practice-note-judgement-color); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .practice-moving-note.is-judged,
+  .practice-moving-note--hold > i.is-judged,
+  .practice-moving-note--burst > i.is-judged { --practice-note-feedback-scale: 1; }
+}
 .practice-count-in { margin: 0; color: #ffdd7a; font-size: 27px; font-weight: 900; text-align: center; }
 .practice-live-feedback { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; min-height: 38px; margin: 12px 0; }
 .practice-live-feedback__judge { font-size: 20px; }
