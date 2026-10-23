@@ -1172,8 +1172,13 @@ a:focus-visible {
 .game-page .game-frame::after {
   inset: 0;
   z-index: 10;
+  width: auto;
+  height: auto;
+  aspect-ratio: auto;
   border: 0.3rem solid rgba(255, 253, 248, 0.86);
   border-radius: inherit;
+  background: transparent;
+  opacity: 1;
   filter: none;
   pointer-events: none;
 }

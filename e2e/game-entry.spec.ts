@@ -10,6 +10,22 @@ test('game preview is visible while active-session discovery is still pending', 
   await expect(page.locator('.game-play-surface__preview')).toBeVisible();
   await expect.poll(() => page.locator('.game-stage-shell').evaluate((element) => getComputedStyle(element, '::before').backgroundImage)).toBe('none');
   await expect(page.locator('.game-stage-shell')).toHaveCSS('background-color', 'rgb(36, 36, 39)');
+  const frameDecoration = await page.locator('.game-page .game-frame').evaluate((frame) => {
+    const style = getComputedStyle(frame, '::after');
+    const rect = frame.getBoundingClientRect();
+    return {
+      background: style.backgroundColor,
+      opacity: style.opacity,
+      width: Number.parseFloat(style.width) + Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.borderRightWidth),
+      height: Number.parseFloat(style.height) + Number.parseFloat(style.borderTopWidth) + Number.parseFloat(style.borderBottomWidth),
+      frameWidth: rect.width,
+      frameHeight: rect.height,
+    };
+  });
+  expect(frameDecoration.background).toBe('rgba(0, 0, 0, 0)');
+  expect(frameDecoration.opacity).toBe('1');
+  expect(Math.abs(frameDecoration.width - frameDecoration.frameWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(frameDecoration.height - frameDecoration.frameHeight)).toBeLessThanOrEqual(1);
   expect(api.getSessionCreateCount()).toBe(0);
 
   await page.getByRole('button', { name: '건너뛰기' }).click();
