@@ -5,7 +5,7 @@ test('player can tune audio, start a run, pause, and continue without losing the
   await mockGameApi(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/game');
-  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.locator('.game-entry-panel .game-entry-button').click();
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
 
   await page.getByText('사운드와 판정 설정').click();
@@ -20,7 +20,6 @@ test('player can tune audio, start a run, pause, and continue without losing the
   await page.keyboard.press('Space');
   await page.waitForTimeout(500);
   await page.reload();
-  await page.getByRole('button', { name: '건너뛰기' }).click();
   await expect(page.getByRole('button', { name: '이어하기' })).toBeVisible();
   await page.getByRole('button', { name: '이어하기' }).click();
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
@@ -36,7 +35,7 @@ test('browser back pauses the active run instead of navigating away', async ({ p
   await mockGameApi(page);
   await page.goto('/');
   await page.goto('/game');
-  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.locator('.game-entry-panel .game-entry-button').click();
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
 
   await page.goBack();

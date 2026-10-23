@@ -234,7 +234,6 @@ test("offers coarse-pointer input in main gameplay and records its down/up pair"
     submittedEvents.push(...(body.events ?? []).map((event) => event.type));
   });
   await installCoarsePointer(page);
-  await page.addInitScript(() => window.localStorage.setItem("office-rhythm-manager:tutorial-disabled", "true"));
   await page.goto("/game?start=1");
 
   const touchButton = page.locator(".game-frame .rhythm-touch-button");

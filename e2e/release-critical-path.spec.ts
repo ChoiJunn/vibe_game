@@ -6,8 +6,7 @@ test('a browser Back action pauses a run and refresh resumes the saved state', a
   const api = await mockGameApi(page);
   await page.goto('/');
   await page.goto('/game');
-  await page.getByRole('button', { name: '건너뛰기' }).click();
-  await page.getByRole('button', { name: '리듬 시작' }).click();
+  await page.locator('.game-entry-panel .game-entry-button').click();
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
 
   await page.goBack();
@@ -15,10 +14,15 @@ test('a browser Back action pauses a run and refresh resumes the saved state', a
   await expect.poll(() => api.getSession()?.status).toBe('paused');
 
   await page.goto('/game');
+  await page.locator('.game-entry-actions button').first().click();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '점수 0' })).toBeVisible();
+  await page.getByRole('button', { name: '일시정지' }).click();
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toBeVisible();
-  await expect(page.getByText('점수 0', { exact: true })).toBeVisible();
+  await page.locator('.game-entry-actions button').first().click();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
+  expect(api.getSession()?.snapshot.score).toBe(0);
 });
 
 test('a saved zero-heart run retries failed-result submission after refresh instead of staying paused', async ({ page }) => {
@@ -29,12 +33,13 @@ test('a saved zero-heart run retries failed-result submission after refresh inst
   });
 
   await page.goto('/game');
-  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.locator('.game-entry-actions button').first().click();
   await expect(page.getByRole('heading', { name: '오늘의 업무 리듬 결과' })).toBeVisible();
   await expect(page.locator('.result-submission')).toContainText('순위표에는 반영되지 않았습니다');
   await expect(page.getByRole('heading', { name: '잠시 멈췄어요' })).toHaveCount(0);
 
   await page.reload();
+  await page.locator('.game-entry-actions button').first().click();
   await expect(page.getByText('결과가 저장되었습니다.')).toBeVisible();
   expect(api.getResult()?.status).toBe('failed');
 });
@@ -47,13 +52,12 @@ test('retrying a failed result from the summary finalizes it before starting a f
   });
 
   await page.goto('/game');
-  const tutorial = page.getByRole('dialog');
-  await expect(tutorial).toBeVisible();
-  await tutorial.locator('.tutorial-actions button').first().click();
+  await page.locator('.game-entry-actions button').first().click();
   await expect(page.locator('.result-submission')).toContainText('결과가 서버에 저장되지 않았어요');
   await page.locator('.result-actions').getByRole('button', { name: '저장 후 다시 플레이' }).click();
 
-  await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
+  await page.locator('.game-entry-panel .game-entry-button').click();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   await expect(page.locator('.result-summary')).toHaveCount(0);
   expect(api.getResult()?.status).toBe('failed');
   expect(api.getSession()?.id).toBe('e2e-run-02');
@@ -70,16 +74,15 @@ test('a 422 result stays off the leaderboard and starts a new run after one aban
   });
 
   await page.goto('/game');
-  const tutorial = page.getByRole('dialog');
-  await expect(tutorial).toBeVisible();
-  await tutorial.locator('.tutorial-actions button').first().click();
+  await page.locator('.game-entry-actions button').first().click();
   await expect(page.locator('.result-submission')).toContainText('순위표에는 반영되지 않았습니다');
   await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some((key) => key.startsWith('office-rhythm:failed-run:v1:')))).toBe(true);
   expect(api.getResult()).toBeNull();
 
   await page.locator('.result-actions').getByRole('button', { name: '새 게임' }).click();
 
-  await expect(page.getByRole('button', { name: '리듬 시작' })).toBeVisible();
+  await page.locator('.game-entry-panel .game-entry-button').click();
+  await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
   await expect(page.locator('.result-summary')).toHaveCount(0);
   expect(api.getAbandonedRunIds()).toEqual(['e2e-run-01']);
   expect(api.getSession()?.id).toBe('e2e-run-02');
@@ -96,9 +99,7 @@ test('a failed abandon stays on the result and re-enables the new-game action', 
   });
 
   await page.goto('/game');
-  const tutorial = page.getByRole('dialog');
-  await expect(tutorial).toBeVisible();
-  await tutorial.locator('.tutorial-actions button').first().click();
+  await page.locator('.game-entry-actions button').first().click();
   await expect(page.locator('.result-submission')).toContainText('순위표에는 반영되지 않았습니다');
   const newGameButton = page.locator('.result-actions').getByRole('button', { name: '새 게임' });
   await newGameButton.click();

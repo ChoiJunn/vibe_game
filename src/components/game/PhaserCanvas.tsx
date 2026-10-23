@@ -28,7 +28,6 @@ import { createEmptyCodex, loadPatternCodex } from '@/client/game/patternCodexSt
 import { clearFailedRun, writeFailedRun } from '@/client/game/failedRunStore';
 import type { VerifiedInputEvent } from '@/server/cosmos/models';
 import { RhythmStagePreview } from './RhythmStagePreview';
-import { TutorialOverlay } from '@/components/tutorial/TutorialOverlay';
 
 type GameRuntime = {
   controller: RhythmGameController;
@@ -166,10 +165,7 @@ export function PhaserCanvas() {
     let entryBusy = false;
     let retryStartMode: 'continue' | 'new' = 'new';
 
-    if (
-      new URLSearchParams(window.location.search).get('start') === '1'
-      && window.localStorage.getItem('office-rhythm-manager:tutorial-disabled') === 'true'
-    ) {
+    if (new URLSearchParams(window.location.search).get('start') === '1') {
       pendingStartIntentRef.current = true;
     }
 
@@ -464,7 +460,6 @@ export function PhaserCanvas() {
           <button type="button" onClick={() => window.location.reload()}>다시 시도</button>
         </div>
       ) : null}
-      <TutorialOverlay onStart={requestStart} />
       {!runtime ? (
         <div className="game-entry-panel">
           {entryState.status === 'checking' ? <p role="status">저장된 플레이를 확인하고 있어요…</p> : null}
