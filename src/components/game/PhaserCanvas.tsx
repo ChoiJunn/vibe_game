@@ -68,6 +68,7 @@ export function hasSavedProgress(snapshot: RunState, inputEventCount: number): b
 
 export function PhaserCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const continueSessionButtonRef = useRef<HTMLButtonElement>(null);
   const startGameRef = useRef<(() => void) | null>(null);
   const entryActionRef = useRef<(() => void) | null>(null);
   const retryEntryRef = useRef<(() => void) | null>(null);
@@ -104,6 +105,11 @@ export function PhaserCanvas() {
   const [failedRunRetained, setFailedRunRetained] = useState(false);
   const [loadError, setLoadError] = useState<string>();
   const isCoarsePointer = useCoarsePointer();
+  useEffect(() => {
+    if (!runtime && entryState.status === 'ready' && entryState.activeSession) {
+      continueSessionButtonRef.current?.focus();
+    }
+  }, [entryState, runtime]);
   useEffect(() => {
     tokenProviderRef.current = getIdToken;
   }, [getIdToken]);
@@ -460,21 +466,14 @@ export function PhaserCanvas() {
           <button type="button" onClick={() => window.location.reload()}>다시 시도</button>
         </div>
       ) : null}
-      {!runtime ? (
+      {!runtime && !(entryState.status === 'ready' && entryState.activeSession) ? (
         <div className="game-entry-panel">
           {entryState.status === 'checking' ? <p role="status">저장된 플레이를 확인하고 있어요…</p> : null}
           {entryState.status === 'starting' ? <p role="status">게임 세션을 준비하고 있어요…</p> : null}
           {entryState.status === 'ready' ? (
             <>
-              <p>{entryState.activeSession ? '저장된 리듬이 있어요. 이어서 연주할까요?' : '오늘의 업무 리듬을 시작해 볼까요?'}</p>
-              {entryState.activeSession ? (
-                <div className="game-entry-actions">
-                  <button className="game-entry-button" type="button" onClick={() => selectSessionRef.current?.('continue')}>이어하기</button>
-                  <button className="game-entry-button" type="button" onClick={() => selectSessionRef.current?.('new')}>새 게임</button>
-                </div>
-              ) : (
-                <button className="game-entry-button" type="button" onClick={requestStart}>게임 시작</button>
-              )}
+              <p>오늘의 업무 리듬을 시작해 볼까요?</p>
+              <button className="game-entry-button" type="button" onClick={requestStart}>게임 시작</button>
             </>
           ) : null}
           {entryState.status === 'error' ? (
@@ -484,6 +483,23 @@ export function PhaserCanvas() {
               <button className="game-entry-button" type="button" onClick={() => retryEntryRef.current?.()}>다시 시도</button>
             </div>
           ) : null}
+        </div>
+      ) : null}
+      {!runtime && entryState.status === 'ready' && entryState.activeSession ? (
+        <div className="game-session-choice-overlay">
+          <section
+            className="game-session-choice-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="game-session-choice-title"
+          >
+            <h2 id="game-session-choice-title">저장된 리듬이 있어요</h2>
+            <p>이어서 연주하거나 새 게임을 시작할 수 있어요.</p>
+            <div className="game-entry-actions">
+              <button ref={continueSessionButtonRef} className="game-entry-button" type="button" onClick={() => selectSessionRef.current?.('continue')}>이어하기</button>
+              <button className="game-entry-button" type="button" onClick={() => selectSessionRef.current?.('new')}>새 게임</button>
+            </div>
+          </section>
         </div>
       ) : null}
       {runtime && !started && !runtime.pauseState.paused && !hasResult ? (

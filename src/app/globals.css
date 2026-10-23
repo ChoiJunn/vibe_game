@@ -1260,6 +1260,35 @@ a:focus-visible {
 .game-entry-error { display: grid; gap: 0.55rem; }
 .game-entry-error > span { color: rgba(255, 253, 248, 0.78); font-size: 0.78rem; line-height: 1.45; overflow-wrap: anywhere; }
 
+.game-session-choice-overlay {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(12, 18, 21, 0.46);
+}
+
+.game-session-choice-dialog {
+  display: grid;
+  width: min(28rem, 100%);
+  justify-items: start;
+  gap: 0.75rem;
+  padding: clamp(1.1rem, 4vw, 1.75rem);
+  border: 1px solid rgba(255, 253, 248, 0.4);
+  border-radius: 1.15rem;
+  background: rgba(28, 40, 45, 0.96);
+  box-shadow: 0 1.25rem 3.5rem rgba(12, 22, 26, 0.38);
+  color: #fffdf8;
+}
+
+.game-session-choice-dialog h2,
+.game-session-choice-dialog p { margin: 0; }
+.game-session-choice-dialog h2 { font-size: clamp(1.2rem, 3.5vw, 1.55rem); line-height: 1.25; }
+.game-session-choice-dialog p { color: rgba(255, 253, 248, 0.82); font-size: 0.9rem; line-height: 1.45; }
+.game-session-choice-dialog .game-entry-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 0.2rem; }
+
 .game-entry-button {
   min-height: 2.75rem;
   padding: 0.68rem 1.1rem;
@@ -1331,6 +1360,8 @@ a:focus-visible {
   .game-page .game-frame::after { border-width: 0.18rem; }
   .game-entry-panel { right: 0.5rem; bottom: clamp(4.8rem, 12vh, 6.5rem); left: 0.5rem; width: auto; padding: 0.75rem 0.85rem; }
   .game-entry-panel > p { font-size: 0.8rem; }
+  .game-session-choice-dialog { gap: 0.65rem; }
+  .game-session-choice-dialog .game-entry-actions { width: 100%; }
 }
 .practice-page { min-height: calc(100vh - 64px); padding: clamp(24px, 4vh, 56px) clamp(14px, 6vw, 96px); background: #f5eee4; }
 .pattern-codex { width: 100%; min-width: 0; max-width: 1180px; margin: 0 auto; }

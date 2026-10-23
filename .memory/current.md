@@ -1,20 +1,19 @@
 ﻿# Current Context
 
 ## Active Plan
-[Direct Gameplay Start from Home](./plans/2026-10-23-direct-gameplay-start.md)
+[Game Start Polish](./plans/2026-10-23-game-start-polish.md)
 
 ## Active Phase
-[P01 Remove Tutorial Gate](./phases/2026-10-23-direct-gameplay-start/P01-remove-tutorial-gate/phase.md)
+[P01 Game Start Experience](./phases/2026-10-23-game-start-polish/P01-game-start-experience/phase.md)
 
 ## Active Task
-None — all tasks in this plan are complete.
+[T02 Game Start Countdown](./phases/2026-10-23-game-start-polish/P01-game-start-experience/T02-game-start-countdown.md)
 
 ## Status
-- Direct gameplay start from the home CTA is implemented and validated.
-- `/game?start=1` starts immediately when no active session exists; saved sessions keep continue/new choices.
-- The tutorial overlay is no longer part of game entry.
-- Validation: typecheck, lint, and 29 affected E2E tests passed.
-- Commit: completed with T01.
+- Direct gameplay start without a saved session and tutorial removal are complete in the preceding plan.
+- T01 completed: saved-session choices are centered in an accessible dialog.
+- T02 adds a visual/audio count-in for new and continued runs.
+- Decisions are recorded in [direct gameplay start](./decisions/2026-10-23-direct-gameplay-start.md).
 
 ## Next Step (IMPORTANT)
-No task is queued. The current plan is complete.
+Read the T02 blueprint and implement the 3-2-1-GO start countdown in `src/game/RhythmGameController.ts`, `src/game/audio/AudioClock.ts`, and `src/components/game/PhaserCanvas.tsx`, then update the planned tests.

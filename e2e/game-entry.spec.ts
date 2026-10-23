@@ -60,16 +60,40 @@ test('home start intent starts gameplay immediately without a tutorial dialog', 
   expect(api.getSessionCreateCount()).toBe(1);
 });
 
-test('player can resume a discovered paused session without creating another session', async ({ page }) => {
+test('saved-session choices are centered and resume without creating another session', async ({ page }) => {
   const api = await mockGameApi(page, { existing: true, snapshot: { cursorMs: 1_200, score: 240 } });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/game?start=1');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toHaveCount(1);
+  await expect(dialog).toHaveAttribute('aria-modal', 'true');
+  await expect(dialog).toHaveAttribute('aria-labelledby', 'game-session-choice-title');
+  await expect(dialog.getByRole('heading', { name: '저장된 리듬이 있어요' })).toBeVisible();
   const resumeButton = page.getByRole('button', { name: '이어하기' });
   await expect(resumeButton).toBeVisible();
+  await expect(resumeButton).toBeFocused();
   await expect(page.getByRole('button', { name: '새 게임' })).toBeVisible();
   expect(api.getSessionReadCount()).toBe(1);
   expect(api.getSessionCreateCount()).toBe(0);
+
+  const expectDialogCentered = async () => {
+    const centers = await dialog.evaluate((element) => {
+      const dialogRect = element.getBoundingClientRect();
+      const stageRect = element.closest('.game-session-choice-overlay')?.parentElement?.getBoundingClientRect();
+      if (!stageRect) throw new Error('Game stage was not found for the saved-session dialog.');
+      return {
+        dialogX: dialogRect.left + dialogRect.width / 2,
+        dialogY: dialogRect.top + dialogRect.height / 2,
+        stageX: stageRect.left + stageRect.width / 2,
+        stageY: stageRect.top + stageRect.height / 2,
+      };
+    });
+    expect(Math.abs(centers.dialogX - centers.stageX)).toBeLessThanOrEqual(2);
+    expect(Math.abs(centers.dialogY - centers.stageY)).toBeLessThanOrEqual(2);
+  };
+  await expectDialogCentered();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectDialogCentered();
 
   await resumeButton.click();
   await expect(page.getByRole('button', { name: '일시정지' })).toBeVisible();
