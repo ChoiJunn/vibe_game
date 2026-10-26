@@ -216,6 +216,23 @@ describe("PracticeRunController", () => {
     controller.dispose();
   });
 
+  it("keeps the first note ahead of the judgement position after a loop restart", async () => {
+    const firstEventMs = 1_500;
+    const oneTap = makeChart([{ id: "tap", type: "tap", startMs: firstEventMs }]);
+    const harness = createHarness(oneTap);
+    const controller = new PracticeRunController(oneTap, undefined, harness.options);
+    await enterPlaying(controller, harness);
+
+    harness.clock.position = oneTap.loopDurationMs;
+    controller.update();
+    await vi.waitFor(() => expect(harness.scheduler.restartLoop).toHaveBeenCalledTimes(2));
+
+    expect(controller.getSnapshot()).toMatchObject({ status: "playing", songPositionMs: 0, nextEventIndex: 0 });
+    controller.handleInput({ type: "keydown", songPositionMs: firstEventMs });
+    expect(controller.getSnapshot()).toMatchObject({ perfectCount: 1, nextEventIndex: 1 });
+    controller.dispose();
+  });
+
   it("forwards saved mute and SFX settings to the practice scheduler", async () => {
     for (const audioSettings of [settings, { ...settings, muted: true, sfxVolume: 0 }]) {
       const harness = createHarness(chart, audioSettings);

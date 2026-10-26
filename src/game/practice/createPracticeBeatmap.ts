@@ -2,6 +2,8 @@ import type { Beatmap, BeatmapPattern, RhythmEvent } from "@/domain/rhythm";
 import { findPattern } from "@/content/beatmaps/patternLibrary";
 import { JUDGEMENT_WINDOWS } from "@/game/judgement/types";
 
+const PRACTICE_APPROACH_WINDOW_MS = 1_500;
+
 export type PracticeChart = {
   beatmap: Beatmap;
   patternId: string;
@@ -15,7 +17,8 @@ export function createPracticeBeatmap(beatmap: Beatmap, patternId: string): Prac
   if (!pattern || pattern.events.length === 0) throw new Error(`Unknown or empty pattern: ${patternId}`);
 
   const orderedEvents = [...pattern.events].sort((a, b) => a.startMs - b.startMs || a.id.localeCompare(b.id));
-  const sourceAudioStartMs = orderedEvents[0].startMs;
+  const firstSourceEventMs = orderedEvents[0].startMs;
+  const sourceAudioStartMs = Math.max(0, firstSourceEventMs - PRACTICE_APPROACH_WINDOW_MS);
   const finalEventMs = Math.max(...orderedEvents.map((event) => event.endMs ?? event.startMs));
   const beatDurationMs = 60_000 / beatmap.bpm;
   const safeTailMs = Math.max(beatDurationMs, JUDGEMENT_WINDOWS.goodMs + 1);

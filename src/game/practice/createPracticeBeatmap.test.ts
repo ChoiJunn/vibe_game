@@ -14,7 +14,8 @@ describe("createPracticeBeatmap", () => {
     const safeTailMs = Math.max(60_000 / beatmap.bpm, 161);
 
     expect(chart.patternId).toBe(sourcePattern.id);
-    expect(chart.sourceAudioStartMs).toBe(sourceEvents[0].startMs);
+    expect(chart.sourceAudioStartMs).toBe(Math.max(0, sourceEvents[0].startMs - 1_500));
+    expect(chart.beatmap.events[0].startMs).toBe(Math.min(sourceEvents[0].startMs, 1_500));
     expect(chart.sourceAudioEndMs).toBe((lastSourceEvent.endMs ?? lastSourceEvent.startMs) + safeTailMs);
     expect(chart.loopDurationMs).toBe(chart.sourceAudioEndMs - chart.sourceAudioStartMs);
     expect(chart.beatmap.bpm).toBe(beatmap.bpm);
@@ -35,6 +36,18 @@ describe("createPracticeBeatmap", () => {
       });
       expect(event.requiredPresses).toBe(source.requiredPresses);
     });
+  });
+
+  it("preserves a source-bounded approach for the earliest patterns and a full approach for later patterns", () => {
+    const earliestPattern = beatmap.patterns.find(({ id }) => id === "pattern-001")!;
+    const laterPattern = beatmap.patterns.find(({ id }) => id === "pattern-002")!;
+    const earliestChart = createPracticeBeatmap(beatmap, earliestPattern.id);
+    const laterChart = createPracticeBeatmap(beatmap, laterPattern.id);
+
+    expect(earliestChart.sourceAudioStartMs).toBe(0);
+    expect(earliestChart.beatmap.events[0].startMs).toBe(968);
+    expect(laterChart.sourceAudioStartMs).toBe(2_758);
+    expect(laterChart.beatmap.events[0].startMs).toBe(1_500);
   });
 
   it("rejects unknown patterns rather than substituting another phrase", () => {
